@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  mysql-container:
+    build:
+      context: .
+      dockerfile: dockerfile.database
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: dbrootpassword
+      MYSQL_DATABASE: weeklychef
+      MYSQL_USER: serviceuser
+      MYSQL_PASSWORD: devpassword
+    volumes:
+      - mysql-data:/Users/enricogoerlitz/mysql
+
+volumes:
+  mysql-data:
