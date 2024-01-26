@@ -1,4 +1,7 @@
-""""""
+"""
+Auth models
+"""
+
 from flask_restx import fields
 
 from app import api

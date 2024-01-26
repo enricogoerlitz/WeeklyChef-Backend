@@ -55,6 +55,7 @@ class AuthRegisterAPI(Resource):
 @ns.route("/token")
 class LoginAPI(Resource):
 
+    @ns.expect(login_model)
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
     @ns.response(code=400, model=error_model, description="Wrong user input")
     @ns.response(code=401, model=error_model, description="Invalid user credentials")  # noqa
@@ -82,7 +83,6 @@ class LoginAPI(Resource):
 @ns.route("/token/refresh")
 class LoginRefreshAPI(Resource):
 
-    @ns.expect(login_model)
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
     @ns.response(code=401, model=error_model, description="Valid Refreshtoken is missing")  # noqa
     @ns.response(code=500, model=error_model, description="Internal error message")  # noqa

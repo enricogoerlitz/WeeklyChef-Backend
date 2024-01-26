@@ -4,5 +4,5 @@ from api import api
 
 
 error_model = api.model("ErrorModel", {
-    "error": fields.String
+    "msg": fields.String
 })
