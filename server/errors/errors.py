@@ -71,3 +71,13 @@ class InvalidLoginCredentialsException(Exception):
     def __init__(self):
         self.message = "User credentials are invalid."
         super().__init__(self.message)
+
+
+class DbModelSerializationException(Exception):
+    """
+    When parameter mapping not working because of an unexpected attribute.
+    """
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)

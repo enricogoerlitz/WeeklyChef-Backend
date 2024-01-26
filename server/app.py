@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required
 
 from config import FlaskConfig
 from db import db
-from utils.init_db import initialize_database
+from server.utils.initialize import initialize_database
 
 # test
 from services.auth.jwt import (
@@ -16,6 +16,7 @@ from services.auth.jwt import (
 
 from services.heathcheck.routes.heathcheck import bp as bp_heathcheck
 from services.auth.routes.auth import bp as bp_auth
+from services.auth.routes.user import bp as bp_user
 
 
 app = Flask(__name__)
@@ -25,13 +26,12 @@ app.config.from_object(FlaskConfig)
 # register pages
 app.register_blueprint(bp_heathcheck)
 app.register_blueprint(bp_auth)
+app.register_blueprint(bp_user)
 
 
 # init app
 db.init_app(app)
 jwt_manager.init_app(app)
-
-
 
 
 @app.route('/protected', methods=['GET'])
@@ -59,3 +59,19 @@ if __name__ == "__main__":
         threaded=True,
         port=8080
     )
+
+
+"""
+    Hier CREATE APP funktion mit 
+        - db
+        - api
+        - jwt manager
+        - ...
+
+    move config to this file!
+
+    in main -> start!
+
+
+
+"""

@@ -4,10 +4,9 @@
         /token
         /token/refresh
 """
-from errors import errors, http_errors
-
 from flask import Blueprint, request
 
+from errors import errors, http_errors
 from logger import logger
 from services.auth.controller import auth_controller
 
@@ -27,7 +26,8 @@ def register():
         logger.info(f"User added: {added_user}")
         return jwt.to_dict()
 
-    except errors.DbModelValidationException as e:
+    except (errors.DbModelValidationException,
+            errors.DbModelSerializationException) as e:
         logger.info(e)
         return http_errors.bad_request(e)
 
@@ -47,7 +47,8 @@ def login():
 
         logger.info(f"User login: {login_user}")
         return jwt.to_dict()
-    except errors.DbModelValidationException as e:
+    except (errors.DbModelValidationException,
+            errors.DbModelSerializationException) as e:
         logger.info(e)
         return http_errors.bad_request(e)
 

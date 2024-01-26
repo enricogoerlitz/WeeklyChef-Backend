@@ -1,4 +1,5 @@
 """Util decorators for this app"""
+from errors import errors
 
 
 def add_to_dict(cls):
@@ -31,7 +32,11 @@ def add_from_json_method(cls):
         Returns:
             cls: An instance of the class.
         """
-        return cls(**obj)
+        try:
+            return cls(**obj)
+        except TypeError as e:
+            err_msg = str(e).replace("__init__() ", "").capitalize()
+            raise errors.DbModelSerializationException(err_msg)
 
     # Add the from_json method to the class
     setattr(cls, 'from_json', from_json)
