@@ -16,14 +16,14 @@ from core.models.api_models.utils import error_model
 
 
 ns = Namespace(
-    "Authentication",
-    __name__,
+    name="Authentication",
+    description=__name__,
     path="/api/v1/auth"
 )
 
 
 @ns.route("/register")
-class AuthRegister(Resource):
+class AuthRegisterAPI(Resource):
 
     @ns.expect(register_model)
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
@@ -53,7 +53,7 @@ class AuthRegister(Resource):
 
 
 @ns.route("/token")
-class Login(Resource):
+class LoginAPI(Resource):
 
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
     @ns.response(code=400, model=error_model, description="Wrong user input")
@@ -80,7 +80,7 @@ class Login(Resource):
 
 
 @ns.route("/token/refresh")
-class LoginRefresh(Resource):
+class LoginRefreshAPI(Resource):
 
     @ns.expect(login_model)
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")

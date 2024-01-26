@@ -8,7 +8,7 @@ from flask import Flask
 from db import db
 from api import api
 from services.auth.jwt import jwt_manager
-from utils.initialize import initialize_database
+# from utils.initialize import initialize_database
 
 
 class FlaskConfig:
@@ -40,6 +40,6 @@ def create_app() -> Flask:
         db.create_all()
 
     # initialize db with starting data
-    initialize_database(app=app)
+    # initialize_database(app=app)
 
     return app

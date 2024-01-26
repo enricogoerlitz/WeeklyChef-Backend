@@ -1,13 +1,19 @@
+"""
+Module fpr managing app JWT
+"""
+
 from functools import wraps
 from dataclasses import dataclass
 
-from flask import jsonify, g
+from flask import g
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
     create_refresh_token,
     get_jwt_identity
 )
+
+from errors import http_errors
 
 
 jwt_manager = JWTManager()
@@ -56,27 +62,13 @@ def userrole_required(required_roles: list[str]):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            user_roles = g.user.roles if hasattr(g, "user") and hasattr(g.user, "roles") else []  # noqa
+            user: dict = get_jwt_identity()
+            user_roles = user.get("roles", [])
+
             if any(role in user_roles for role in required_roles):
                 return f(*args, **kwargs)
-            else:
-                return jsonify(message="Unauthorized. Role required."), 403
+
+            exp_msg = f"Unauthorized. Roles {str(required_roles)} required."
+            return http_errors.unauthorized(Exception(exp_msg))
         return wrapper
     return decorator
-
-
-# # Create an endpoint for user login
-# @app.route("/login", methods=["POST"])
-# def login():
-#     data = request.get_json()
-#     username = data.get("username")
-#     password = data.get("password")
-
-#     user = find_user_by_username(username)
-
-#     if user and password == user.password:
-#         # Identity can be any data that is json serializable
-#         access_token = create_access_token(identity=user.to_dict())
-#         return jsonify(access_token=access_token), 200
-
-#     return jsonify(message="Invalid credentials"), 401
