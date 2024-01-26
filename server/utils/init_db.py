@@ -1,10 +1,10 @@
 from flask import Flask
 
-from server.core.models.user import User, Role
-from database.db import db
+from core.models.user import User, Role
+from db import db
 
 
-def db_init(app: Flask) -> None:
+def initialize_database(app: Flask) -> None:
     """Create standard user, roles, ..."""
     with app.app_context():
         role_names = ["standard", "admin", "staff"]

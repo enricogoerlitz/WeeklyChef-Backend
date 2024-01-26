@@ -4,24 +4,34 @@ from flask import Flask, jsonify, request
 from flask_jwt_extended import jwt_required
 
 from config import FlaskConfig
-from database.db import db
-from utils.init_db import db_init
+from db import db
+from utils.init_db import initialize_database
 
 # test
-from auth_service.jwt import (
+from services.auth.jwt import (
     jwt_manager,
     jwt_add_user,
     userrole_required
 )
-from core.models.user import Role
+
+from services.heathcheck.routes.heathcheck import bp as bp_heathcheck
+from services.auth.routes.auth import bp as bp_auth
 
 
 app = Flask(__name__)
 app.config.from_object(FlaskConfig)
 
 
+# register pages
+app.register_blueprint(bp_heathcheck)
+app.register_blueprint(bp_auth)
+
+
+# init app
 db.init_app(app)
 jwt_manager.init_app(app)
+
+
 
 
 @app.route('/protected', methods=['GET'])
@@ -32,26 +42,20 @@ def protected():
     return jsonify(logged_in_as=request.user.to_dict()), 200
 
 
+@app.errorhandler(500)
+def internal_server_error(error):
+    err_msg = error if app.debug else "Unexpected internal error."
+    return {"error": err_msg}, 500
+
+
 with app.app_context():
     db.create_all()
-    role = Role.query.filter_by(name="admin").first()
-
-    # usr = User(email="rico.goerlitz@gmail5.com", password="passwordTest")  # noqa
-    # usr.roles.append(role)
-
-    # db.session.add(usr)
-    # db.session.commit()
-
-    # print(Role.query.filter_by(name="admin").first())
-    # print(User.query.filter(User.email.like('rico.goerlitz%')).first())
-
-
-db_init(app=app)
+    initialize_database(app=app)
 
 
 if __name__ == "__main__":
     app.run(
         debug=True,
         threaded=True,
-        port=3000
+        port=8080
     )

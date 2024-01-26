@@ -1,6 +1,9 @@
 """User Model"""
-from database.db import db
-from utils.decorators import add_to_dict
+from sqlalchemy.orm import validates
+
+from db import db
+from utils import model_validator
+from utils.decorators import add_to_dict, add_from_json_method
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -25,6 +28,7 @@ class Role(db.Model):
         return str(self.to_dict())
 
 
+@add_from_json_method
 class User(db.Model):
     __tablename__ = "users"
 
@@ -40,7 +44,7 @@ class User(db.Model):
     )
 
     def __init__(self, email: str, username: str, password: str):
-        self.email = email
+        self.email = email.lower()
         self.username = username
         self.set_password(password)
 
@@ -48,7 +52,26 @@ class User(db.Model):
         self.password = generate_password_hash(password)
 
     def check_password(self, password) -> bool:
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password, password)
+
+    @validates("email")
+    def validate_email(self, _, email: str) -> str:
+        model_validator.validate_email(
+            fieldname="email",
+            email=email,
+            max_length=120
+        )
+        return email
+
+    @validates("username")
+    def validate_username(self, _, username: str) -> str:
+        model_validator.validate_length(
+            fieldname="username",
+            value=username,
+            min=5,
+            max=50
+        )
+        return username
 
     def to_identity(self) -> dict:
         return {

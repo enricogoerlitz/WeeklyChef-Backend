@@ -10,3 +10,7 @@
         /user?id=1,2,3,4
         /user/<user_id>/role/<role_id>
 """
+from flask import Blueprint
+
+from core.models.user import Role
+

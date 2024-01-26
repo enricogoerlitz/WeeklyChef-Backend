@@ -1,8 +1,11 @@
 from functools import wraps
-from flask import jsonify, request
+from dataclasses import dataclass
+
+from flask import jsonify, g
 from flask_jwt_extended import (
     JWTManager,
-    # create_access_token,
+    create_access_token,
+    create_refresh_token,
     get_jwt_identity
 )
 
@@ -10,10 +13,41 @@ from flask_jwt_extended import (
 jwt_manager = JWTManager()
 
 
+@dataclass(frozen=True)
+class JsonWebTokenDTO:
+    token: str
+    refresh_token: str
+
+    @staticmethod
+    def create(obj: dict) -> 'JsonWebTokenDTO':
+        """
+        Creates an JsonWebTokenDTO from the given object.
+
+        Args:
+            obj (dict): any dictinory as object
+
+        Returns:
+            JsonWebTokenDTO: created JsonWebTokenDTO
+        """
+        token = create_access_token(identity=obj)
+        refresh_token = create_refresh_token(identity=obj)
+
+        return JsonWebTokenDTO(
+            token=token,
+            refresh_token=refresh_token
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "token": self.token,
+            "refresh_token": self.refresh_token
+        }
+
+
 def jwt_add_user(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        request["user"] = get_jwt_identity()
+        g.user = get_jwt_identity()
         return f(*args, **kwargs)
     return wrapper
 
@@ -22,7 +56,7 @@ def userrole_required(required_roles: list[str]):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            user_roles = request.user.roles if hasattr(request, "user") and hasattr(request.user, "roles") else []  # noqa
+            user_roles = g.user.roles if hasattr(g, "user") and hasattr(g.user, "roles") else []  # noqa
             if any(role in user_roles for role in required_roles):
                 return f(*args, **kwargs)
             else:
