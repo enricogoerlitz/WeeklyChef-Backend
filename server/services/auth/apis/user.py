@@ -15,7 +15,7 @@ from flask import Blueprint, request
 from services.auth.controller import auth_controller
 from errors import errors, http_errors
 from logger import logger
-from core.models.user import User
+from core.models.db_models.user import User
 
 
 bp = Blueprint(

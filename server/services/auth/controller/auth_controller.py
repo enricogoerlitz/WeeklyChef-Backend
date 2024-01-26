@@ -5,7 +5,7 @@ from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 
 from db import db
 from errors import errors
-from core.models.user import User, Role
+from core.models.db_models.user import User, Role
 from utils import roles
 from services.auth.jwt import JsonWebTokenDTO
 

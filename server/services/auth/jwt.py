@@ -15,7 +15,7 @@ jwt_manager = JWTManager()
 
 @dataclass(frozen=True)
 class JsonWebTokenDTO:
-    token: str
+    access_token: str
     refresh_token: str
 
     @staticmethod
@@ -29,17 +29,17 @@ class JsonWebTokenDTO:
         Returns:
             JsonWebTokenDTO: created JsonWebTokenDTO
         """
-        token = create_access_token(identity=obj)
+        access_token = create_access_token(identity=obj)
         refresh_token = create_refresh_token(identity=obj)
 
         return JsonWebTokenDTO(
-            token=token,
+            access_token=access_token,
             refresh_token=refresh_token
         )
 
     def to_dict(self) -> dict:
         return {
-            "token": self.token,
+            "access_token": self.access_token,
             "refresh_token": self.refresh_token
         }
 

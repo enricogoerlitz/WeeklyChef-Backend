@@ -1,6 +1,6 @@
 from flask import Flask
 
-from core.models.user import User, Role
+from core.models.db_models.user import User, Role
 from db import db
 
 
