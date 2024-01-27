@@ -35,7 +35,7 @@ def initialize_database(app: Flask) -> None:
 
         all_roles = [admin_role, staff_role, std_role]
         staff_roles = [staff_role, std_role]
-    
+
         # USERS
         superuser = User(
             email="root.email@gmail.com",
@@ -57,14 +57,8 @@ def initialize_database(app: Flask) -> None:
         std_user.roles.append(std_role)
 
         init_users = [superuser, staff_user, std_user]
-        init_users = [
-            init_user
-            for init_user in init_users
-            if not init_user.query.filter_by(username=init_user.username).first()  # noqa
-        ]
 
-        if len(init_users) > 0:
-            db.session.add_all(init_users)
+        db.session.add_all(init_users)
 
         # >>> RECIPE INIT
         # UNITS

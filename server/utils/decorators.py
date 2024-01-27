@@ -37,7 +37,7 @@ def add_from_json_method(cls):
         cls: The modified class.
     """
     @staticmethod
-    def from_json(obj: dict) -> cls:
+    def from_json(obj: dict, api_model) -> cls:
         """
         Creates object from JSON dictionary.
 
@@ -47,8 +47,11 @@ def add_from_json_method(cls):
         Returns:
             cls: An instance of the class.
         """
+        base_json = {key: None for key in api_model.keys()}
+        final_obj = {**base_json, **obj}
+
         try:
-            return cls(**obj)
+            return cls(**final_obj)
         except TypeError as e:
             err_msg = str(e).replace("__init__() ", "").capitalize()
             raise errors.DbModelSerializationException(err_msg)

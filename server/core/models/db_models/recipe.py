@@ -104,7 +104,7 @@ class Ingredient(db.Model):
     @validates("displayname")
     def validate_displayname(self, _, name: str) -> str:
         model_validator.validate_string(
-            fieldname="name",
+            fieldname="displayname",
             value=name,
             min_length=3,
             max_length=30
@@ -173,7 +173,7 @@ class Recipe(db.Model):
     creator_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)  # noqa
 
-    category = db.relationship("Category", backref="recipe", lazy="joined")
+    category = db.relationship("Category", backref="recipe", lazy="select")
     ingredients = db.relationship(
         "Ingredient",
         secondary="recipe_ingredient",
@@ -280,6 +280,20 @@ class RecipeIngredient(db.Model):
     __table_args__ = (
         UniqueConstraint("recipe_id", "ingredient_id", name="uq_recipe_ingredient"),  # noqa
     )
+
+    @validates("quantity")
+    def validate_quantity(
+        self,
+        _,
+        quantity: str
+    ) -> str:
+        model_validator.validate_integer(
+            fieldname="quantity",
+            value=quantity,
+            min=1,
+            max=100_000
+        )
+        return quantity
 
 
 @add_from_json_method

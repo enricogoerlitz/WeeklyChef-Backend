@@ -1,7 +1,9 @@
 """
+General Permission decorators
 """
 
 from functools import wraps
+
 from flask_jwt_extended import get_jwt_identity
 
 from errors import http_errors
@@ -18,7 +20,7 @@ def IsAdmin(func):
             return func(*args, **kwargs)
 
         return http_errors.unauthorized(
-            _unauthorized_error(
+            unauthorized_error(
                 authorized_roles=[roles.ADMIN]
             )
         )
@@ -36,7 +38,7 @@ def IsAdminOrStaff(func):
             return func(*args, **kwargs)
 
         return http_errors.unauthorized(
-            _unauthorized_error(
+            unauthorized_error(
                 authorized_roles=[roles.ADMIN, roles.STAFF]
             )
         )
@@ -44,7 +46,7 @@ def IsAdminOrStaff(func):
     return wrapper
 
 
-def _unauthorized_error(authorized_roles: list[str]):
+def unauthorized_error(authorized_roles: list[str]):
     auth_roles_str = ", ".join(authorized_roles)
     msg = f"User is unauthorized. Needed permissions: '{auth_roles_str}'"
     return msg

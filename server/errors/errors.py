@@ -14,6 +14,16 @@ class UserAlreadyExistingException(Exception):
         super().__init__(message)
 
 
+class DbModelAlreadyExistingException(Exception):
+    """
+    When the db model is already existing
+    """
+
+    def __init__(self, model: Any, data: dict):
+        message = f"Model {model.__name__} already existing with the data {str(data)}"  # noqa
+        super().__init__(message)
+
+
 class DbModelNotFoundException(Exception):
     """
     The db model was not found in database.

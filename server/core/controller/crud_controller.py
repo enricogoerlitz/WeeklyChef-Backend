@@ -4,7 +4,7 @@ Helper for basic CRUD operations
 from typing import Any
 
 from flask_restx import marshal
-from flask import Response, request
+from flask import Response
 
 from logger import logger
 from db import db
@@ -61,11 +61,13 @@ def handle_get_list(model: db.Model, api_model: api.model) -> Response:
 def handle_post(
         model: db.Model,
         api_model: api.model,
-        unique_columns: list[str] = None
+        api_model_send: api.model,
+        data: dict,
+        unique_columns: list[str] = None,
+        unique_primarykey: Any = None
 ) -> Response:
     try:
-        req_data = request.get_json()
-        obj = model.from_json(req_data)
+        obj = model.from_json(data, api_model_send)
 
         _check_unqiue_column(
             model=model,
@@ -73,12 +75,22 @@ def handle_post(
             unique_columns=unique_columns
         )
 
+        _ckeck_unique_primarykey(
+            model=model,
+            unique_primarykeys=unique_primarykey
+        )
+
         db.session.add(obj)
         db.session.commit()
 
         return marshal(obj, api_model), 201
 
-    except errors.DbModelUnqiueConstraintException as e:
+    except (errors.DbModelValidationException,
+            errors.DbModelSerializationException) as e:
+        return http_errors.bad_request(e)
+
+    except (errors.DbModelUnqiueConstraintException,
+            errors.DbModelAlreadyExistingException) as e:
         return http_errors.conflict(e)
 
     except Exception as e:
@@ -89,15 +101,14 @@ def handle_post(
 def handle_update(
         model: db.Model,
         api_model: api.model,
-        id: Any
+        id: Any,
+        data: dict
 ) -> Response:
     try:
-        update_data = request.get_json()
-
         obj = _find_object_by_id(model, id)
 
         # TODO: auslagern!
-        for key, value in update_data.items():
+        for key, value in data.items():
             if not hasattr(obj, key):
                 err_msg = f"Field '{key}' doen't exist in object '{model.__name__}'"  # noqa
                 raise errors.DbModelFieldValueError(err_msg)
@@ -168,6 +179,25 @@ def _check_unqiue_column(
                 filedname=column,
                 value=obj_attr_value
             )
+
+
+def _ckeck_unique_primarykey(
+        model,
+        unique_primarykeys: tuple[str]
+) -> None:
+
+    if unique_primarykeys is None:
+        return
+
+    obj = model.query.get(unique_primarykeys)
+
+    if obj is None:
+        return
+
+    raise errors.DbModelAlreadyExistingException(
+        model=model,
+        data=unique_primarykeys
+    )
 
 
 def _find_object_by_id(

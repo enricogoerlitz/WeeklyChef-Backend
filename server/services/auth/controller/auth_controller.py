@@ -5,9 +5,10 @@ from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 
 from db import db
 from errors import errors
+from core.models.api_models.auth import register_model_send
 from core.models.db_models.user import User, Role
 from utils import roles
-from services.auth.jwt import JsonWebTokenDTO
+from utils.jwt import JsonWebTokenDTO
 
 
 def handle_register(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
@@ -21,7 +22,7 @@ def handle_register(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
     Returns:
         tuple[User, JsonWebTokenDTO]: new user from db and JWT
     """
-    user: User = User.from_json(req_data)
+    user: User = User.from_json(req_data, register_model_send)
 
     _validate_user_is_existing(user)
 

@@ -47,19 +47,18 @@ ingredient_model = api.model("IngredientModel", {
     "quantity_per_unit": fields.Float,
     "is_spices": fields.Boolean,
     "search_description": fields.String,
-    "unit_id": fields.String,
+    "unit_id": fields.Integer,
     "unit": fields.Nested(unit_model)
 })
 
 ingredient_model_send = api.model("IngredientModelSend", {
-    "id": fields.Integer,
     "name": fields.String,
     "displayname": fields.String,
     "default_price": fields.Float,
     "quantity_per_unit": fields.Float,
     "is_spices": fields.Boolean,
     "search_description": fields.String,
-    "unit_id": fields.String
+    "unit_id": fields.Integer
 })
 
 
@@ -81,7 +80,6 @@ recipe_model = api.model("RecipeModel", {
 })
 
 recipe_model_send = api.model("RecipeModelSend", {
-    "id": fields.Integer,
     "name": fields.String,
     "preperation_description": fields.String,
     "difficulty": fields.String,
@@ -90,4 +88,19 @@ recipe_model_send = api.model("RecipeModelSend", {
     "search_description": fields.String,
     "category_id": fields.Integer,
     "creator_user_id": fields.Integer
+})
+
+recipe_tag_model = api.model("RecipeTagModel", {
+    "recipe_id": fields.Integer,
+    "tag_id": fields.Integer
+})
+
+recipe_ingredient_model = api.model("RecipeIngredientModel", {
+    "recipe_id": fields.Integer,
+    "ingredient_id": fields.Integer,
+    "quantity": fields.Float
+})
+
+recipe_ingredient_model_send = api.model("RecipeIngredientModelSend", {
+    "quantity": fields.Float
 })

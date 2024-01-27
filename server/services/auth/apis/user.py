@@ -17,7 +17,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from logger import logger
 from errors import errors, http_errors
-from services.auth.jwt import userrole_required
+from utils.jwt import userrole_required
 from utils import roles
 from services.auth.controller import auth_controller
 from core.models.db_models.user import User
