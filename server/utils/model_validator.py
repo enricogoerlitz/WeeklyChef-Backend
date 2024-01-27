@@ -1,12 +1,21 @@
 """"""
 import re
 
+from typing import Any
+
 from errors import errors
 
 
-def validate_length(fieldname: str, value: str, min: int, max: int) -> None:
+def validate_string(
+        *,
+        fieldname: str,
+        value: str,
+        min: int,
+        max: int,
+        nullable: bool = False
+) -> None:
     """
-    Validates a field length
+    Validates the field by min and max length and is string.
 
     Args:
         fieldname (str): the name of the filed
@@ -18,9 +27,14 @@ def validate_length(fieldname: str, value: str, min: int, max: int) -> None:
         errors.DbModelFieldRequieredException: if field was null
         errors.DbModelFieldLengthException: if field was to short or to long
     """
-    if value is None:
-        err_msg = f"The field {fieldname} is required but was null."  # noqa
-        raise errors.DbModelFieldRequieredException(err_msg)
+
+    if nullable and value is None:
+        return
+
+    _validate_field_required(fieldname, value)
+
+    if not isinstance(value, str):
+        raise errors.DbModelFieldTypeError(fieldname, value, [str])
 
     vlen = len(value)
     if vlen < min or vlen > max:
@@ -28,8 +42,15 @@ def validate_length(fieldname: str, value: str, min: int, max: int) -> None:
         raise errors.DbModelFieldLengthException(err_msg)
 
 
-def validate_email(fieldname: str, email: str, max_length: int) -> None:
-    """_summary_
+def validate_email(
+        *,
+        fieldname: str,
+        email: str,
+        max_length: int,
+        nullable: bool = False
+) -> None:
+    """
+    Validates a string as email.
 
     Args:
         fieldname (str): the name of the filed
@@ -41,14 +62,131 @@ def validate_email(fieldname: str, email: str, max_length: int) -> None:
         errors.DbModelFieldRequieredException: if field was null
         errors.DbModelFieldLengthException: if field was to short or to long
     """
+
+    if nullable and email is None:
+        return
+
+    _validate_field_required(fieldname, email)
+
+    if not isinstance(email, str):
+        raise errors.DbModelFieldTypeError(fieldname, email, [str])
+
     email_regex = r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$'
     if not re.match(email_regex, email):
         err_msg = "The E-Mail field does not contain a valid email."
         raise errors.DbModelFieldEmailInvalidException(err_msg)
 
-    validate_length(
+    validate_string(
         fieldname=fieldname,
         value=email,
         min=3,
         max=max_length
     )
+
+
+def validate_float(
+        *,
+        fieldname: str,
+        value: float,
+        min: float = None,
+        max: float = None,
+        nullable: bool = False
+) -> None:
+    """_summary_
+
+    Args:
+        fieldname (str): _description_
+        value (float): _description_
+        min (float, optional): _description_. Defaults to None.
+        max (float, optional): _description_. Defaults to None.
+        nullable (bool, optional): _description_. Defaults to False.
+
+    Raises:
+        errors.DbModelFieldTypeError: _description_
+        errors.DbModelFieldValueError: _description_
+    """
+    if nullable and value is None:
+        return
+
+    _validate_field_required(fieldname, value)
+
+    if not isinstance(value, (float, int)):
+        raise errors.DbModelFieldTypeError(fieldname, value, [float])
+
+    if (
+        (min is not None and value < min) or
+        (max is not None and value > max)
+    ):
+        err_msg = f"The field {fieldname} should have a minumum value of {min} and maximum value of {max}."  # noqa
+        raise errors.DbModelFieldValueError(err_msg)
+
+
+def validate_integer(
+        *,
+        fieldname: str,
+        value: int,
+        min: int = None,
+        max: int = None,
+        nullable: bool = False
+) -> None:
+    """_summary_
+
+    Args:
+        fieldname (str): _description_
+        value (int): _description_
+        min (int, optional): _description_. Defaults to None.
+        max (int, optional): _description_. Defaults to None.
+        nullable (bool, optional): _description_. Defaults to False.
+
+    Raises:
+        errors.DbModelFieldTypeError: _description_
+        errors.DbModelFieldValueError: _description_
+    """
+    if nullable and value is None:
+        return
+
+    _validate_field_required(fieldname, value)
+
+    if not isinstance(value, int):
+        raise errors.DbModelFieldTypeError(fieldname, value, [int])
+
+    if (
+        (min is not None and value < min) or
+        (max is not None and value > max)
+    ):
+        err_msg = f"The field {fieldname} should have a minumum value of {min} and maximum value of {max}."  # noqa
+        raise errors.DbModelFieldValueError(err_msg)
+
+
+def validate_boolean(
+        *,
+        fieldname: str,
+        value: bool,
+        nullable: bool = False
+) -> None:
+    if nullable and value is None:
+        return
+
+    _validate_field_required(fieldname, value)
+
+    if not isinstance(value, bool):
+        raise errors.DbModelFieldTypeError(fieldname, value, [bool])
+
+
+def _validate_field_required(
+        fieldname: str,
+        value: Any
+) -> None:
+    """
+    Checks is given value None and throws an exception if value is None
+
+    Args:
+        fieldname (str): fieldname
+        value (Any): any value to compare
+
+    Raises:
+        errors.DbModelFieldRequieredException: if value is None
+    """
+
+    if value is None:
+        raise errors.DbModelFieldRequieredException(fieldname)

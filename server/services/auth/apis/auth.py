@@ -66,6 +66,7 @@ class LoginAPI(Resource):
 
             logger.info(f"User login: {login_user}")
             return jwt.to_dict()
+
         except (errors.DbModelValidationException,
                 errors.DbModelSerializationException) as e:
             logger.info(e)
@@ -90,8 +91,10 @@ class LoginRefreshAPI(Resource):
         try:
             jwt_refreshed = auth_controller.handle_refresh_token()
             return jwt_refreshed.to_dict()
+
         except NoAuthorizationError as e:
             return http_errors.unauthorized(e)
+
         except Exception as e:
-            logger.error(type(e))
+            logger.error(e)
             return http_errors.UNEXPECTED_ERROR_RESULT

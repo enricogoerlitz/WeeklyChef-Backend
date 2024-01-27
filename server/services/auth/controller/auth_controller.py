@@ -49,8 +49,7 @@ def handle_login(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
         username is None and
         email is None
     ):
-        err_msg = "username or email field is required!"
-        raise errors.DbModelFieldRequieredException(err_msg)
+        raise errors.DbModelFieldRequieredException("username or email")
 
     filter_kwargs = {"username": username} \
         if username is not None else {"email": email}

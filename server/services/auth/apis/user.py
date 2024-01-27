@@ -10,6 +10,7 @@
         /user?id=1,2,3,4
         /user/<user_id>/role/<role_id>
 """
+
 from flask import request
 from flask_restx import Resource, Namespace, marshal
 from flask_jwt_extended import jwt_required, get_jwt_identity

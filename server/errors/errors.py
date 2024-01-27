@@ -1,6 +1,7 @@
 """
 Collection of app errors
 """
+from typing import Any
 
 
 class UserAlreadyExistingException(Exception):
@@ -9,8 +10,8 @@ class UserAlreadyExistingException(Exception):
     """
 
     def __init__(self):
-        self.message = "User already existing."
-        super().__init__(self.message)
+        message = "User already existing."
+        super().__init__(message)
 
 
 class DbModelNotFoundException(Exception):
@@ -19,8 +20,7 @@ class DbModelNotFoundException(Exception):
     """
 
     def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class DbModelValidationException(Exception):
@@ -29,8 +29,7 @@ class DbModelValidationException(Exception):
     """
 
     def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class DbModelFieldLengthException(DbModelValidationException):
@@ -39,8 +38,7 @@ class DbModelFieldLengthException(DbModelValidationException):
     """
 
     def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class DbModelFieldRequieredException(DbModelValidationException):
@@ -48,9 +46,9 @@ class DbModelFieldRequieredException(DbModelValidationException):
     The db model field is required, but was null
     """
 
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
+    def __init__(self, fieldname: str):
+        message = f"The field '{fieldname}' is required but was null."
+        super().__init__(message)
 
 
 class DbModelFieldEmailInvalidException(DbModelValidationException):
@@ -59,8 +57,33 @@ class DbModelFieldEmailInvalidException(DbModelValidationException):
     """
 
     def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
+
+
+class DbModelFieldTypeError(DbModelValidationException):
+    """
+    The db model field was invalid like
+        -  int expected, was float
+        -  int expected, was string ...
+    """
+
+    def __init__(self, fieldname: str, value: Any, expected_types: list[type]):
+        expected_types = ", ".join([
+            expected_type.__name__ for expected_type in expected_types])
+        message = f"Field '{fieldname}' ({value}) was type of {type(value)} " \
+                  + f", but expected types: {expected_types}"
+        super().__init__(message)
+
+
+class DbModelFieldValueError(DbModelValidationException):
+    """
+    The db model field was invalid like
+        -  int expected, was float
+        -  int expected, was string ...
+    """
+
+    def __init__(self, message: str):
+        super().__init__(message)
 
 
 class InvalidLoginCredentialsException(Exception):
@@ -69,8 +92,8 @@ class InvalidLoginCredentialsException(Exception):
     """
 
     def __init__(self):
-        self.message = "User credentials are invalid."
-        super().__init__(self.message)
+        message = "User credentials are invalid."
+        super().__init__(message)
 
 
 class DbModelSerializationException(Exception):
@@ -79,5 +102,4 @@ class DbModelSerializationException(Exception):
     """
 
     def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)

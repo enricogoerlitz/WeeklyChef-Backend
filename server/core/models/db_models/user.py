@@ -1,20 +1,13 @@
 """
 User Models
 """
-
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from db import db
 from utils import model_validator
 from utils.decorators import add_to_dict, add_from_json_method
 from werkzeug.security import generate_password_hash, check_password_hash
-
-
-user_roles = db.Table(
-    "user_roles",
-    db.Column("user_id", db.Integer, db.ForeignKey("users.id")),
-    db.Column("role_id", db.Integer, db.ForeignKey("role.id"))
-)
 
 
 @add_to_dict
@@ -29,6 +22,16 @@ class Role(db.Model):
 
     def __str__(self) -> str:
         return str(self.to_dict())
+
+    @validates("name")
+    def validate_username(self, _, name: str) -> str:
+        model_validator.validate_string(
+            fieldname="name",
+            value=name,
+            min=1,
+            max=50
+        )
+        return name
 
 
 @add_from_json_method
@@ -68,7 +71,7 @@ class User(db.Model):
 
     @validates("username")
     def validate_username(self, _, username: str) -> str:
-        model_validator.validate_length(
+        model_validator.validate_string(
             fieldname="username",
             value=username,
             min=5,
@@ -86,3 +89,15 @@ class User(db.Model):
 
     def __str__(self) -> str:
         return str(self.to_identity())
+
+
+@add_from_json_method
+@add_to_dict
+class UserRoleComposite(db.Model):
+    __tablename__ = "user_roles"
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
+    role_id = db.Column(db.Integer, db.ForeignKey("role.id"), primary_key=True)  # noqa
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "role_id", name="uq_user_role"),
+    )

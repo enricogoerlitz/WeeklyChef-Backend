@@ -4,7 +4,7 @@ Auth models
 
 from flask_restx import fields
 
-from app import api
+from config import api
 
 register_model = api.model("RegisterModel", {
     "email": fields.String,
