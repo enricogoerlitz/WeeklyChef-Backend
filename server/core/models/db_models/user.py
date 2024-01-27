@@ -28,8 +28,8 @@ class Role(db.Model):
         model_validator.validate_string(
             fieldname="name",
             value=name,
-            min=1,
-            max=50
+            min_length=1,
+            max_length=50
         )
         return name
 
@@ -74,8 +74,8 @@ class User(db.Model):
         model_validator.validate_string(
             fieldname="username",
             value=username,
-            min=5,
-            max=50
+            min_length=5,
+            max_length=50
         )
         return username
 

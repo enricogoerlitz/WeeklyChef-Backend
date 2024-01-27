@@ -8,11 +8,15 @@ from flask import request
 from flask_restx import Resource, Namespace
 from flask_jwt_extended.exceptions import NoAuthorizationError
 
+from core.models.api_models.utils import error_model
 from errors import errors, http_errors
 from logger import logger
 from services.auth.controller import auth_controller
-from core.models.api_models.auth import login_model, register_model, jwt_model
-from core.models.api_models.utils import error_model
+from core.models.api_models.auth import (
+    login_model_send,
+    register_model_send,
+    jwt_model
+)
 
 
 ns = Namespace(
@@ -25,7 +29,7 @@ ns = Namespace(
 @ns.route("/register")
 class AuthRegisterAPI(Resource):
 
-    @ns.expect(register_model)
+    @ns.expect(register_model_send)
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
     @ns.response(code=400, model=error_model, description="Wrong user input")
     @ns.response(code=409, model=error_model, description="User is alrready existing")  # noqa
@@ -55,7 +59,7 @@ class AuthRegisterAPI(Resource):
 @ns.route("/token")
 class LoginAPI(Resource):
 
-    @ns.expect(login_model)
+    @ns.expect(login_model_send)
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
     @ns.response(code=400, model=error_model, description="Wrong user input")
     @ns.response(code=401, model=error_model, description="Invalid user credentials")  # noqa

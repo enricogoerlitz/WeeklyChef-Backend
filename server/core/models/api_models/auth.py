@@ -6,13 +6,13 @@ from flask_restx import fields
 
 from config import api
 
-register_model = api.model("RegisterModel", {
+register_model_send = api.model("RegisterModelSend", {
     "email": fields.String,
     "username": fields.String,
     "password": fields.String
 })
 
-login_model = api.model("LoginModel", {
+login_model_send = api.model("LoginModelSend", {
     "username": fields.String,
     "password": fields.String
 })

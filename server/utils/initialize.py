@@ -1,12 +1,14 @@
 """
 Module for initialize db with some basic data
 """
+import random
 
 from flask import Flask
+from sqlalchemy import or_
 
 from core.models.db_models import (
     Role, User, Unit, Category, Ingredient,
-    Recipe
+    Recipe, RecipeIngredient, RecipeTagComposite, Tag
 )
 from db import db
 
@@ -27,23 +29,46 @@ def initialize_database(app: Flask) -> None:
         if len(init_roles) > 0:
             db.session.add_all(init_roles)
 
-        user_roles = Role.query.filter(Role.name.in_(role_names)).all()
+        admin_role = Role.query.filter_by(name="admin").first()
+        staff_role = Role.query.filter_by(name="staff").first()
+        std_role = Role.query.filter_by(name="standard").first()
 
+        all_roles = [admin_role, staff_role, std_role]
+        staff_roles = [staff_role, std_role]
+    
         # USERS
-        init_user = User(
+        superuser = User(
             email="root.email@gmail.com",
             username="CoolerTeddy",
-            password="init_password"
+            password="password"
         )
-        init_user.roles.extend(user_roles)
+        staff_user = User(
+            email="root2.email@gmail.com",
+            username="CoolerTeddy2",
+            password="password"
+        )
+        std_user = User(
+            email="root3.email@gmail.com",
+            username="CoolerTeddy3",
+            password="password"
+        )
+        superuser.roles.extend(all_roles)
+        staff_user.roles.extend(staff_roles)
+        std_user.roles.append(std_role)
 
-        if not init_user.query.filter_by(
-                username=init_user.username).first():
-            db.session.add(init_user)
+        init_users = [superuser, staff_user, std_user]
+        init_users = [
+            init_user
+            for init_user in init_users
+            if not init_user.query.filter_by(username=init_user.username).first()  # noqa
+        ]
+
+        if len(init_users) > 0:
+            db.session.add_all(init_users)
 
         # >>> RECIPE INIT
         # UNITS
-        init_units = ["stk", "ml", "l", "priese", "g", "kg", "teelöffel", "esslöffel"]  # noqa
+        init_units = ["stk", "ml", "l", "priese", "g", "kg", "teelöffel", "esslöffel", "change_me", "delete_me"]  # noqa
         init_units = [Unit(name=init_unit) for init_unit in init_units]
         init_units = [
             init_unit
@@ -55,7 +80,7 @@ def initialize_database(app: Flask) -> None:
             db.session.add_all(init_units)
 
         # CATEGORIES
-        init_categories = ["Hauptspeise", "Frühstück", "Beilage", "Dessert"]
+        init_categories = ["Hauptspeise", "Frühstück", "Beilage", "Dessert", "change_me", "delete_me"]  # noqa
         init_categories = [Category(name=init_category) for init_category in init_categories]  # noqa
 
         init_categories = [
@@ -68,8 +93,8 @@ def initialize_database(app: Flask) -> None:
             db.session.add_all(init_categories)
 
         # TAGS
-        init_tags = ["Vegan", "Vegetarisch", "Fleisch", "Rustikal", "Sommergericht", "Suppe"]  # noqa
-        init_tags = [Category(name=init_tag) for init_tag in init_tags]  # noqa
+        init_tags = ["Vegan", "Vegetarisch", "Fleisch", "Rustikal", "Sommergericht", "Suppe", "change_me", "delete_me"]  # noqa
+        init_tags = [Tag(name=init_tag) for init_tag in init_tags]  # noqa
         init_tags = [
             init_tag
             for init_tag in init_tags
@@ -77,7 +102,7 @@ def initialize_database(app: Flask) -> None:
         ]
 
         if len(init_units) > 0:
-            db.session.add_all(init_categories)
+            db.session.add_all(init_tags)
 
         # INGREDIENTS
         init_ingredients = [
@@ -178,7 +203,28 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
             creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
             category_id=Category.query.filter_by(name="Hauptspeise").first().id,  # noqa
         )
-
         db.session.add(recipe)
+
+        recipe_id = Recipe.query.first().id
+        recipe_ingredients = [
+            RecipeIngredient(
+                recipe_id=recipe_id,
+                ingredient_id=ingredient.id,
+                quantity=random.randint(1, 20))
+            for ingredient in Ingredient.query.all()
+        ]
+
+        db.session.add_all(recipe_ingredients)
+
+        recipe_tags = [
+            RecipeTagComposite(recipe_id=recipe_id, tag_id=tag.id)
+            for tag in Tag.query.filter(
+                or_(
+                    Tag.name == "Fleisch",
+                    Tag.name == "Sommergericht"
+                )
+            ).all()
+        ]
+        db.session.add_all(recipe_tags)
 
         db.session.commit()

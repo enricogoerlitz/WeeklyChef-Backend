@@ -103,3 +103,13 @@ class DbModelSerializationException(Exception):
 
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class DbModelUnqiueConstraintException(Exception):
+    """
+    When a column with a given value is already existing
+    """
+
+    def __init__(self, filedname: str, value: Any) -> None:
+        err_msg = f"Field '{filedname}' with value '{str(value)}' is already existing."  # noqa
+        super().__init__(err_msg)

@@ -22,7 +22,7 @@ from utils import roles
 from services.auth.controller import auth_controller
 from core.models.db_models.user import User
 from core.models.api_models.user import user_model
-from core.models.api_models.auth import register_model
+from core.models.api_models.auth import register_model_send
 from core.models.api_models.utils import error_model
 
 
@@ -48,11 +48,11 @@ class UserListAPI(Resource):
             logger.error(e)
             return http_errors.UNEXPECTED_ERROR_RESULT
 
-    @ns.expect(register_model)
+    @ns.expect(register_model_send)
     @ns.response(code=200, model={}, description="List of user models")  # noqa
     @ns.response(code=400, model=error_model, description="Wrong user input")
     @ns.response(code=401, model=error_model, description="User unauthorized")  # noqa
-    @ns.response(code=409, model=error_model, description="User is alrready existing")  # noqa
+    @ns.response(code=409, model=error_model, description="User is already existing")  # noqa
     @ns.response(code=500, model=error_model, description="Internal error message")  # noqa
     @jwt_required()
     @userrole_required([roles.ADMIN, roles.STAFF])

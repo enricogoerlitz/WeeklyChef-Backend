@@ -1,5 +1,7 @@
 """"""
 
+from typing import Union
+
 UNEXPECTED_ERROR_RESULT = (
     {
         "msg": "An unexpected error has occored."
@@ -7,21 +9,21 @@ UNEXPECTED_ERROR_RESULT = (
 )
 
 
-def bad_request(exp: Exception) -> tuple[dict, int]:
+def bad_request(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"msg": str(exp)}, 400
 
 
-def unauthorized(exp: Exception) -> tuple[dict, int]:
+def unauthorized(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"msg": str(exp)}, 401
 
 
-def forbidden(exp: Exception) -> tuple[dict, int]:
+def forbidden(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"msg": str(exp)}, 403
 
 
-def not_found(exp: Exception) -> tuple[dict, int]:
+def not_found(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"msg": str(exp)}, 404
 
 
-def conflict(exp: Exception) -> tuple[dict, int]:
+def conflict(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"msg": str(exp)}, 409

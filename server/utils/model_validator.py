@@ -10,8 +10,8 @@ def validate_string(
         *,
         fieldname: str,
         value: str,
-        min: int,
-        max: int,
+        min_length: int,
+        max_length: int,
         nullable: bool = False
 ) -> None:
     """
@@ -31,14 +31,14 @@ def validate_string(
     if nullable and value is None:
         return
 
-    _validate_field_required(fieldname, value)
+    validate_field_required(fieldname, value)
 
     if not isinstance(value, str):
         raise errors.DbModelFieldTypeError(fieldname, value, [str])
 
     vlen = len(value)
-    if vlen < min or vlen > max:
-        err_msg = f"The field {fieldname} should have a length of minumum {min} and maximum {max}."  # noqa
+    if vlen < min_length or vlen > max_length:
+        err_msg = f"The field {fieldname} should have a length of minumum {min_length} and maximum {max_length}."  # noqa
         raise errors.DbModelFieldLengthException(err_msg)
 
 
@@ -66,7 +66,7 @@ def validate_email(
     if nullable and email is None:
         return
 
-    _validate_field_required(fieldname, email)
+    validate_field_required(fieldname, email)
 
     if not isinstance(email, str):
         raise errors.DbModelFieldTypeError(fieldname, email, [str])
@@ -79,8 +79,8 @@ def validate_email(
     validate_string(
         fieldname=fieldname,
         value=email,
-        min=3,
-        max=max_length
+        min_length=3,
+        max_length=max_length
     )
 
 
@@ -108,7 +108,7 @@ def validate_float(
     if nullable and value is None:
         return
 
-    _validate_field_required(fieldname, value)
+    validate_field_required(fieldname, value)
 
     if not isinstance(value, (float, int)):
         raise errors.DbModelFieldTypeError(fieldname, value, [float])
@@ -145,7 +145,7 @@ def validate_integer(
     if nullable and value is None:
         return
 
-    _validate_field_required(fieldname, value)
+    validate_field_required(fieldname, value)
 
     if not isinstance(value, int):
         raise errors.DbModelFieldTypeError(fieldname, value, [int])
@@ -167,13 +167,13 @@ def validate_boolean(
     if nullable and value is None:
         return
 
-    _validate_field_required(fieldname, value)
+    validate_field_required(fieldname, value)
 
     if not isinstance(value, bool):
         raise errors.DbModelFieldTypeError(fieldname, value, [bool])
 
 
-def _validate_field_required(
+def validate_field_required(
         fieldname: str,
         value: Any
 ) -> None:

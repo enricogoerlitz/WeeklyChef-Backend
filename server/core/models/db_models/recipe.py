@@ -6,6 +6,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from db import db
+from errors import errors
 from utils import model_validator
 from utils.decorators import add_to_dict, add_from_json_method, add__str__
 
@@ -24,8 +25,8 @@ class Unit(db.Model):
         model_validator.validate_string(
             fieldname="name",
             value=name,
-            min=1,
-            max=10
+            min_length=1,
+            max_length=10
         )
         return name
 
@@ -47,8 +48,8 @@ class Category(db.Model):
         model_validator.validate_string(
             fieldname="name",
             value=name,
-            min=4,
-            max=30
+            min_length=4,
+            max_length=30
         )
         return name
 
@@ -67,8 +68,8 @@ class Tag(db.Model):
         model_validator.validate_string(
             fieldname="name",
             value=name,
-            min=4,
-            max=30
+            min_length=4,
+            max_length=30
         )
         return name
 
@@ -95,8 +96,8 @@ class Ingredient(db.Model):
         model_validator.validate_string(
             fieldname="name",
             value=name,
-            min=4,
-            max=50
+            min_length=4,
+            max_length=50
         )
         return name
 
@@ -105,8 +106,8 @@ class Ingredient(db.Model):
         model_validator.validate_string(
             fieldname="name",
             value=name,
-            min=3,
-            max=30
+            min_length=3,
+            max_length=30
         )
         return name
 
@@ -141,12 +142,18 @@ class Ingredient(db.Model):
         model_validator.validate_string(
             fieldname="search_description",
             value=search_description,
-            min=4,
-            max=75
+            min_length=4,
+            max_length=75
         )
         return search_description
 
-    # TODO: validate required? -> oder wird das automatisch gemacht?
+    @validates("unit_id")
+    def validate_unit_id(self, _, unit_id: int) -> str:
+        model_validator.validate_field_required(
+            fieldname="unit_id",
+            value=unit_id
+        )
+        return unit_id
 
 
 @add_from_json_method
@@ -158,7 +165,7 @@ class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     person_count = db.Column(db.Integer, nullable=False)
-    preperation_description = db.Column(db.String(1000), nullable=False)
+    preperation_description = db.Column(db.String(1_000), nullable=False)
     preperation_time_minutes = db.Column(db.Integer, nullable=False)
     difficulty = db.Column(db.String(15), nullable=False)
     search_description = db.Column(db.String(75), nullable=False)
@@ -166,23 +173,104 @@ class Recipe(db.Model):
     creator_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)  # noqa
 
-    category = db.relationship("Category", backref="ingredient", lazy="joined")
+    category = db.relationship("Category", backref="recipe", lazy="joined")
     ingredients = db.relationship(
         "Ingredient",
         secondary="recipe_ingredient",
-        backref=db.backref("recipe", lazy="joined")
+        backref=db.backref("recipe", lazy="dynamic")
     )
     tags = db.relationship(
         "Tag",
         secondary="recipe_tag",
-        backref=db.backref("recipe", lazy="joined")
+        backref=db.backref("recipe", lazy="dynamic")
     )
+
+    @validates("name")
+    def validate_name(self, _, name: str) -> str:
+        model_validator.validate_string(
+            fieldname="name",
+            value=name,
+            min_length=5,
+            max_length=50
+        )
+        return name
+
+    @validates("person_count")
+    def validate_person_count(self, _, person_count: str) -> str:
+        model_validator.validate_integer(
+            fieldname="person_count",
+            value=person_count,
+            min=1,
+            max=100
+        )
+        return person_count
+
+    @validates("preperation_description")
+    def validate_preperation_description(
+        self,
+        _,
+        preperation_description: str
+    ) -> str:
+        model_validator.validate_string(
+            fieldname="preperation_description",
+            value=preperation_description,
+            min_length=5,
+            max_length=1_000
+        )
+        return preperation_description
+
+    @validates("preperation_time_minutes")
+    def validate_preperation_time_minutes(
+        self,
+        _,
+        preperation_time_minutes: str
+    ) -> str:
+        model_validator.validate_integer(
+            fieldname="preperation_time_minutes",
+            value=preperation_time_minutes,
+            min=1,
+            max=100_000
+        )
+        return preperation_time_minutes
+
+    @validates("difficulty")
+    def validate_difficulty(self, _, difficulty: str) -> str:
+        if str(difficulty) not in ["einfach", "normal", "fortgeschritten"]:
+            err_msg = "The field 'difficulty' must be 'einfach', 'normal' or 'fortgeschritten''"  # noqa
+            raise errors.DbModelValidationException(err_msg)
+        return difficulty
+
+    @validates("search_description")
+    def validate_search_description(self, _, search_description: str) -> str:
+        model_validator.validate_string(
+            fieldname="search_description",
+            value=search_description,
+            min_length=4,
+            max_length=75
+        )
+        return search_description
+
+    @validates("creator_user_id")
+    def validate_creator_user_id(self, _, creator_user_id: int) -> str:
+        model_validator.validate_field_required(
+            fieldname="creator_user_id",
+            value=creator_user_id
+        )
+        return creator_user_id
+
+    @validates("category_id")
+    def validate_category_id(self, _, category_id: int) -> str:
+        model_validator.validate_field_required(
+            fieldname="category_id",
+            value=category_id
+        )
+        return category_id
 
 
 @add_from_json_method
 @add_to_dict
 @add__str__
-class RecipeIngredientComposit(db.Model):
+class RecipeIngredient(db.Model):
     __tablename__ = "recipe_ingredient"
 
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)  # noqa
