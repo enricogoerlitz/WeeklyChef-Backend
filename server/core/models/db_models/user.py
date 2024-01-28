@@ -6,11 +6,11 @@ from sqlalchemy.orm import validates
 
 from db import db
 from utils import model_validator
-from utils.decorators import add_to_dict, add_from_json_method
+from utils.decorators import add_to_dict_method, add_from_json_method
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-@add_to_dict
+@add_to_dict_method
 class Role(db.Model):
     __tablename__ = "role"
 
@@ -92,7 +92,7 @@ class User(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
+@add_to_dict_method
 class UserRoleComposite(db.Model):
     __tablename__ = "user_roles"
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa

@@ -5,7 +5,7 @@ Util decorators for this app
 from errors import errors
 
 
-def add_to_dict(cls):
+def add_to_dict_method(cls):
     def to_dict(self):
         d = self.__dict__  # {attr: getattr(self, attr) for attr in vars(self)}
         del d["_sa_instance_state"]
@@ -15,7 +15,7 @@ def add_to_dict(cls):
     return cls
 
 
-def add__str__(cls):
+def add__str__method(cls):
     def to_str(self):
         d = self.__dict__
         del d["_sa_instance_state"]

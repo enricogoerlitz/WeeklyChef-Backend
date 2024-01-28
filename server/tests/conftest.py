@@ -6,7 +6,7 @@ from config import create_app
 from db import db
 
 
-# how to run tests:
+# how to run tests (https://www.youtube.com/watch?v=RLKW7ZMJOf4&ab_channel=PrettyPrinted):  # noqa
 #   cd ./server
 #   python -m pytest tests/ -W ignore::DeprecationWarning
 

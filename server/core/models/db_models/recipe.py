@@ -8,12 +8,16 @@ from sqlalchemy.orm import validates
 from db import db
 from errors import errors
 from utils import model_validator
-from utils.decorators import add_to_dict, add_from_json_method, add__str__
+from utils.decorators import (
+    add_to_dict_method,
+    add_from_json_method,
+    add__str__method
+)
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class Unit(db.Model):
     __tablename__ = "unit"
 
@@ -35,8 +39,8 @@ class Unit(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class Category(db.Model):
     __tablename__ = "category"
 
@@ -55,8 +59,8 @@ class Category(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class Tag(db.Model):
     __tablename__ = "tag"
 
@@ -75,8 +79,8 @@ class Tag(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class Ingredient(db.Model):
     __tablename__ = "ingredient"
 
@@ -157,8 +161,8 @@ class Ingredient(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class Recipe(db.Model):
     __tablename__ = "recipe"
 
@@ -268,8 +272,8 @@ class Recipe(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class RecipeIngredient(db.Model):
     __tablename__ = "recipe_ingredient"
 
@@ -297,8 +301,8 @@ class RecipeIngredient(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class RecipeTagComposite(db.Model):
     __tablename__ = "recipe_tag"
 
@@ -311,8 +315,8 @@ class RecipeTagComposite(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class RecipeRating(db.Model):
     __tablename__ = "recipe_rating"
 
@@ -326,8 +330,8 @@ class RecipeRating(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class RecipeImage(db.Model):
     __tablename__ = "rimage"
 
@@ -336,8 +340,8 @@ class RecipeImage(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class ReicpeImageComposite(db.Model):
     __tablename__ = "recipe_image"
 
@@ -351,8 +355,8 @@ class ReicpeImageComposite(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class Collection(db.Model):
     __tablename__ = "collection"
 
@@ -363,9 +367,9 @@ class Collection(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
-class UserSharedCollectionComposite(db.Model):
+@add_to_dict_method
+@add__str__method
+class UserSharedCollection(db.Model):
     __tablename__ = "collection_user"
 
     collection_id = db.Column(db.Integer, db.ForeignKey("collection.id"), primary_key=True)  # noqa
@@ -378,8 +382,8 @@ class UserSharedCollectionComposite(db.Model):
 
 
 @add_from_json_method
-@add_to_dict
-@add__str__
+@add_to_dict_method
+@add__str__method
 class CollectionRecipeComposite(db.Model):
     __tablename__ = "collection_recipe"
 
