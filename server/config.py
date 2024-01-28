@@ -9,7 +9,15 @@ from db import db
 from api import api
 from utils.jwt import jwt_manager
 from utils.initialize import initialize_database
-from core.models.db_models import *  # noqa - import all models for table init
+from core.models.db_models import *  # noqa - import all models for table initfrom api import api
+from services.heathcheck.apis.heathcheck import ns as ns_heathcheck
+from services.auth.apis.auth import ns as ns_auth
+from services.auth.apis.user import ns as ns_user
+from services.recipe.apis.recipe import ns as ns_recipe
+from services.recipe.apis.ingredient import ns as ns_ingredient
+from services.recipe.apis.category import ns as ns_category
+from services.recipe.apis.unit import ns as ns_unit
+from services.recipe.apis.tag import ns as ns_tag
 
 
 class FlaskConfig:
@@ -20,15 +28,28 @@ class FlaskConfig:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
 
-def create_app() -> Flask:
+def create_app(database_uri: str = None) -> Flask:
     # Create app and configuration
     app = Flask(__name__)
     app.config.from_object(FlaskConfig)
+
+    if database_uri is not None:
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
 
     # init app
     db.init_app(app)
     api.init_app(app)
     jwt_manager.init_app(app)
+
+    # add namespaces
+    api.add_namespace(ns_heathcheck)
+    api.add_namespace(ns_auth)
+    api.add_namespace(ns_user)
+    api.add_namespace(ns_recipe)
+    api.add_namespace(ns_ingredient)
+    api.add_namespace(ns_category)
+    api.add_namespace(ns_unit)
+    api.add_namespace(ns_tag)
 
     # add errorhandler
     @app.errorhandler(500)
