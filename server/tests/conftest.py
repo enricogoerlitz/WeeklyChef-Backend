@@ -1,5 +1,7 @@
 import pytest
 
+from flask import Flask
+
 from config import create_app
 from db import db
 
@@ -19,5 +21,5 @@ def app():
 
 
 @pytest.fixture()
-def client(app):
+def client(app: Flask):
     return app.test_client()
