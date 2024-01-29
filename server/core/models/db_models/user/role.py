@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy.orm import validates
 
 from db import db
-from utils import model_validator as ModelValidator
+from core.utils import model_validator as ModelValidator
 from utils.decorators import add_to_dict_method
 
 

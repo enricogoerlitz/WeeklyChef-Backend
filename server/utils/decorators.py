@@ -7,11 +7,12 @@ from errors import errors
 
 def add_to_dict_method(cls):
     def to_dict(self):
-        d = self.__dict__  # {attr: getattr(self, attr) for attr in vars(self)}
+        d = self.__dict__
         del d["_sa_instance_state"]
         return d
 
-    cls.to_dict = to_dict
+    setattr(cls, "to_dict", to_dict)
+
     return cls
 
 
@@ -56,7 +57,6 @@ def add_from_json_method(cls):
             err_msg = str(e).replace("__init__() ", "").capitalize()
             raise errors.DbModelSerializationException(err_msg)
 
-    # Add the from_json method to the class
     setattr(cls, "from_json", from_json)
 
     return cls

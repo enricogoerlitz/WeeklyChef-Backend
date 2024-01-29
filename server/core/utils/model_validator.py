@@ -2,6 +2,8 @@
 import re
 
 from typing import Any
+from dateutil import parser
+from datetime import datetime, date
 
 from errors import errors
 
@@ -88,8 +90,8 @@ def validate_float(
         *,
         fieldname: str,
         value: float,
-        min: float = None,
-        max: float = None,
+        min_: float = None,
+        max_: float = None,
         nullable: bool = False
 ) -> None:
     """_summary_
@@ -114,10 +116,10 @@ def validate_float(
         raise errors.DbModelFieldTypeError(fieldname, value, [float])
 
     if (
-        (min is not None and value < min) or
-        (max is not None and value > max)
+        (min_ is not None and value < min_) or
+        (max_ is not None and value > max_)
     ):
-        err_msg = f"The field {fieldname} should have a minumum value of {min} and maximum value of {max}."  # noqa
+        err_msg = f"The field {fieldname} should have a minumum value of {min_} and maximum value of {max_}."  # noqa
         raise errors.DbModelFieldValueError(err_msg)
 
 
@@ -125,8 +127,8 @@ def validate_integer(
         *,
         fieldname: str,
         value: int,
-        min: int = None,
-        max: int = None,
+        min_: int = None,
+        max_: int = None,
         nullable: bool = False
 ) -> None:
     """_summary_
@@ -151,10 +153,10 @@ def validate_integer(
         raise errors.DbModelFieldTypeError(fieldname, value, [int])
 
     if (
-        (min is not None and value < min) or
-        (max is not None and value > max)
+        (min_ is not None and value < min_) or
+        (max_ is not None and value > max_)
     ):
-        err_msg = f"The field {fieldname} should have a minumum value of {min} and maximum value of {max}."  # noqa
+        err_msg = f"The field {fieldname} should have a minumum value of {min_} and maximum value of {max_}."  # noqa
         raise errors.DbModelFieldValueError(err_msg)
 
 
@@ -190,3 +192,28 @@ def validate_field_required(
 
     if value is None:
         raise errors.DbModelFieldRequieredException(fieldname)
+
+
+def validate_datetime(
+        fieldname: str,
+        value: Any,
+        min_datetime: datetime,
+        max_datetime: datetime,
+        nullable: bool = False
+) -> None:
+    if nullable and value is None:
+        return
+
+    validate_field_required(fieldname, value)
+
+    try:
+        value = parser.parse(value)
+    except Exception:
+        raise errors.DbModelFieldTypeError(fieldname, value, [datetime, date])
+
+    if (
+        (min_datetime is not None and value < min_datetime) or
+        (max_datetime is not None and value > max_datetime)
+    ):
+        err_msg = f"The field {fieldname} should have a minumum value of {min_datetime} and maximum value of {max_datetime}."  # noqa
+        raise errors.DbModelFieldValueError(err_msg)

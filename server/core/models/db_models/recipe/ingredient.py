@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy.orm import validates
 
 from db import db
-from utils import model_validator as ModelValidator
+from core.utils import model_validator as ModelValidator
 from utils.decorators import (
     add_to_dict_method,
     add_from_json_method,
@@ -33,7 +33,7 @@ class Ingredient(db.Model):
     unit = db.relationship("Unit", backref="ingredient", lazy="select")
 
     @validates("name")
-    def validate_unitname(self, key: str, value: Any) -> str:
+    def validate_name(self, key: str, value: Any) -> str:
         ModelValidator.validate_string(
             fieldname=key,
             value=value,
@@ -57,7 +57,7 @@ class Ingredient(db.Model):
         ModelValidator.validate_float(
             fieldname=key,
             value=value,
-            min=0.
+            min_=0.
         )
         return value
 
@@ -66,7 +66,7 @@ class Ingredient(db.Model):
         ModelValidator.validate_float(
             fieldname=key,
             value=value,
-            min=0.
+            min_=0.
         )
         return value
 
@@ -90,7 +90,7 @@ class Ingredient(db.Model):
 
     @validates("unit_id")
     def validate_unit_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )

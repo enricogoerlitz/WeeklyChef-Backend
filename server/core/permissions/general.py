@@ -7,7 +7,7 @@ from functools import wraps
 from flask_jwt_extended import get_jwt_identity
 
 from errors import http_errors
-from utils import roles
+from core.utils import roles
 
 
 def IsAdmin(func):

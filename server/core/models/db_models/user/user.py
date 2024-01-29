@@ -8,7 +8,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from db import db
-from utils import model_validator as ModelValidator
+from core.utils import model_validator as ModelValidator
 from utils.decorators import add_to_dict_method, add_from_json_method
 from werkzeug.security import generate_password_hash, check_password_hash
 

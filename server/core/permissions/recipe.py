@@ -9,7 +9,7 @@ from sqlalchemy import and_
 
 from core.models.db_models.recipe.recipe import Recipe
 from errors import http_errors
-from utils import roles
+from core.utils import roles
 from core.permissions.general import unauthorized_error
 
 

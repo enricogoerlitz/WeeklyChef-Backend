@@ -8,7 +8,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from db import db
-from utils import model_validator as ModelValidator
+from core.utils import model_validator as ModelValidator
 from utils.decorators import (
     add_to_dict_method,
     add_from_json_method,
@@ -23,19 +23,57 @@ class Supermarket(db.Model):
     __tablename__ = "supermarket"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(10), nullable=False)
+    name = db.Column(db.String(30), nullable=False)
     street = db.Column(db.String(100), nullable=False)
     postcode = db.Column(db.String(15), nullable=False)
     district = db.Column(db.String(30), nullable=False)
     owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
 
     @validates("name")
-    def validate_unitname(self, key: str, value: Any) -> str:
+    def validate_name(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            value=value,
+            min_length=3,
+            max_length=10
+        )
+        return value
+
+    @validates("street")
+    def validate_street(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            value=value,
+            min_length=3,
+            max_length=100
+        )
+        return value
+
+    @validates("postcode")
+    def validate_postcode(self, key: str, value: Any) -> str:
         ModelValidator.validate_string(
             fieldname=key,
             value=value,
             min_length=1,
-            max_length=10
+            max_length=15
+        )
+        return value
+
+    @validates("district")
+    def validate_district(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            value=value,
+            min_length=1,
+            max_length=30
+        )
+        return value
+
+    @validates("owner_user_id")
+    def validate_owner_user_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value
         )
         return value
 
@@ -52,9 +90,9 @@ class SupermarketArea(db.Model):
     __tablename__ = "sarea"
 
     id = db.Column(db.Integer, primary_key=True)
-    supermarket_id = db.Column(db.Integer, db.ForeignKey("supermarket.id"), nullable=False)  # noqa
     name = db.Column(db.String(15), unique=True, nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
+    supermarket_id = db.Column(db.Integer, db.ForeignKey("supermarket.id"), nullable=False)  # noqa
 
     ingredients = db.relationship(
         "SupermarketAreaIngredientComposite",
@@ -75,6 +113,33 @@ class SupermarketArea(db.Model):
         )
     )
 
+    @validates("name")
+    def validate_name(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            value=value,
+            min_length=3,
+            max_length=10
+        )
+        return value
+
+    @validates("order_number")
+    def validate_order_number(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value,
+            min_=1
+        )
+        return value
+
+    @validates("supermarket_id")
+    def validate_supermarket_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value
+        )
+        return value
+
 
 class SupermarketAreaIngredientComposite(db.Model):
     __tablename__ = "sarea_ingredient"
@@ -93,6 +158,31 @@ class SupermarketAreaIngredientComposite(db.Model):
         ),
     )
 
+    @validates("sarea_id")
+    def validate_sarea_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value
+        )
+        return value
+
+    @validates("ingredient_id")
+    def validate_ingredient_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value
+        )
+        return value
+
+    @validates("ingredient_price")
+    def validate_ingredient_price(self, key: str, value: Any) -> str:
+        ModelValidator.validate_float(
+            fieldname=key,
+            value=value,
+            min_=0.
+        )
+        return value
+
 
 @add_from_json_method
 @add_to_dict_method
@@ -110,3 +200,19 @@ class UserSharedEditSupermarket(db.Model):
             name="uq_supermarket_user"
         ),
     )
+
+    @validates("supermarket_id")
+    def validate_supermarket_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value
+        )
+        return value
+
+    @validates("user_id")
+    def validate_user_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value
+        )
+        return value

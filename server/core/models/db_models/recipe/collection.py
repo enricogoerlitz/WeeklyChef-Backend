@@ -7,7 +7,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from db import db
-from utils import model_validator as ModelValidator
+from core.utils import model_validator as ModelValidator
 from utils.decorators import (
     add_to_dict_method,
     add_from_json_method,
@@ -38,7 +38,7 @@ class Collection(db.Model):
 
     @validates("owner_user_id")
     def validate_owner_user_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -69,7 +69,7 @@ class UserSharedCollection(db.Model):
 
     @validates("collection_id")
     def validate_collection_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -77,7 +77,7 @@ class UserSharedCollection(db.Model):
 
     @validates("user_id")
     def validate_user_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -107,7 +107,7 @@ class CollectionRecipeComposite(db.Model):
 
     @validates("collection_id")
     def validate_collection_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -115,7 +115,7 @@ class CollectionRecipeComposite(db.Model):
 
     @validates("recipe_id")
     def validate_recipe_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )

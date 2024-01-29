@@ -9,7 +9,7 @@ from sqlalchemy.orm import validates
 
 from db import db
 from errors import errors
-from utils import model_validator as ModelValidator
+from core.utils import model_validator as ModelValidator
 from utils.decorators import (
     add_to_dict_method,
     add_from_json_method,
@@ -61,8 +61,8 @@ class Recipe(db.Model):
         ModelValidator.validate_integer(
             fieldname=key,
             value=value,
-            min=1,
-            max=100
+            min_=1,
+            max_=100
         )
         return value
 
@@ -89,8 +89,8 @@ class Recipe(db.Model):
         ModelValidator.validate_integer(
             fieldname=Any,
             value=value,
-            min=1,
-            max=100_000
+            min_=1,
+            max_=100_000
         )
         return value
 
@@ -113,7 +113,7 @@ class Recipe(db.Model):
 
     @validates("creator_user_id")
     def validate_creator_user_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -121,7 +121,7 @@ class Recipe(db.Model):
 
     @validates("category_id")
     def validate_category_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -144,7 +144,7 @@ class RecipeIngredient(db.Model):
 
     @validates("recipe_id")
     def validate_recipe_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -152,7 +152,7 @@ class RecipeIngredient(db.Model):
 
     @validates("ingredient_id")
     def validate_ingredient_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=Any,
             value=value
         )
@@ -163,8 +163,8 @@ class RecipeIngredient(db.Model):
         ModelValidator.validate_integer(
             fieldname=key,
             value=value,
-            min=1,
-            max=100_000
+            min_=1,
+            max_=100_000
         )
         return value
 
@@ -184,7 +184,7 @@ class RecipeTagComposite(db.Model):
 
     @validates("recipe_id")
     def validate_recipe_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -192,7 +192,7 @@ class RecipeTagComposite(db.Model):
 
     @validates("tag_id")
     def validate_tag_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -215,7 +215,7 @@ class RecipeRating(db.Model):
 
     @validates("user_id")
     def validate_user_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -223,7 +223,7 @@ class RecipeRating(db.Model):
 
     @validates("recipe_id")
     def validate_tag_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -234,8 +234,8 @@ class RecipeRating(db.Model):
         ModelValidator.validate_float(
             fieldname=key,
             value=value,
-            min=0.5,
-            max=5
+            min_=0.5,
+            max_=5
         )
         return value
 
@@ -275,7 +275,7 @@ class ReicpeImageComposite(db.Model):
 
     @validates("recipe_id")
     def validate_tag_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -283,7 +283,7 @@ class ReicpeImageComposite(db.Model):
 
     @validates("image_id")
     def validate_image_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_field_required(
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )

@@ -7,7 +7,7 @@ from db import db
 from errors import errors
 from core.models.api_models.auth import register_model_send
 from core.models.db_models.user import User, Role
-from utils import roles
+from core.utils import roles
 from utils.jwt import JsonWebTokenDTO
 
 
@@ -32,14 +32,7 @@ def handle_register(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
     db.session.add(user)
     db.session.commit()
 
-    added_user: User = User.query.filter_by(username=username).first()
-
-    if not added_user:
-        raise errors.DbModelNotFoundException(
-            "User was not found after successfully insert."
-        )
-
-    return added_user, JsonWebTokenDTO.create(added_user.to_identity())
+    return user, JsonWebTokenDTO.create(user.to_identity())
 
 
 def handle_login(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
@@ -73,7 +66,7 @@ def _validate_user_is_existing(user: User) -> None:
     is_existing_count = User.query.filter(
         or_(
             User.email == user.email,
-            username == username
+            User.username == user.username
         )
     ).count()
 
