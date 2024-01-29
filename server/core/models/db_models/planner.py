@@ -6,11 +6,13 @@ Recipe planner models
 Man kann mehrere Planner erstellen und andere leute einladen
 """
 
+from typing import Any
+
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from db import db
-from utils import model_validator
+from utils import model_validator as ModelValidator
 from utils.decorators import (
     add_to_dict_method,
     add_from_json_method,
@@ -30,17 +32,14 @@ class RecipePlanner(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     @validates("name")
-    def validate_unitname(self, _, name: str) -> str:
-        model_validator.validate_string(
-            fieldname="name",
-            value=name,
+    def validate_unitname(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            value=value,
             min_length=1,
             max_length=10
         )
-        return name
-
-    def __str__(self) -> str:
-        return str(dict(self))
+        return value
 
 
 @add_from_json_method
@@ -91,5 +90,5 @@ class UserSharedRecipePlanner(db.Model):
     planner = db.relationship("RecipePlanner", backref="rplanner_user", lazy="select")  # noqa
 
     __table_args__ = (
-        UniqueConstraint("rplanner_id", "user_id", name="uq_rplanner_user"),  # noqa
+        UniqueConstraint("rplanner_id", "user_id", name="uq_rplanner_user"),
     )

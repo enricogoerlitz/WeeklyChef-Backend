@@ -1,3 +1,0 @@
-"""
-Food shop Models
-"""

@@ -1,37 +1,16 @@
 """
 User Models
 """
+
+from typing import Any
+
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from db import db
-from utils import model_validator
+from utils import model_validator as ModelValidator
 from utils.decorators import add_to_dict_method, add_from_json_method
 from werkzeug.security import generate_password_hash, check_password_hash
-
-
-@add_to_dict_method
-class Role(db.Model):
-    __tablename__ = "role"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-
-    def __init__(self, name: str):
-        self.name = name
-
-    def __str__(self) -> str:
-        return str(self.to_dict())
-
-    @validates("name")
-    def validate_username(self, _, name: str) -> str:
-        model_validator.validate_string(
-            fieldname="name",
-            value=name,
-            min_length=1,
-            max_length=50
-        )
-        return name
 
 
 @add_from_json_method
@@ -61,23 +40,23 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
     @validates("email")
-    def validate_email(self, _, email: str) -> str:
-        model_validator.validate_email(
-            fieldname="email",
-            email=email,
+    def validate_email(self, key: str, value: Any) -> str:
+        ModelValidator.validate_email(
+            fieldname=key,
+            email=value,
             max_length=120
         )
-        return email
+        return value
 
     @validates("username")
-    def validate_username(self, _, username: str) -> str:
-        model_validator.validate_string(
-            fieldname="username",
-            value=username,
+    def validate_username(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            value=value,
             min_length=5,
             max_length=50
         )
-        return username
+        return value
 
     def to_identity(self) -> dict:
         return {

@@ -32,7 +32,7 @@ def handle_register(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
     db.session.add(user)
     db.session.commit()
 
-    added_user: User = User.query.filter_by(username=user.username).first()
+    added_user: User = User.query.filter_by(username=username).first()
 
     if not added_user:
         raise errors.DbModelNotFoundException(
@@ -73,7 +73,7 @@ def _validate_user_is_existing(user: User) -> None:
     is_existing_count = User.query.filter(
         or_(
             User.email == user.email,
-            User.username == user.username
+            username == username
         )
     ).count()
 
