@@ -4,6 +4,7 @@ General Flask-App creation for monoith architecture
 from datetime import timedelta
 
 from flask import Flask
+from flask_cors import CORS
 
 from db import db
 from api import api
@@ -38,6 +39,7 @@ def create_app(database_uri: str = None) -> Flask:
         app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
 
     # init app
+    CORS(app)
     db.init_app(app)
     api.init_app(app)
     jwt_manager.init_app(app)

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API-Anfrage</title>
+</head>
+<body>
+<button onclick="fetchData()">Daten abrufen</button>
+
+<script>
+function fetchData() {
+    const url = "http://localhost:8080/api/v1/recipe/";
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNjM4ODc4NiwianRpIjoiMTkzY2Y0NzEtMTE1My00MWI5LWIxYTctMTU2YTM1ZDI1MjU1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MSwidXNlcm5hbWUiOiJDb29sZXJUZWRkeSIsImVtYWlsIjoicm9vdC5lbWFpbEBnbWFpbC5jb20iLCJyb2xlcyI6WyJhZG1pbiIsInN0YWZmIiwic3RhbmRhcmQiXX0sIm5iZiI6MTcwNjM4ODc4NiwiY3NyZiI6Ijk0MTY2MGVkLTNjZjAtNDhhZS04MjJhLTI4NWZkYzAwZWM1YSIsImV4cCI6MTcwODk4MDc4Nn0.PAIq2pZ_r0VZYpgv5DeEhGWIN9F9nVnOii5JUgVNEyg";
+
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+}
+</script>
+</body>
+</html>

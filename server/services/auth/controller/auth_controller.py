@@ -11,7 +11,7 @@ from core.enums import roles
 from utils.jwt import JsonWebTokenDTO
 
 
-def handle_register(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
+def handle_register(user_data: dict) -> tuple[User, JsonWebTokenDTO]:
     """
     Adds an user to database, creates an JsonWebTokenDTO and returns
     the created User and JsonWebTokenDTO.
@@ -22,7 +22,7 @@ def handle_register(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
     Returns:
         tuple[User, JsonWebTokenDTO]: new user from db and JWT
     """
-    user: User = User.from_json(req_data, register_model_send)
+    user: User = User.from_json(user_data, register_model_send)
 
     _validate_user_is_existing(user)
 
@@ -35,10 +35,10 @@ def handle_register(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
     return user, JsonWebTokenDTO.create(user.to_identity())
 
 
-def handle_login(req_data: dict) -> tuple[User, JsonWebTokenDTO]:
-    username = req_data.get("username", None)
-    email = req_data.get("email", None)
-    password = req_data.get("password", None)
+def handle_login(user_data: dict) -> tuple[User, JsonWebTokenDTO]:
+    username = user_data.get("username", None)
+    email = user_data.get("email", None)
+    password = user_data.get("password", None)
     if (
         username is None and
         email is None

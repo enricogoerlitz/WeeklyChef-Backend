@@ -29,8 +29,9 @@ class User(db.Model):
     )
 
     def __init__(self, email: str, username: str, password: str):
-        self.email = email.lower()
+        self.email = email
         self.username = username
+        self.validate_password("password", password)
         self.set_password(password)
 
     def set_password(self, password: str) -> None:
@@ -40,13 +41,13 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
     @validates("email")
-    def validate_email(self, key: str, value: Any) -> str:
+    def validate_email(self, key: str, value: str) -> str:
         ModelValidator.validate_email(
             fieldname=key,
             email=value,
             max_length=120
         )
-        return value
+        return value.lower()
 
     @validates("username")
     def validate_username(self, key: str, value: Any) -> str:
@@ -55,6 +56,16 @@ class User(db.Model):
             value=value,
             min_length=5,
             max_length=50
+        )
+        return value
+
+    @validates("password")
+    def validate_password(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            value=value,
+            min_length=5,
+            max_length=500
         )
         return value
 
