@@ -7,7 +7,7 @@ from flask_jwt_extended import create_access_token
 from config import create_app
 from db import db
 from core.models.db_models import Role, User
-from core.utils import roles
+from core.enums import roles
 
 
 # how to run tests (https://www.youtube.com/watch?v=RLKW7ZMJOf4&ab_channel=PrettyPrinted):  # noqa

@@ -9,6 +9,7 @@ from sqlalchemy.orm import validates
 
 from db import db
 from errors import errors
+from core.enums import difficulty
 from core.utils import model_validator as ModelValidator
 from utils.decorators import (
     add_to_dict_method,
@@ -73,7 +74,7 @@ class Recipe(db.Model):
         value: Any
     ) -> str:
         ModelValidator.validate_string(
-            fieldname=Any,
+            fieldname=key,
             value=value,
             min_length=5,
             max_length=1_000
@@ -87,7 +88,7 @@ class Recipe(db.Model):
         value: Any
     ) -> str:
         ModelValidator.validate_integer(
-            fieldname=Any,
+            fieldname=key,
             value=value,
             min_=1,
             max_=100_000
@@ -96,7 +97,7 @@ class Recipe(db.Model):
 
     @validates("difficulty")
     def validate_difficulty(self, _: str, value: Any) -> str:
-        if str(value) not in ["einfach", "normal", "fortgeschritten"]:
+        if str(value) not in difficulty.ALLOWED_DIFFICULTIES:
             err_msg = "The field 'difficulty' must be 'einfach', 'normal' or 'fortgeschritten''"  # noqa
             raise errors.DbModelValidationException(err_msg)
         return value
@@ -104,7 +105,7 @@ class Recipe(db.Model):
     @validates("search_description")
     def validate_search_description(self, key: str, value: str) -> str:
         ModelValidator.validate_string(
-            fieldname=Any,
+            fieldname=key,
             value=value,
             min_length=4,
             max_length=75
@@ -153,7 +154,7 @@ class RecipeIngredient(db.Model):
     @validates("ingredient_id")
     def validate_ingredient_id(self, key: str, value: Any) -> str:
         ModelValidator.validate_integer(
-            fieldname=Any,
+            fieldname=key,
             value=value
         )
         return value

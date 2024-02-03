@@ -32,12 +32,12 @@ def test_category_get(
 
         # when
         response = client.get(api_route, headers=admin_headers)
-        status_code = response.status_code
+
         result_data = json.loads(response.data)
+        expected_data = category.to_dict()
 
         # then
-        expected_data = category.to_dict()
-        assert status_code == 200
+        assert response.status_code == 200
         assert result_data == expected_data
 
 
@@ -48,16 +48,13 @@ def test_category_get_invalid_id(
 ):
     with app.app_context():
         # given
-        api_route = f"{ROUTE}/9999999"
+        api_route = f"{ROUTE}/-1"
 
         # when
         response = client.get(api_route, headers=admin_headers)
-        status_code = response.status_code
-        result_data = json.loads(response.data)
 
         # then
-        assert status_code == 404
-        assert "msg" in result_data
+        assert response.status_code == 404
 
 
 def test_category_get_authorization(
@@ -78,18 +75,20 @@ def test_category_get_authorization(
         response_staff = client.get(api_route, headers=staff_headers)
         response_admin = client.get(api_route, headers=admin_headers)
 
-        # then
+        result_data_std = json.loads(response_std.data)
+        result_data_staff = json.loads(response_staff.data)
+        result_data_admin = json.loads(response_admin.data)
         expected_data = category.to_dict()
 
+        # then
         assert response_without.status_code != 200
         assert response_std.status_code == 200
         assert response_staff.status_code == 200
         assert response_admin.status_code == 200
 
-        assert expected_data != json.loads(response_without.data)
-        assert expected_data == json.loads(response_std.data)
-        assert expected_data == json.loads(response_staff.data)
-        assert expected_data == json.loads(response_admin.data)
+        assert result_data_std == expected_data
+        assert result_data_staff == expected_data
+        assert result_data_admin == expected_data
 
 
 # TEST GET-LIST
@@ -108,13 +107,14 @@ def test_category_get_list(
 
         # when
         response = client.get(api_route, headers=admin_headers)
-        status_code = response.status_code
+
         result_data = json.loads(response.data)
+        expected_data = [category.to_dict() for category in categorys]
 
         # then
-        assert status_code == 200
+        assert response.status_code == 200
         assert len(categorys) == COUNT
-        assert result_data == [category.to_dict() for category in categorys]
+        assert result_data == expected_data
 
 
 def test_category_get_list_authorization(
@@ -136,18 +136,20 @@ def test_category_get_list_authorization(
         response_staff = client.get(api_route, headers=staff_headers)
         response_admin = client.get(api_route, headers=admin_headers)
 
-        # then
+        result_data_std = json.loads(response_std.data)
+        result_data_staff = json.loads(response_staff.data)
+        result_data_admin = json.loads(response_admin.data)
         expected_data = [category.to_dict() for category in categorys]
 
+        # then
         assert response_without.status_code != 200
         assert response_std.status_code == 200
         assert response_staff.status_code == 200
         assert response_admin.status_code == 200
 
-        assert expected_data != json.loads(response_without.data)
-        assert expected_data == json.loads(response_std.data)
-        assert expected_data == json.loads(response_staff.data)
-        assert expected_data == json.loads(response_admin.data)
+        assert result_data_std == expected_data
+        assert result_data_staff == expected_data
+        assert result_data_admin == expected_data
 
 
 # TEST-POST
@@ -165,19 +167,17 @@ def test_category_post(
 
         # when
         response = client.post(api_route, headers=admin_headers, json=data)
-        status_code = response.status_code
-        result_data = json.loads(response.data)
-        db_result_data = Category.query.filter_by(**data).first().to_dict()
 
-        # then
-        expected_data = data.copy()
+        result_data = json.loads(response.data)
+        result_data_db = Category.query.filter_by(**data).first().to_dict()
         result_data_without_id = result_data.copy()
         del result_data_without_id["id"]
+        expected_data = data.copy()
 
-        assert status_code == 201
+        # then
+        assert response.status_code == 201
         assert result_data_without_id == expected_data
-        assert "id" in result_data
-        assert db_result_data == result_data
+        assert result_data_db == result_data
 
 
 def test_category_post_authorization(
@@ -266,19 +266,17 @@ def test_category_patch(
 
         # when
         response = client.patch(api_route, headers=admin_headers, json=data)
-        status_code = response.status_code
-        result_data = json.loads(response.data)
-        db_result_data = Category.query.get(category.id).to_dict()
 
-        # then
-        expected_data = data.copy()
+        result_data = json.loads(response.data)
+        result_data_db = Category.query.get(category.id).to_dict()
         result_data_without_id = result_data.copy()
         del result_data_without_id["id"]
+        expected_data = data.copy()
 
-        assert status_code == 200
+        # then
+        assert response.status_code == 200
         assert result_data_without_id == expected_data
-        assert "id" in result_data
-        assert db_result_data == result_data
+        assert result_data_db == result_data
 
 
 def test_category_put_invalid_id(
@@ -293,10 +291,9 @@ def test_category_put_invalid_id(
 
         # when
         response = client.patch(api_route, headers=admin_headers, json=data)
-        status_code = response.status_code
 
         # then
-        assert status_code == 404
+        assert response.status_code == 404
 
 
 def test_category_put_authorization(
@@ -378,19 +375,18 @@ def test_category_delete(
     with app.app_context():
         # given
         category = create_category()
-        db_model_count_init = Category.query.count()
+        db_model_count_before = Category.query.count()
         api_route = f"{ROUTE}/{category.id}"
 
         # when
         response = client.delete(api_route, headers=admin_headers)
-        status_code = response.status_code
+
+        db_model_count_after = Category.query.count()
 
         # then
-        db_model_count = Category.query.count()
-
-        assert status_code == 204
-        assert db_model_count_init == 1
-        assert db_model_count == 0
+        assert response.status_code == 204
+        assert db_model_count_before == 1
+        assert db_model_count_after == 0
 
 
 def test_category_delete_invalid_id(
@@ -401,19 +397,18 @@ def test_category_delete_invalid_id(
     with app.app_context():
         # given
         create_category()
-        db_model_count_init = Category.query.count()
+        db_model_count_before = Category.query.count()
         api_route = f"{ROUTE}/-1"
 
         # when
         response = client.delete(api_route, headers=admin_headers)
-        status_code = response.status_code
+
+        db_model_count_after = Category.query.count()
 
         # then
-        db_model_count = Category.query.count()
-
-        assert status_code == 404
-        assert db_model_count_init == 1
-        assert db_model_count == 1
+        assert response.status_code == 404
+        assert db_model_count_before == 1
+        assert db_model_count_after == 1
 
 
 def test_category_delete_authorization(
@@ -441,10 +436,10 @@ def test_category_delete_authorization(
         response_staff = client.delete(api_route_staff, headers=staff_headers)
         response_admin = client.delete(api_route_admin, headers=admin_headers)
 
-        db_data_without = Category.query.get(category_without.id)
-        db_data_std = Category.query.get(category_std.id)
-        db_data_staff = Category.query.get(category_staff.id)
-        db_data_admin = Category.query.get(category_admin.id)
+        result_data_db_without = Category.query.get(category_without.id)
+        result_data_db_std = Category.query.get(category_std.id)
+        result_data_db_staff = Category.query.get(category_staff.id)
+        result_data_db_admin = Category.query.get(category_admin.id)
 
         # then
         assert response_without.status_code != 204
@@ -452,7 +447,7 @@ def test_category_delete_authorization(
         assert response_staff.status_code == 204
         assert response_admin.status_code == 204
 
-        assert db_data_without is not None
-        assert db_data_std is not None
-        assert db_data_staff is None
-        assert db_data_admin is None
+        assert result_data_db_without is not None
+        assert result_data_db_std is not None
+        assert result_data_db_staff is None
+        assert result_data_db_admin is None

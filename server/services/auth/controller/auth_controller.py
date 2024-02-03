@@ -7,7 +7,7 @@ from db import db
 from errors import errors
 from core.models.api_models.auth import register_model_send
 from core.models.db_models.user import User, Role
-from core.utils import roles
+from core.enums import roles
 from utils.jwt import JsonWebTokenDTO
 
 

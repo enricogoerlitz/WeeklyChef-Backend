@@ -8,7 +8,8 @@ from errors import errors
 def add_to_dict_method(cls):
     def to_dict(self):
         d = self.__dict__
-        del d["_sa_instance_state"]
+        if "_sa_instance_state" in d.keys():
+            del d["_sa_instance_state"]
         return d
 
     setattr(cls, "to_dict", to_dict)
@@ -19,7 +20,8 @@ def add_to_dict_method(cls):
 def add__str__method(cls):
     def to_str(self):
         d = self.__dict__
-        del d["_sa_instance_state"]
+        if "_sa_instance_state" in d.keys():
+            del d["_sa_instance_state"]
         return str(d)
 
     cls.__str__ = to_str
