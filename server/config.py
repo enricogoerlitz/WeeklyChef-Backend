@@ -18,6 +18,7 @@ from services.recipe.apis.ingredient import ns as ns_ingredient
 from services.recipe.apis.category import ns as ns_category
 from services.recipe.apis.unit import ns as ns_unit
 from services.recipe.apis.tag import ns as ns_tag
+from services.recipe.apis.collection import ns as ns_collection
 
 
 class FlaskConfig:
@@ -47,6 +48,7 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_user)
     api.add_namespace(ns_recipe)
     api.add_namespace(ns_ingredient)
+    api.add_namespace(ns_collection)
     api.add_namespace(ns_category)
     api.add_namespace(ns_unit)
     api.add_namespace(ns_tag)

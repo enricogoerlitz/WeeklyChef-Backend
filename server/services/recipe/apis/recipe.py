@@ -72,6 +72,7 @@ class RecipeAPI(Resource):
     @ns.response(code=200, model=recipe_model, description=sui.desc_get(ns.name))               # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
@@ -81,11 +82,12 @@ class RecipeAPI(Resource):
     @ns.response(code=200, model=recipe_model, description=sui.desc_update(ns.name))            # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsAdminOrStaff
-    def put(self, id):
-        return crud_controller.handle_update(
+    def patch(self, id):
+        return crud_controller.handle_patch(
             model=Recipe,
             api_model=recipe_model,
             id=id,
@@ -95,6 +97,7 @@ class RecipeAPI(Resource):
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsAdminOrStaff
@@ -108,6 +111,7 @@ class RecipeTagAPI(Resource):
     @ns.response(code=201, model=recipe_tag_model, description=sui.desc_added("RecipeTag"))     # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeTag"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
@@ -130,6 +134,7 @@ class RecipeTagAPI(Resource):
     @ns.response(code=204, model=None, description=sui.desc_delete("RecipeTag"))                # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
@@ -144,6 +149,7 @@ class RecipeIngredientAPI(Resource):
     @ns.response(code=201, model=recipe_ingredient_model, description=sui.desc_added("RecipeIngredient"))   # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                   # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeIngredient"))            # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
@@ -166,6 +172,7 @@ class RecipeIngredientAPI(Resource):
     @ns.response(code=204, model=None, description=sui.desc_delete("RecipeIngredient"))         # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff

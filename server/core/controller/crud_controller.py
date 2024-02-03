@@ -5,6 +5,7 @@ from typing import Any
 
 from flask_restx import marshal
 from flask import Response
+from flask_jwt_extended.exceptions import NoAuthorizationError
 
 from logger import logger
 from db import db
@@ -34,7 +35,10 @@ def handle_get(
         return marshal(obj, api_model), 200
 
     except errors.DbModelNotFoundException as e:
-        return http_errors.bad_request(e)
+        return http_errors.not_found(e)
+
+    except NoAuthorizationError as e:
+        return http_errors.unauthorized(e)
 
     except Exception as e:
         logger.error(e)
@@ -98,7 +102,7 @@ def handle_post(
         return http_errors.UNEXPECTED_ERROR_RESULT
 
 
-def handle_update(
+def handle_patch(
         model: db.Model,
         api_model: api.model,
         id: Any,

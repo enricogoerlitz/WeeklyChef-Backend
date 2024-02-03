@@ -29,3 +29,7 @@ def desc_delete(modelname: str) -> str:
 
 def desc_conflict(modelname: str) -> str:
     return f"{modelname} already existing"
+
+
+def desc_notfound(modelname: str) -> str:
+    return f"{modelname} not found"

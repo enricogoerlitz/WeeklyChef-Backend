@@ -104,3 +104,34 @@ recipe_ingredient_model = api.model("RecipeIngredientModel", {
 recipe_ingredient_model_send = api.model("RecipeIngredientModelSend", {
     "quantity": fields.Float
 })
+
+
+# COLLECTION MODELS
+
+collection_model = api.model("Collection", {
+    "id": fields.Integer,
+    "name": fields.String,
+    "owner_user_id": fields.Integer,
+    "is_default": fields.Boolean
+})
+
+collection_model_send = api.model("CollectionSend", {
+    "name": fields.String,
+    "owner_user_id": fields.Integer,
+    "is_default": fields.Boolean
+})
+
+collection_recipe_model = api.model("CollectionRecipeModel", {
+    "collection_id": fields.Integer,
+    "recipe_id": fields.Integer
+})
+
+collection_user_model = api.model("CollectionUserModel", {
+    "collection_id": fields.Integer,
+    "user_id": fields.Integer,
+    "can_edit": fields.Boolean
+})
+
+collection_user_model_send = api.model("CollectionUserModelSend", {
+    "can_edit": fields.Boolean
+})

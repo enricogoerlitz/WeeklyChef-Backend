@@ -60,6 +60,7 @@ class TagAPI(Resource):
     @ns.response(code=200, model=tag_model, description=sui.desc_get(ns.name))              # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                   # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def get(self, id):
@@ -69,11 +70,12 @@ class TagAPI(Resource):
     @ns.response(code=200, model=tag_model, description=sui.desc_update(ns.name))           # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                   # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     @IsAdminOrStaff
-    def put(self, id):
-        return crud_controller.handle_update(
+    def patch(self, id):
+        return crud_controller.handle_patch(
             model=Tag,
             api_model=tag_model,
             id=id,
@@ -83,6 +85,7 @@ class TagAPI(Resource):
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                   # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     @IsAdminOrStaff
