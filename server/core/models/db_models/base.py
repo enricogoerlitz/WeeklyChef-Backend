@@ -1,7 +1,3 @@
-"""
-Base DB Models
-"""
-
 from db import db
 from utils.decorators import (
     add_to_dict_method,

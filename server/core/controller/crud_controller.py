@@ -1,6 +1,3 @@
-"""
-Helper for basic CRUD operations
-"""
 from typing import Any
 
 from flask_restx import marshal
@@ -14,8 +11,8 @@ from errors import errors
 
 
 def handle_get(
-        model: db.Model,
-        api_model: api.model,
+        model: db.Model,  # type: ignore
+        api_model: api.model,  # type: ignore
         id: Any
 ) -> Response:
     """_summary_
@@ -41,7 +38,7 @@ def handle_get(
         return http_errors.UNEXPECTED_ERROR_RESULT
 
 
-def handle_get_list(model: db.Model, api_model: api.model) -> Response:
+def handle_get_list(model: db.Model, api_model: api.model) -> Response:  # type: ignore  # noqa
     """_summary_
 
     Args:
@@ -59,9 +56,9 @@ def handle_get_list(model: db.Model, api_model: api.model) -> Response:
 
 
 def handle_post(
-        model: db.Model,
-        api_model: api.model,
-        api_model_send: api.model,
+        model: db.Model,  # type: ignore
+        api_model: api.model,  # type: ignore
+        api_model_send: api.model,  # type: ignore
         data: dict,
         unique_columns: list[str] = None,
         unique_primarykey: Any = None
@@ -99,8 +96,8 @@ def handle_post(
 
 
 def handle_patch(
-        model: db.Model,
-        api_model: api.model,
+        model: db.Model,  # type: ignore
+        api_model: api.model,  # type: ignore
         id: Any,
         data: dict
 ) -> Response:
@@ -130,7 +127,7 @@ def handle_patch(
 
 
 def handle_delete(
-        model: db.Model,
+        model: db.Model,  # type: ignore
         id: Any
 ) -> Response:
     try:

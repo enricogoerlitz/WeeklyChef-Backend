@@ -1,6 +1,3 @@
-"""
-Collection of app errors
-"""
 from typing import Any
 
 

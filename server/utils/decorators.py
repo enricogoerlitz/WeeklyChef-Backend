@@ -1,7 +1,3 @@
-"""
-Util decorators for this app
-"""
-
 from errors import errors
 
 

@@ -1,12 +1,3 @@
-"""
-Recipe Routes
-
-- recipe
-- recipe<-tag           /recipe/<int:id>/tag/<int:tag_id>
-- recipe<-ingredient
-- recipe<-image
-"""
-
 from flask import request
 from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required

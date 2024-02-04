@@ -1,7 +1,3 @@
-"""
-Module fpr managing app JWT
-"""
-
 from dataclasses import dataclass
 
 from flask_jwt_extended import (

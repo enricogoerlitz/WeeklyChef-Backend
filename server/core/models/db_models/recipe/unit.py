@@ -1,7 +1,3 @@
-"""
-Unit Models
-"""
-
 from typing import Any
 
 from sqlalchemy.orm import validates

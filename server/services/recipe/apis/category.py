@@ -1,7 +1,3 @@
-"""
-Category Routes
-"""
-
 from flask import request
 from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required

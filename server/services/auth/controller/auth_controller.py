@@ -1,4 +1,3 @@
-""""""
 from flask import Response
 from sqlalchemy import or_
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request

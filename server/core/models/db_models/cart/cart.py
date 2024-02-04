@@ -1,5 +1,4 @@
 """
-Cart models
 
 
 Jeder hat einen Einkaufkorb

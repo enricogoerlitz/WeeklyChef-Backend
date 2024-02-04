@@ -1,5 +1,4 @@
 """
-Recipe planner models
 
 => Keine Zeiten, sondern Positionen für ordering
 

@@ -1,6 +1,3 @@
-"""
-
-"""
 from flask_restx import Resource, Namespace
 from logger import logger
 

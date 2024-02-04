@@ -1,7 +1,3 @@
-"""
-User api models
-"""
-
 from flask_restx import fields
 
 from api import api

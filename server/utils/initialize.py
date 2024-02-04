@@ -1,6 +1,3 @@
-"""
-Module for initialize db with some basic data
-"""
 import random
 
 from flask import Flask

@@ -1,6 +1,3 @@
-"""
-General Flask-App creation for monoith architecture
-"""
 from datetime import timedelta
 
 from flask import Flask

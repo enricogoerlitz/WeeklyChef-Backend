@@ -1,6 +1,3 @@
-"""
-Collection Models
-"""
 from typing import Any
 
 from sqlalchemy import UniqueConstraint

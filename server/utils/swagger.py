@@ -1,7 +1,3 @@
-"""
-Swagger UI Utils
-"""
-
 DESC_UNAUTH = "Unauthorized User"
 DESC_INVUI = "Invalid User Input"
 DESC_UNEXP = "Unexpected Server Error"
