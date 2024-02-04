@@ -1,4 +1,4 @@
-from config import create_app
+from config.auth import create_app
 
 
 if __name__ == "__main__":

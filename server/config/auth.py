@@ -11,12 +11,6 @@ from core.models.db_models import *  # noqa - import all models for table initfr
 from services.heathcheck.apis.heathcheck import ns as ns_heathcheck
 from services.auth.apis.auth import ns as ns_auth
 from services.auth.apis.user import ns as ns_user
-from services.recipe.apis.recipe import ns as ns_recipe
-from services.recipe.apis.ingredient import ns as ns_ingredient
-from services.recipe.apis.category import ns as ns_category
-from services.recipe.apis.unit import ns as ns_unit
-from services.recipe.apis.tag import ns as ns_tag
-from services.recipe.apis.collection import ns as ns_collection
 
 
 class FlaskConfig:
@@ -45,12 +39,6 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_heathcheck)
     api.add_namespace(ns_auth)
     api.add_namespace(ns_user)
-    api.add_namespace(ns_recipe)
-    api.add_namespace(ns_ingredient)
-    api.add_namespace(ns_collection)
-    api.add_namespace(ns_category)
-    api.add_namespace(ns_unit)
-    api.add_namespace(ns_tag)
 
     # add errorhandler
     @app.errorhandler(500)

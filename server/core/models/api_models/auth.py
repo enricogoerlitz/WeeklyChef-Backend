@@ -1,6 +1,6 @@
 from flask_restx import fields
 
-from config import api
+from api import api
 
 register_model_send = api.model("RegisterModelSend", {
     "email": fields.String,
