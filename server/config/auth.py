@@ -1,24 +1,33 @@
+import os
+
 from datetime import timedelta
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 
-from db import db
-from api import api
-from utils.jwt import jwt_manager
-from utils.initialize import initialize_database
-from core.models.db_models import *  # noqa - import all models for table initfrom api import api
-from services.heathcheck.apis.heathcheck import ns as ns_heathcheck
-from services.auth.apis.auth import ns as ns_auth
-from services.auth.apis.user import ns as ns_user
+from server.db import db
+from server.api import api
+from server.utils.jwt import jwt_manager
+from server.utils.initialize import initialize_database
+from server.core.models.db_models import *  # noqa - import all models for table initfrom server.api import api
+from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
+from server.services.auth.apis.auth import ns as ns_auth
+from server.services.auth.apis.user import ns as ns_user
+
+
+load_dotenv()
 
 
 class FlaskConfig:
-    SQLALCHEMY_DATABASE_URI = "mysql://serviceuser:devpassword@127.0.0.1:3307/weeklychef"  # noqa
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = "f1ppweq9b3234935d89426aas6303uu38865c1a12574ac9deb393dp34bc8f21eb9920124"  # noqa
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=30)  # timedelta(minutes=15)
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+    SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
+    SQLALCHEMY_TRACK_MODIFICATIONS = bool(
+        os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS"))
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(
+        minutes=int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRES_MINUTES")))
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(
+        minutes=int(os.environ.get("JWT_REFRESH_TOKEN_EXPIRES_MINUTES")))
 
 
 def create_app(database_uri: str = None) -> Flask:

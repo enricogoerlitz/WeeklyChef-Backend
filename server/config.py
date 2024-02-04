@@ -3,20 +3,20 @@ from datetime import timedelta
 from flask import Flask
 from flask_cors import CORS
 
-from db import db
-from api import api
-from utils.jwt import jwt_manager
-from utils.initialize import initialize_database
-from core.models.db_models import *  # noqa - import all models for table initfrom api import api
-from services.heathcheck.apis.heathcheck import ns as ns_heathcheck
-from services.auth.apis.auth import ns as ns_auth
-from services.auth.apis.user import ns as ns_user
-from services.recipe.apis.recipe import ns as ns_recipe
-from services.recipe.apis.ingredient import ns as ns_ingredient
-from services.recipe.apis.category import ns as ns_category
-from services.recipe.apis.unit import ns as ns_unit
-from services.recipe.apis.tag import ns as ns_tag
-from services.recipe.apis.collection import ns as ns_collection
+from server.db import db
+from server.api import api
+from server.utils.jwt import jwt_manager
+from server.utils.initialize import initialize_database
+from server.core.models.db_models import *  # noqa - import all models for table initfrom server.api import api
+from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
+from server.services.auth.apis.auth import ns as ns_auth
+from server.services.auth.apis.user import ns as ns_user
+from server.services.recipe.apis.recipe import ns as ns_recipe
+from server.services.recipe.apis.ingredient import ns as ns_ingredient
+from server.services.recipe.apis.category import ns as ns_category
+from server.services.recipe.apis.unit import ns as ns_unit
+from server.services.recipe.apis.tag import ns as ns_tag
+from server.services.recipe.apis.collection import ns as ns_collection
 
 
 class FlaskConfig:

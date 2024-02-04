@@ -5,7 +5,7 @@ import os
 
 from dotenv import load_dotenv
 
-from services.auth.config import create_app
+from server.services.auth.config import create_app
 
 
 load_dotenv()

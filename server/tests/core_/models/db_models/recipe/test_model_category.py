@@ -1,7 +1,7 @@
 from flask import Flask
 
-from db import db
-from core.models.db_models import Category
+from server.db import db
+from server.core.models.db_models import Category
 
 
 def test_create(app: Flask):

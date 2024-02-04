@@ -1,23 +1,23 @@
 import pytest
 
 from flask import Flask
-from errors import errors
+from server.errors import errors
 
-from db import db
-from core.models.db_models import (
+from server.db import db
+from server.core.models.db_models import (
     Category,
     User,
     RecipeTagComposite,
     Tag,
     Recipe
 )
-from core.models.api_models import (
+from server.core.models.api_models import (
     category_model,
     category_model_send, register_model_send,
     recipe_tag_model
 )
-from core.controller import crud_controller
-from core.controller.crud_controller import (
+from server.core.controller import crud_controller
+from server.core.controller.crud_controller import (
     _check_unqiue_column,
     _ckeck_unique_primarykey,
     _find_object_by_id

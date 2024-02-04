@@ -1,5 +1,5 @@
 from flask_restx import Resource, Namespace
-from logger import logger
+from server.logger import logger
 
 
 ns = Namespace(

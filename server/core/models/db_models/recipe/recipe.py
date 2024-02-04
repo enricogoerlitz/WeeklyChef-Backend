@@ -3,11 +3,11 @@ from typing import Any
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
-from db import db
-from errors import errors
-from core.enums import difficulty
-from core.utils import model_validator as ModelValidator
-from utils.decorators import (
+from server.db import db
+from server.errors import errors
+from server.core.enums import difficulty
+from server.core.utils import model_validator as ModelValidator
+from server.utils.decorators import (
     add_to_dict_method,
     add_from_json_method,
     add__str__method

@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_jwt_extended.utils import decode_token
 
-from db import db
-from services.auth.controller import auth_controller
-from core.models.db_models import User
-from core.enums import roles
+from server.db import db
+from server.services.auth.controller import auth_controller
+from server.core.models.db_models import User
+from server.core.enums import roles
 
 
 def create_user(

@@ -3,13 +3,13 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_jwt_extended.utils import decode_token
 
-from core.permissions.general import IsAdminOrStaff
-from services.auth.controller import auth_controller
-from core.controller import crud_controller
-from core.models.db_models.user import User
-from core.models.api_models.user import user_model
-from core.models.api_models.auth import register_model_send
-from core.models.api_models.utils import error_model
+from server.core.permissions.general import IsAdminOrStaff
+from server.services.auth.controller import auth_controller
+from server.core.controller import crud_controller
+from server.core.models.db_models.user import User
+from server.core.models.api_models.user import user_model
+from server.core.models.api_models.auth import register_model_send
+from server.core.models.api_models.utils import error_model
 
 
 ns = Namespace(

@@ -7,13 +7,13 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 
-from db import db
-from api import api
-from utils.jwt import jwt_manager
-from core.models.db_models import *  # noqa - import all models for table initfrom api import api
-from services.heathcheck.apis.heathcheck import ns as ns_heathcheck
-from services.auth.apis.auth import ns as ns_auth
-from services.auth.apis.user import ns as ns_user
+from server.db import db
+from server.api import api
+from server.utils.jwt import jwt_manager
+from server.core.models.db_models import *  # noqa - import all models for table initfrom server.api import api
+from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
+from server.services.auth.apis.auth import ns as ns_auth
+from server.services.auth.apis.user import ns as ns_user
 
 
 load_dotenv()

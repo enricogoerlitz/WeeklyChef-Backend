@@ -1,5 +1,5 @@
-from db import db
-from utils.decorators import (
+from server.db import db
+from server.utils.decorators import (
     add_to_dict_method,
     add_from_json_method,
     add__str__method

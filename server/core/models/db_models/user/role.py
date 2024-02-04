@@ -2,9 +2,9 @@ from typing import Any
 
 from sqlalchemy.orm import validates
 
-from db import db
-from core.utils import model_validator as ModelValidator
-from utils.decorators import add_to_dict_method
+from server.db import db
+from server.core.utils import model_validator as ModelValidator
+from server.utils.decorators import add_to_dict_method
 
 
 @add_to_dict_method

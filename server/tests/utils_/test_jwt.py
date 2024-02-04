@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_jwt_extended.utils import decode_token
 
-from utils.jwt import JsonWebTokenDTO
-from core.enums import roles
+from server.utils.jwt import JsonWebTokenDTO
+from server.core.enums import roles
 
 
 def test_jwt_dto_create(app: Flask):

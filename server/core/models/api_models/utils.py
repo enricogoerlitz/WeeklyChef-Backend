@@ -1,5 +1,5 @@
 from flask_restx import fields
-from api import api
+from server.api import api
 
 
 base_name_model_fields = {

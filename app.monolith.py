@@ -1,8 +1,4 @@
-import sys
-sys.path.append("..")
-sys.path.append("../..")
-
-from config.monolith import create_app  # noqa
+from server.config.monolith import create_app
 
 
 if __name__ == "__main__":

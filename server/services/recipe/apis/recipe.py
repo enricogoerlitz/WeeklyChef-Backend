@@ -2,17 +2,17 @@ from flask import request
 from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
-from utils import swagger as sui
-from core.controller import crud_controller
-from core.models.api_models.utils import error_model
-from core.permissions.general import IsAdminOrStaff
-from core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
-from core.models.api_models.recipe import (
+from server.utils import swagger as sui
+from server.core.controller import crud_controller
+from server.core.models.api_models.utils import error_model
+from server.core.permissions.general import IsAdminOrStaff
+from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
+from server.core.models.api_models.recipe import (
     recipe_model, recipe_model_send,
     recipe_tag_model,
     recipe_ingredient_model, recipe_ingredient_model_send
 )
-from core.models.db_models import (
+from server.core.models.db_models import (
     Recipe,
     RecipeTagComposite,
     RecipeIngredient

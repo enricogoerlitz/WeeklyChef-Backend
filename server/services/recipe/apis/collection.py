@@ -2,16 +2,16 @@ from flask import request
 from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
-from utils import swagger as sui
-from core.controller import crud_controller
-from core.models.api_models.utils import error_model
-from core.permissions.general import IsAdminOrStaff
-from core.models.api_models.recipe import (
+from server.utils import swagger as sui
+from server.core.controller import crud_controller
+from server.core.models.api_models.utils import error_model
+from server.core.permissions.general import IsAdminOrStaff
+from server.core.models.api_models.recipe import (
     collection_model, collection_model_send,
     collection_recipe_model,
     collection_user_model, collection_user_model_send
 )
-from core.models.db_models import (
+from server.core.models.db_models import (
     Collection,
     CollectionRecipeComposite
 )

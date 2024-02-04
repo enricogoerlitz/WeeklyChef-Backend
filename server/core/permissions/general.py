@@ -2,8 +2,8 @@ from functools import wraps
 
 from flask_jwt_extended import get_jwt_identity
 
-from errors import http_errors
-from core.enums import roles
+from server.errors import http_errors
+from server.core.enums import roles
 
 
 def IsAdmin(func):

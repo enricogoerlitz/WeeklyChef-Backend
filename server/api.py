@@ -1,4 +1,11 @@
+import os
+
 from flask_restx import Api
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 authorizations = {
     "Bearer": {
@@ -10,10 +17,9 @@ authorizations = {
 
 # http://localhost:8080/swagger-docs
 api = Api(
-    version="1.0",
-    title="WeeklyChef API v1.0",
-    description="This is the monolith WeeklyChef API Version, "
-                + "which contains all routes",
+    version=os.environ.get("SWAGGER_API_VERSION"),
+    title=os.environ.get("SWAGGER_API_TITLE"),
+    description=os.environ.get("SWAGGER_API_DESCRIPTION"),
     authorizations=authorizations,
     doc="/swagger-docs",
 )

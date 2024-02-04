@@ -1,4 +1,4 @@
-from errors import errors
+from server.errors import errors
 
 
 def add_to_dict_method(cls):

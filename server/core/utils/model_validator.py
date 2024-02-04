@@ -4,7 +4,7 @@ from typing import Any
 from dateutil import parser
 from datetime import datetime, date
 
-from errors import errors
+from server.errors import errors
 
 
 def validate_string(

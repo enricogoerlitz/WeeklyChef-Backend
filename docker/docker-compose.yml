@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  mysql-container:
+  database:
     build:
       context: .
       dockerfile: dockerfile.database
@@ -14,6 +14,62 @@ services:
       MYSQL_PASSWORD: devpassword
     volumes:
       - mysql-data:/Users/enricogoerlitz/mysql
+
+  redis:
+    build:
+      context: .
+      dockerfile: dockerfile.redis
+    ports:
+      - "6380:6379"
+    environment:
+      REDIS_PASSWORD: weeklychefredispassword
+
+  auth-service:
+    build:
+      context: ../
+      dockerfile: docker/dockerfile.service.auth
+    ports:
+      - "5001:5001"
+    environment:
+      DEBUG: true
+      SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database:3306/weeklychef"
+      SQLALCHEMY_TRACK_MODIFICATIONS: false
+      JWT_SECRET_KEY: "f1ae9b76935d89426cec6993698e865c1a12574ac9deb393dcdbc8f21eb76998"
+      JWT_ACCESS_TOKEN_EXPIRES_MINUTES: 43200
+      JWT_REFRESH_TOKEN_EXPIRES_MINUTES: 86400
+      SWAGGER_API_VERSION: "1.0"
+      SWAGGER_API_TITLE: "WeeklyChef API v1.0"
+      SWAGGER_API_DESCRIPTION: "WeeklyChef Authentication Service REST API"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - /Users/enricogoerlitz/LDesktop/Dev-Projects/Web-Development/WeeklyChef-Backend/server:/server
+    depends_on:
+      - database
+      - redis
+
+  recipe-service:
+    build:
+      context: ../
+      dockerfile: docker/dockerfile.service.recipe
+    ports:
+      - "5002:5002"
+    environment:
+      DEBUG: true
+      SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database:3306/weeklychef"
+      SQLALCHEMY_TRACK_MODIFICATIONS: false
+      JWT_SECRET_KEY: "f1ae9b76935d89426cec6993698e865c1a12574ac9deb393dcdbc8f21eb76998"
+      JWT_ACCESS_TOKEN_EXPIRES_MINUTES: 43200
+      JWT_REFRESH_TOKEN_EXPIRES_MINUTES: 86400
+      SWAGGER_API_VERSION: "1.0"
+      SWAGGER_API_TITLE: "WeeklyChef API v1.0"
+      SWAGGER_API_DESCRIPTION: "WeeklyChef Authentication Service REST API"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - /Users/enricogoerlitz/LDesktop/Dev-Projects/Web-Development/WeeklyChef-Backend/server:/server
+    depends_on:
+      - auth-service
 
 volumes:
   mysql-data:

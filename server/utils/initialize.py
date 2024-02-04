@@ -3,11 +3,11 @@ import random
 from flask import Flask
 from sqlalchemy import or_
 
-from core.models.db_models import (
+from server.core.models.db_models import (
     Role, User, Unit, Category, Ingredient,
     Recipe, RecipeIngredient, RecipeTagComposite, Tag
 )
-from db import db
+from server.db import db
 
 
 def initialize_database(app: Flask) -> None:
@@ -184,6 +184,22 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
 """
 
         # RECIPE
+        print("INIT DB HERE")
+        recipes = [
+                Recipe(
+                name=f"Spaghetti Carbonara Klassisch {i}",
+                person_count=2,
+                preperation_description=prep_description,
+                preperation_time_minutes=20,
+                difficulty="fortgeschritten",
+                search_description="spaghetti carbonara nudeln klassisch",
+                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                category_id=Category.query.filter_by(name="Hauptspeise").first().id,  # noqa
+            ) for i in range(1, 1_000)
+        ]
+        db.session.add_all(recipes)
+        print("INIT DB DONE")
+
         recipe = Recipe(
             name="Spaghetti Carbonara Klassisch",
             person_count=2,

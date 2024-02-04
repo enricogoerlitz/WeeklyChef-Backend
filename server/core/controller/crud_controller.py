@@ -1,19 +1,23 @@
+import json
+
 from typing import Any
 
 from flask_restx import marshal
-from flask import Response
+from flask import Response, request
 
-from logger import logger
-from db import db
-from api import api
-from errors import http_errors
-from errors import errors
+from server.logger import logger
+from server.db import db
+from server.redis import redis, DEFAULT_CACHE_TIME
+from server.api import api
+from server.errors import http_errors
+from server.errors import errors
 
 
 def handle_get(
         model: db.Model,  # type: ignore
         api_model: api.model,  # type: ignore
-        id: Any
+        id: Any,
+        use_redis: bool = True
 ) -> Response:
     """_summary_
 
@@ -26,9 +30,22 @@ def handle_get(
         Response: _description_
     """
     try:
+        redis_key = f"{model.__name__}-id:{request.path}"
+
+        if use_redis:
+            obj = redis.get(redis_key)
+            if obj is not None:
+                obj = json.loads(obj)
+                return obj, 200
+
         obj = _find_object_by_id(model, id)
 
-        return marshal(obj, api_model), 200
+        response_data = marshal(obj, api_model)
+        redis_data = json.dumps(response_data)
+
+        redis.set(redis_key, redis_data, DEFAULT_CACHE_TIME)
+
+        return response_data, 200
 
     except errors.DbModelNotFoundException as e:
         return http_errors.not_found(e)
@@ -38,7 +55,11 @@ def handle_get(
         return http_errors.UNEXPECTED_ERROR_RESULT
 
 
-def handle_get_list(model: db.Model, api_model: api.model) -> Response:  # type: ignore  # noqa
+def handle_get_list(
+        model: db.Model,
+        api_model: api.model,
+        use_redis: bool = True
+) -> Response:  # type: ignore  # noqa
     """_summary_
 
     Args:
@@ -49,7 +70,20 @@ def handle_get_list(model: db.Model, api_model: api.model) -> Response:  # type:
         Response: _description_
     """
     try:
-        return marshal(model.query.all(), api_model), 200
+        redis_key = f"{model.__name__}-list:{request.path}"
+
+        if use_redis:
+            obj = redis.get(redis_key)
+            if obj is not None:
+                obj = json.loads(obj)
+                return obj, 200
+
+        response_data = marshal(model.query.all(), api_model)
+        redis_data = json.dumps(response_data)
+
+        redis.set(redis_key, redis_data, DEFAULT_CACHE_TIME)
+
+        return response_data, 200
     except Exception as e:
         logger.error(e)
         return http_errors.UNEXPECTED_ERROR_RESULT
@@ -79,6 +113,10 @@ def handle_post(
 
         db.session.add(obj)
         db.session.commit()
+
+        redis_key_pattern = f"{model.__name__}-list:*"
+        for key in redis.keys(redis_key_pattern):
+            redis.delete(key)
 
         return marshal(obj, api_model), 201
 

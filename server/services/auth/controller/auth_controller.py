@@ -4,13 +4,13 @@ from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from flask_jwt_extended.exceptions import NoAuthorizationError
 
 
-from db import db
-from logger import logger
-from errors import errors, http_errors
-from core.models.api_models.auth import register_model_send
-from core.models.db_models.user import User, Role
-from core.enums import roles
-from utils.jwt import JsonWebTokenDTO
+from server.db import db
+from server.logger import logger
+from server.errors import errors, http_errors
+from server.core.models.api_models.auth import register_model_send
+from server.core.models.db_models.user import User, Role
+from server.core.enums import roles
+from server.utils.jwt import JsonWebTokenDTO
 
 
 def handle_register(user_data: dict) -> Response:

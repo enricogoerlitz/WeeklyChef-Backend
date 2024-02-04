@@ -1,0 +1,9 @@
+FROM redis:latest
+
+COPY conf/redis.conf /usr/local/etc/redis/redis.conf
+
+ENV REDIS_PASSWORD=weeklychefredispassword
+
+EXPOSE 6379
+
+CMD ["redis-server", "/usr/local/etc/redis/redis.conf"]

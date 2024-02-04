@@ -1,7 +1,7 @@
 import pytest
 
-from errors import errors
-from core.utils import model_validator as ModelValidator
+from server.errors import errors
+from server.core.utils import model_validator as ModelValidator
 
 
 def test_validate_field_required():

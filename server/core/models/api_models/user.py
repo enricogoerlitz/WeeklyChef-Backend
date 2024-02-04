@@ -1,6 +1,6 @@
 from flask_restx import fields
 
-from api import api
+from server.api import api
 
 
 role_model = api.model("RoleModel", {

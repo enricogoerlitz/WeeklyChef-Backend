@@ -1,9 +1,9 @@
 from flask import request
 from flask_restx import Resource, Namespace
 
-from core.models.api_models.utils import error_model
-from services.auth.controller import auth_controller
-from core.models.api_models.auth import (
+from server.core.models.api_models.utils import error_model
+from server.services.auth.controller import auth_controller
+from server.core.models.api_models.auth import (
     login_model_send,
     register_model_send,
     jwt_model
