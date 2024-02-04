@@ -1,9 +1,7 @@
-import pytest
-
 from flask import Flask
+from flask_jwt_extended.utils import decode_token
 
 from db import db
-from errors import errors
 from services.auth.controller import auth_controller
 from core.models.db_models import User
 from core.enums import roles
@@ -35,24 +33,23 @@ def test_handle_register(app: Flask):
         }
 
         # when
-        user, jwt = auth_controller.handle_register(data)
+        result_data, status_code = auth_controller.handle_register(data)
+        result_user_data = decode_token(result_data["access_token"]).get("sub")
+        del result_user_data["id"]
 
-        jwt_data = jwt.to_dict()
+        expected_user_data = {
+            **data,
+            "roles": [roles.STANDARD]
+        }
+        del expected_user_data["password"]
 
         # then
-        assert user is not None
-        assert user.password != data["password"]
-        assert user.check_password(data["password"])
-        assert user.username == data["username"]
-        assert user.email == data["email"]
-        assert len(user.roles) == 1
-        assert user.roles[0].name == roles.STANDARD
-
-        assert jwt is not None
-        assert "access_token" in jwt_data
-        assert "refresh_token" in jwt_data
-        assert len(jwt_data["access_token"]) > 10
-        assert len(jwt_data["refresh_token"]) > 10
+        assert status_code == 200
+        assert result_data is not None
+        assert "access_token" in result_data
+        assert "refresh_token" in result_data
+        assert result_user_data == expected_user_data
+        assert len(result_data["refresh_token"]) > 10
 
 
 def test_handle_register_missing_data(app: Flask):
@@ -73,15 +70,27 @@ def test_handle_register_missing_data(app: Flask):
             "email": "test@email.com"
         }
 
-        # when + then
-        with pytest.raises(errors.DbModelFieldRequieredException):
-            auth_controller.handle_register(data_missing_username)
+        # when
+        (result_data_missing_username,
+         status_code_missing_username) = auth_controller.handle_register(
+            data_missing_username)
 
-        with pytest.raises(errors.DbModelFieldRequieredException):
-            auth_controller.handle_register(data_missing_email)
+        (result_data_missing_email,
+         status_code_missing_email) = auth_controller.handle_register(
+            data_missing_email)
 
-        with pytest.raises(errors.DbModelFieldRequieredException):
-            auth_controller.handle_register(data_missing_password)
+        (result_data_missing_password,
+         status_code_missing_password) = auth_controller.handle_register(
+            data_missing_password)
+
+        # then
+        assert status_code_missing_username == 400
+        assert status_code_missing_email == 400
+        assert status_code_missing_password == 400
+
+        assert "msg" in result_data_missing_username
+        assert "msg" in result_data_missing_email
+        assert "msg" in result_data_missing_password
 
 
 def test_handle_register_user_already_existing(app: Flask):
@@ -99,12 +108,21 @@ def test_handle_register_user_already_existing(app: Flask):
             "password": "password"
         }
 
-        # when + then
-        with pytest.raises(errors.UserAlreadyExistingException):
-            auth_controller.handle_register(data_username_existing)
+        # when
+        (result_data_username_existing,
+         status_code_username_existing) = auth_controller.handle_register(
+             data_username_existing)
 
-        with pytest.raises(errors.UserAlreadyExistingException):
-            auth_controller.handle_register(data_email_existing)
+        (result_data_email_existing,
+         status_code_email_existing) = auth_controller.handle_register(
+             data_email_existing)
+
+        # then
+        assert status_code_username_existing == 409
+        assert status_code_email_existing == 409
+
+        assert "msg" in result_data_username_existing
+        assert "msg" in result_data_email_existing
 
 
 def test_handle_login(app: Flask):
@@ -122,31 +140,38 @@ def test_handle_login(app: Flask):
         }
 
         # when
-        user_by_username, jwt_by_username = auth_controller.handle_login(
+        jwt_by_username, status_code_by_username = auth_controller.handle_login(  # noqa
             data_with_username)
-        user_by_email, jwt_by_email = auth_controller.handle_login(
+        jwt_by_email, status_code_by_email = auth_controller.handle_login(
             data_with_email)
 
-        jwt_by_username_data = jwt_by_username.to_dict()
-        jwt_by_email_data = jwt_by_email.to_dict()
+        user_by_username = decode_token(
+            jwt_by_username["access_token"]).get("sub")
+        user_by_email = decode_token(
+            jwt_by_email["access_token"]).get("sub")
 
         # then
-        assert user_by_username.username == user.username
-        assert user_by_username.email == user.email
-        assert user_by_email.username == user.username
-        assert user_by_email.email == user.email
+        assert status_code_by_username == 200
+        assert status_code_by_email == 200
+
+        assert user_by_username["username"] == user.username
+        assert user_by_username["email"] == user.email
+        assert user_by_email["username"] == user.username
+        assert user_by_email["email"] == user.email
+        assert "roles" in user_by_username
+        assert "roles" in user_by_email
 
         assert jwt_by_username is not None
-        assert "access_token" in jwt_by_username_data
-        assert "refresh_token" in jwt_by_username_data
-        assert len(jwt_by_username_data["access_token"]) > 10
-        assert len(jwt_by_username_data["refresh_token"]) > 10
+        assert "access_token" in jwt_by_username
+        assert "refresh_token" in jwt_by_username
+        assert len(jwt_by_username["access_token"]) > 10
+        assert len(jwt_by_username["refresh_token"]) > 10
 
         assert user_by_email is not None
-        assert "access_token" in jwt_by_email_data
-        assert "refresh_token" in jwt_by_email_data
-        assert len(jwt_by_email_data["access_token"]) > 10
-        assert len(jwt_by_email_data["refresh_token"]) > 10
+        assert "access_token" in jwt_by_email
+        assert "refresh_token" in jwt_by_email
+        assert len(jwt_by_email["access_token"]) > 10
+        assert len(jwt_by_email["refresh_token"]) > 10
 
 
 def test_handle_login_missing_username_or_email(app: Flask):
@@ -158,9 +183,16 @@ def test_handle_login_missing_username_or_email(app: Flask):
             "password": "password"
         }
 
-        # when + then
-        with pytest.raises(errors.DbModelFieldRequieredException):
-            auth_controller.handle_login(data)
+        # when
+        result_data, status_code = auth_controller.handle_login(data)
+
+        expected_data = {
+            "msg": "The field 'username or email' is required but was null."
+        }
+
+        # then
+        assert status_code == 400
+        assert result_data == expected_data
 
 
 def test_handle_login_invalid_credentials(app: Flask):
@@ -177,9 +209,22 @@ def test_handle_login_invalid_credentials(app: Flask):
             "password": "WrongPassword"
         }
 
-        # when + then
-        with pytest.raises(errors.InvalidLoginCredentialsException):
-            auth_controller.handle_login(data_wrong_username)
+        # when
+        (result_data_wrong_username,
+         status_code_wrong_username) = auth_controller.handle_login(
+             data_wrong_username)
 
-        with pytest.raises(errors.InvalidLoginCredentialsException):
-            auth_controller.handle_login(data_wrong_password)
+        (result_data_wrong_password,
+         status_code_wrong_password) = auth_controller.handle_login(
+             data_wrong_password)
+
+        expected_data = {
+            "msg": "User credentials are invalid."
+        }
+
+        # then
+        assert status_code_wrong_username == 401
+        assert status_code_wrong_password == 401
+
+        assert result_data_wrong_username == expected_data
+        assert result_data_wrong_password == expected_data
