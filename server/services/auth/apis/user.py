@@ -48,6 +48,8 @@ class UserListAPI(Resource):
 
         return data, status_code
 
+    # patch for adding / removing roles etc
+
 
 @ns.route("/me")
 class UserMeAPI(Resource):

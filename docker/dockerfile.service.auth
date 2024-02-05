@@ -26,5 +26,5 @@ CMD if [ "$DEBUG" = "true" ] ; \
     else \
         gunicorn -b 0.0.0.0:5001 wsgi:app ; \
     fi
-# CMD ["python", "wsgi.auth.py"]
+# CMD ["python", "wsgi.py"]
 # CMD ["gunicorn", "-b", "0.0.0.0:5001", "wsgi:app"]

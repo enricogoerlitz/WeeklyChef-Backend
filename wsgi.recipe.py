@@ -1,7 +1,7 @@
 import os
 import time
 
-from server.config.recipe import create_app
+from server.services.recipe.service import create_app
 
 
 DEBUG = os.environ.get("DEBUG")

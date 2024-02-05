@@ -1,13 +1,13 @@
 import os
 import time
 
-from server.services.auth.service import create_app
+from server.monolith import create_app
 
 
 DEBUG = os.environ.get("DEBUG")
 THREADED = True
 HOST = "0.0.0.0"
-PORT = 5001
+PORT = 5000
 
 
 time.sleep(3)
