@@ -1,10 +1,11 @@
+# type: ignore
 import pytest
 
 from flask import Flask
 from flask.testing import FlaskClient
 from flask_jwt_extended import create_access_token
 
-from config import create_app
+from server.config.monolith import create_app
 from server.db import db
 from server.core.models.db_models import Role, User
 from server.core.enums import roles

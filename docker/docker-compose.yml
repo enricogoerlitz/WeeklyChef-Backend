@@ -1,4 +1,5 @@
-version: '3'
+version: "3"
+name: "weeklychef-backend"
 
 services:
   database:

@@ -1,49 +1,35 @@
-import json
-
+# type: ignore
 from typing import Any
 
 from flask_restx import marshal
-from flask import Response, request
+from flask import Response
 
 from server.logger import logger
 from server.db import db
-from server.redis import redis, DEFAULT_CACHE_TIME
+from server import redis
 from server.api import api
 from server.errors import http_errors
 from server.errors import errors
 
 
 def handle_get(
-        model: db.Model,  # type: ignore
-        api_model: api.model,  # type: ignore
+        model: db.Model,
+        api_model: api.model,
         id: Any,
         use_redis: bool = True
 ) -> Response:
-    """_summary_
-
-    Args:
-        model (db.Model): _description_
-        api_model (api.model): _description_
-        id (Any): _description_
-
-    Returns:
-        Response: _description_
-    """
     try:
-        redis_key = f"{model.__name__}-id:{request.path}"
-
+        redis_key = redis.gen_key(model)
         if use_redis:
             obj = redis.get(redis_key)
             if obj is not None:
-                obj = json.loads(obj)
                 return obj, 200
 
         obj = _find_object_by_id(model, id)
-
         response_data = marshal(obj, api_model)
-        redis_data = json.dumps(response_data)
 
-        redis.set(redis_key, redis_data, DEFAULT_CACHE_TIME)
+        if use_redis:
+            redis.set(redis_key, response_data)
 
         return response_data, 200
 
@@ -59,29 +45,18 @@ def handle_get_list(
         model: db.Model,
         api_model: api.model,
         use_redis: bool = True
-) -> Response:  # type: ignore  # noqa
-    """_summary_
-
-    Args:
-        model (db.Model): _description_
-        api_model (api.model): _description_
-
-    Returns:
-        Response: _description_
-    """
+) -> Response:  # noqa
     try:
-        redis_key = f"{model.__name__}-list:{request.path}"
-
+        redis_key = redis.gen_key(model)
         if use_redis:
             obj = redis.get(redis_key)
             if obj is not None:
-                obj = json.loads(obj)
                 return obj, 200
 
         response_data = marshal(model.query.all(), api_model)
-        redis_data = json.dumps(response_data)
 
-        redis.set(redis_key, redis_data, DEFAULT_CACHE_TIME)
+        if use_redis:
+            redis.set(redis_key, response_data)
 
         return response_data, 200
     except Exception as e:
@@ -90,12 +65,13 @@ def handle_get_list(
 
 
 def handle_post(
-        model: db.Model,  # type: ignore
-        api_model: api.model,  # type: ignore
-        api_model_send: api.model,  # type: ignore
+        model: db.Model,
+        api_model: api.model,
+        api_model_send: api.model,
         data: dict,
         unique_columns: list[str] = None,
-        unique_primarykey: Any = None
+        unique_primarykey: Any = None,
+        clear_cache: bool = True
 ) -> Response:
     try:
         obj = model.from_json(data, api_model_send)
@@ -114,9 +90,9 @@ def handle_post(
         db.session.add(obj)
         db.session.commit()
 
-        redis_key_pattern = f"{model.__name__}-list:*"
-        for key in redis.keys(redis_key_pattern):
-            redis.delete(key)
+        if clear_cache:
+            redis_key_pattern = redis.gen_key(model, "*")
+            redis.clear_cache(redis_key_pattern)
 
         return marshal(obj, api_model), 201
 
@@ -134,10 +110,11 @@ def handle_post(
 
 
 def handle_patch(
-        model: db.Model,  # type: ignore
-        api_model: api.model,  # type: ignore
+        model: db.Model,
+        api_model: api.model,
         id: Any,
-        data: dict
+        data: dict,
+        clear_cache: bool = True
 ) -> Response:
     try:
         obj = _find_object_by_id(model, id)
@@ -150,6 +127,10 @@ def handle_patch(
             setattr(obj, key, value)
 
         db.session.commit()
+
+        if clear_cache:
+            redis_key_pattern = redis.gen_key(model, "*")
+            redis.clear_cache(redis_key_pattern)
 
         return marshal(obj, api_model), 200
 
@@ -165,14 +146,19 @@ def handle_patch(
 
 
 def handle_delete(
-        model: db.Model,  # type: ignore
-        id: Any
+        model: db.Model,
+        id: Any,
+        clear_cache: bool = True
 ) -> Response:
     try:
         obj = _find_object_by_id(model, id)
 
         db.session.delete(obj)
         db.session.commit()
+
+        if clear_cache:
+            redis_key_pattern = redis.gen_key(model, "*")
+            redis.clear_cache(redis_key_pattern)
 
         return None, 204
 
@@ -189,20 +175,6 @@ def _check_unqiue_column(
         obj,
         unique_columns: list[str]
 ) -> Exception:
-    """_summary_
-
-    Args:
-        model (_type_): _description_
-        obj (_type_): _description_
-        unique_columns (list[str]): _description_
-
-    Raises:
-        errors.DbModelUnqiueConstraintException: _description_
-
-    Returns:
-        Exception: _description_
-    """
-
     if unique_columns is None:
         return
 
@@ -240,19 +212,6 @@ def _find_object_by_id(
         model,
         id
 ) -> Any:
-    """_summary_
-
-    Args:
-        model (_type_): _description_
-        id (_type_): _description_
-
-    Raises:
-        errors.DbModelNotFoundException: _description_
-
-    Returns:
-        Any: _description_
-    """
-
     obj = model.query.get(id)
 
     if not obj:

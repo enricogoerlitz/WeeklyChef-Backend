@@ -14,8 +14,7 @@ ENV DEBUG=false
 ENV SQLALCHEMY_TRACK_MODIFICATIONS=false
 ENV JWT_ACCESS_TOKEN_EXPIRES_MINUTES=15
 ENV JWT_REFRESH_TOKEN_EXPIRES_MINUTES=43200
-ENV REDIS_HOST=127.0.0.1
-ENV REDIS_PORT=6380
+ENV REDIS_PORT=6379
 
 # PORT EXPOSING
 EXPOSE 5001
@@ -25,7 +24,7 @@ CMD if [ "$DEBUG" = "true" ] ; \
     then \
         python wsgi.py ; \
     else \
-        gunicorn -b 0.0.0.0:5002 wsgi:app ; \
+        gunicorn -b 0.0.0.0:5001 wsgi:app ; \
     fi
 # CMD ["python", "wsgi.auth.py"]
 # CMD ["gunicorn", "-b", "0.0.0.0:5001", "wsgi:app"]
