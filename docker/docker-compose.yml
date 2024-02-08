@@ -69,6 +69,7 @@ services:
       REDIS_PORT: 6379
     volumes:
       - /Users/enricogoerlitz/LDesktop/Dev-Projects/Web-Development/WeeklyChef-Backend/server:/server
+      - /Users/enricogoerlitz/weeklychef/images:/images
     depends_on:
       - auth-service
 

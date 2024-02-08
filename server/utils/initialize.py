@@ -195,7 +195,7 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
                 search_description="spaghetti carbonara nudeln klassisch",
                 creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
                 category_id=Category.query.filter_by(name="Hauptspeise").first().id,  # noqa
-            ) for i in range(1, 1_000)
+            ) for i in range(1, 10_000)
         ]
         db.session.add_all(recipes)
         print("INIT DB DONE")

@@ -4,6 +4,7 @@ FROM python:3.12.1
 COPY /server /server
 COPY wsgi.recipe.py wsgi.py
 COPY __init__.py __init__.py
+COPY /images /images
 COPY requirements.txt requirements.txt
 
 # SETUP PYTHON PKG

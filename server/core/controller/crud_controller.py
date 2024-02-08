@@ -45,7 +45,7 @@ def handle_get_list(
         model: db.Model,
         api_model: api.model,
         use_redis: bool = True
-) -> Response:  # noqa
+) -> Response:
     try:
         redis_key = redis.gen_key(model)
         if use_redis:

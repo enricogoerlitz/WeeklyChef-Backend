@@ -70,7 +70,7 @@ def set_async(
         key: str,
         value: dict,
         ex: int = DEFAULT_CACHE_TIME
-) -> None:
+) -> threading.Thread:
     thread = threading.Thread(target=set, args=[key, value, ex])
     thread.start()
     return thread

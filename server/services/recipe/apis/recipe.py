@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, send_from_directory
 from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
@@ -170,3 +170,62 @@ class RecipeIngredientAPI(Resource):
     def delete(self, id, ingredient_id):
         return crud_controller.handle_delete(
             RecipeIngredient, (id, ingredient_id))
+
+
+UPLOAD_FOLDER = "/images"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+
+def allowed_file(filename):
+    return "." in filename and \
+           filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+import os  # noqa
+import uuid  # noqa
+
+
+@ns.route("/image")
+class RecipeImageAPI(Resource):
+
+    @ns.response(code=200, description="List of all image filenames")
+    @ns.response(code=401, description="Unauthorized")
+    @ns.response(code=500, description="Unexpected error")
+    def get(self):
+        filenames = os.listdir(UPLOAD_FOLDER)[1]
+        return send_from_directory(UPLOAD_FOLDER, filenames)
+        return filenames, 200
+
+    @ns.response(code=201, description="Image uploaded successfully")
+    @ns.response(code=401, description="Unauthorized")
+    @ns.response(code=500, description="Unexpected error")
+    @jwt_required()
+    def post(self):
+        if "file" not in request.files:
+            return {"message": "No file part"}, 400
+
+        file = request.files["file"]
+
+        if file.filename == "":
+            return {"message": "No selected file"}, 400
+
+        if file and allowed_file(file.filename):
+            _, file_extension = os.path.splitext(file.filename)
+            filename = str(uuid.uuid4()) + file_extension
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            return {"message": "Image uploaded successfully"}, 201
+        else:
+            return {"message": "Invalid file format"}, 400
+
+
+@ns.route("/image/<filename>")
+class RecipeImageFileAPI(Resource):
+
+    @ns.response(code=200, description="Image file")
+    @ns.response(code=401, description="Unauthorized")
+    @ns.response(code=404, description="Image file not found")
+    @ns.response(code=500, description="Unexpected error")
+    @jwt_required()
+    @IsAdminOrStaff
+    def get(self, filename):
+        return send_from_directory(UPLOAD_FOLDER, filename)
