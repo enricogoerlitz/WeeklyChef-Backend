@@ -1,11 +1,17 @@
 # type: ignore
-from typing import Any
+from werkzeug import exceptions
+
+from typing import Any, Callable
 
 from flask_restx import marshal
 from flask import Response
+from sqlalchemy import or_, and_
+from flask_sqlalchemy.pagination import Pagination
+from flask_sqlalchemy.query import Query
 
 from server.logger import logger
 from server.db import db
+from server.core.enums import searchtype
 from server import redis
 from server.api import api
 from server.errors import http_errors
@@ -44,6 +50,9 @@ def handle_get(
 def handle_get_list(
         model: db.Model,
         api_model: api.model,
+        reqargs: dict,
+        page_size: int = 20,
+        search_fields: list[str] = None,
         use_redis: bool = True
 ) -> Response:
     try:
@@ -53,14 +62,41 @@ def handle_get_list(
             if obj is not None:
                 return obj, 200
 
-        response_data = marshal(model.query.all(), api_model)
+        model_query: Query = model.query
+
+        model_search = _create_model_search(
+            model=model,
+            search_fields=search_fields,
+            reqargs=reqargs
+        )
+
+        if model_search is not None:
+            model_query = model_query.filter(model_search)
+
+        result_data = _paginate_model_query(
+            model_query=model_query,
+            reqargs=reqargs,
+            page_size=page_size
+        )
+
+        response_data = marshal(result_data, api_model)
 
         if use_redis:
             redis.set(redis_key, response_data)
 
         return response_data, 200
+
+    except exceptions.NotFound:
+        # pagination page could not found any data
+        return [], 200
+
+    except (errors.ValueErrorGeneral,
+            errors.PaginationPageException,
+            errors.PaginationPageSizeException) as e:
+        return http_errors.bad_request(e)
+
     except Exception as e:
-        logger.error(e)
+        logger.error(f"{str(e)}, {type(e)}")
         return http_errors.UNEXPECTED_ERROR_RESULT
 
 
@@ -219,3 +255,117 @@ def _find_object_by_id(
         raise errors.DbModelNotFoundException(err_msg)
 
     return obj
+
+
+def _create_model_search(
+        model: db.Model,
+        search_fields: list[str],
+        reqargs: dict
+) -> Query:
+    if search_fields is None:
+        return None
+
+    search_type = reqargs.get("search_type", searchtype.EQUALS)
+    search_way = reqargs.get("search_way", "or")  # "or" / "and"
+
+    if search_type is None:
+        return None
+
+    _validate_search_type(search_type)
+    _validate_search_way(search_way)
+
+    fn_search_way: Callable = or_ if search_way == "or" else and_
+    match search_type:
+        case searchtype.EQUALS:
+            return fn_search_way(*[
+                getattr(model, field) == reqargs.get(field)
+                for field in search_fields
+                if reqargs.get(field) is not None
+            ])
+
+        case searchtype.CONTAINS:
+            return fn_search_way(*[
+                getattr(model, field).like(f"%{reqargs.get(field)}%")
+                for field in search_fields
+                if reqargs.get(field) is not None
+            ])
+
+        case searchtype.STARTS_WITH:
+            return fn_search_way(*[
+                getattr(model, field).startswith(reqargs.get(field))
+                for field in search_fields
+                if reqargs.get(field) is not None
+            ])
+
+        case searchtype.ENDS_WITH:
+            return fn_search_way(*[
+                getattr(model, field).endswith(reqargs.get(field))
+                for field in search_fields
+                if reqargs.get(field) is not None
+            ])
+
+
+def _paginate_model_query(
+        model_query: Query,
+        reqargs: dict,
+        page_size
+) -> list:
+    page = reqargs.get("page")
+    page_size = reqargs.get("page_size", page_size)
+
+    if page is None:
+        return model_query.all()
+
+    _validate_page(page)
+    _validate_page_size(page_size)
+    result_pagination: Pagination = model_query.paginate(
+        page=int(page),
+        per_page=int(page_size)
+    )
+
+    return result_pagination.items
+
+
+def _validate_page(
+        page: int
+) -> None:
+    if not _is_integer(page):
+        err_msg = "Query parameter 'page' should be type of int."
+        raise errors.ValueErrorGeneral(err_msg)
+
+    if int(page) < 1:
+        raise errors.PaginationPageException(page)
+
+
+def _validate_page_size(
+        page_size: int
+) -> None:
+    if not _is_integer(page_size):
+        err_msg = "Query parameter 'page_size' should be type of int."
+        raise errors.ValueErrorGeneral(err_msg)
+
+    if int(page_size) < 1:
+        raise errors.PaginationPageSizeException(page_size)
+
+
+def _validate_search_type(search_type: str = searchtype.EQUALS) -> None:
+    if search_type not in searchtype.ALLOWED_SEARCH_TYPES:
+        err_msg = f"The given search_type '{search_type}' is invalid. Use: {str(search_type)}."  # noqa
+        raise errors.ValueErrorGeneral(err_msg)
+
+
+def _validate_search_way(search_way: str = "or") -> None:
+    if search_way not in ["or", "and"]:
+        err_msg = f"The given search_way '{search_way}' is invalid. Use: ['or', 'and']."  # noqa
+        raise errors.ValueErrorGeneral(err_msg)
+
+
+# TODO: auslagern!
+def _is_integer(
+        value: int
+) -> bool:
+    try:
+        int(value)
+        return True
+    except Exception:
+        return False

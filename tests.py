@@ -3,8 +3,8 @@ import subprocess
 
 
 TEST_PATHS = [
-    ("core", "server/core/tests"),
     ("heathcheck", "server/services/heathcheck/tests"),
+    ("core", "server/core/tests"),
     ("auth", "server/services/auth/tests"),
     ("recipe", "server/services/recipe/tests")
 ]

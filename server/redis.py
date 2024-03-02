@@ -28,7 +28,8 @@ def gen_key(
 ) -> str:
     try:
         if path is None:
-            path = request.path
+            path = request.full_path
+
         return f"{model.__name__}:{path}"
     except Exception as e:
         _log_redis_error(e)

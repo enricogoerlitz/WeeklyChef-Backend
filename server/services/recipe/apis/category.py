@@ -3,7 +3,7 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
-from server.core.controller import crud_controller
+from server.core.controller import crud_controller as CRUDController
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.recipe import (
@@ -27,9 +27,10 @@ class CategoryListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
-        return crud_controller.handle_get_list(
+        return CRUDController.handle_get_list(
             model=Category,
-            api_model=category_model
+            api_model=category_model,
+            reqargs=request.args
         )
 
     @ns.expect(category_model_send)
@@ -41,7 +42,7 @@ class CategoryListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=Category,
             api_model=category_model,
             api_model_send=category_model_send,
@@ -59,7 +60,7 @@ class CategoryAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
-        return crud_controller.handle_get(Category, category_model, id)
+        return CRUDController.handle_get(Category, category_model, id)
 
     @ns.expect(category_model_send)
     @ns.response(code=200, model=category_model, description=sui.desc_update(ns.name))          # noqa
@@ -70,7 +71,7 @@ class CategoryAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
-        return crud_controller.handle_patch(
+        return CRUDController.handle_patch(
             model=Category,
             api_model=category_model,
             id=id,
@@ -85,4 +86,4 @@ class CategoryAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
-        return crud_controller.handle_delete(Category, id)
+        return CRUDController.handle_delete(Category, id)

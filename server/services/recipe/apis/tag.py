@@ -3,7 +3,7 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
-from server.core.controller import crud_controller
+from server.core.controller import crud_controller as CRUDController
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.recipe import (
@@ -27,9 +27,10 @@ class TagListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def get(self):
-        return crud_controller.handle_get_list(
+        return CRUDController.handle_get_list(
             model=Tag,
-            api_model=tag_model
+            api_model=tag_model,
+            reqargs=request.args
         )
 
     @ns.expect(tag_model_send)
@@ -41,7 +42,7 @@ class TagListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=Tag,
             api_model=tag_model,
             api_model_send=tag_model_send,
@@ -60,7 +61,7 @@ class TagAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def get(self, id):
-        return crud_controller.handle_get(Tag, tag_model, id)
+        return CRUDController.handle_get(Tag, tag_model, id)
 
     @ns.expect(tag_model_send)
     @ns.response(code=200, model=tag_model, description=sui.desc_update(ns.name))           # noqa
@@ -71,7 +72,7 @@ class TagAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
-        return crud_controller.handle_patch(
+        return CRUDController.handle_patch(
             model=Tag,
             api_model=tag_model,
             id=id,
@@ -86,4 +87,4 @@ class TagAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
-        return crud_controller.handle_delete(Tag, id)
+        return CRUDController.handle_delete(Tag, id)

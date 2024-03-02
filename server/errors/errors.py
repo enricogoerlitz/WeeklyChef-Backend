@@ -114,9 +114,38 @@ class DbModelSerializationException(Exception):
 
 class DbModelUnqiueConstraintException(Exception):
     """
-    When a column with a given value is already existing
+    When a column with a given value is already existing.
     """
 
     def __init__(self, filedname: str, value: Any) -> None:
         err_msg = f"Field '{filedname}' with value '{str(value)}' is already existing."  # noqa
+        super().__init__(err_msg)
+
+
+class PaginationPageException(Exception):
+    """
+    When page input from user is invalid.
+    """
+
+    def __init__(self, value: int) -> None:
+        err_msg = f"The given page for pagination is invalid ({value})"  # noqa
+        super().__init__(err_msg)
+
+
+class PaginationPageSizeException(Exception):
+    """
+    When page size input from user is invalid.
+    """
+
+    def __init__(self, value: int) -> None:
+        err_msg = f"The given page size for pagination is invalid ({value})"  # noqa
+        super().__init__(err_msg)
+
+
+class ValueErrorGeneral(Exception):
+    """
+    Custom ValueError implementation
+    """
+
+    def __init__(self, err_msg: str) -> None:
         super().__init__(err_msg)

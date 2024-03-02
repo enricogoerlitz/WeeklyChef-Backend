@@ -3,7 +3,7 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
-from server.core.controller import crud_controller
+from server.core.controller import crud_controller as CRUDController
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
@@ -34,9 +34,15 @@ class RecipeListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
-        return crud_controller.handle_get_list(
+        return CRUDController.handle_get_list(
             model=Recipe,
-            api_model=recipe_model
+            api_model=recipe_model,
+            reqargs=request.args,
+            search_fields=[
+                "name",
+                "search_description",
+                "preperation_description"
+            ]
         )
 
     @ns.expect(recipe_model_send)
@@ -48,7 +54,7 @@ class RecipeListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=Recipe,
             api_model=recipe_model,
             api_model_send=recipe_model_send,
@@ -67,7 +73,7 @@ class RecipeAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
-        return crud_controller.handle_get(Recipe, recipe_model, id)
+        return CRUDController.handle_get(Recipe, recipe_model, id)
 
     @ns.expect(recipe_model_send)
     @ns.response(code=200, model=recipe_model, description=sui.desc_update(ns.name))            # noqa
@@ -78,7 +84,7 @@ class RecipeAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
-        return crud_controller.handle_patch(
+        return CRUDController.handle_patch(
             model=Recipe,
             api_model=recipe_model,
             id=id,
@@ -93,7 +99,7 @@ class RecipeAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
-        return crud_controller.handle_delete(Recipe, id)
+        return CRUDController.handle_delete(Recipe, id)
 
 
 @ns.route("/<int:id>/tag/<int:tag_id>")
@@ -113,7 +119,7 @@ class RecipeTagAPI(Resource):
             "tag_id": tag_id
         }
 
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=RecipeTagComposite,
             api_model=recipe_tag_model,
             api_model_send=recipe_tag_model,
@@ -130,7 +136,7 @@ class RecipeTagAPI(Resource):
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, tag_id):
-        return crud_controller.handle_delete(RecipeTagComposite, (id, tag_id))
+        return CRUDController.handle_delete(RecipeTagComposite, (id, tag_id))
 
 
 @ns.route("/<int:id>/ingredient/<int:ingredient_id>")
@@ -152,7 +158,7 @@ class RecipeIngredientAPI(Resource):
             "quantity": request.get_json().get("quantity")
         }
 
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=RecipeIngredient,
             api_model=recipe_ingredient_model,
             api_model_send=recipe_ingredient_model_send,
@@ -168,10 +174,11 @@ class RecipeIngredientAPI(Resource):
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, ingredient_id):
-        return crud_controller.handle_delete(
+        return CRUDController.handle_delete(
             RecipeIngredient, (id, ingredient_id))
 
 
+# TODO: fix this!
 UPLOAD_FOLDER = "/images"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 

@@ -3,7 +3,7 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
-from server.core.controller import crud_controller
+from server.core.controller import crud_controller as CRUDController
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.recipe import (
@@ -32,9 +32,10 @@ class CollectionListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
-        return crud_controller.handle_get_list(
+        return CRUDController.handle_get_list(
             model=Collection,
-            api_model=collection_model
+            api_model=collection_model,
+            reqargs=request.args
         )
 
     @ns.expect(collection_model_send)
@@ -46,7 +47,7 @@ class CollectionListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=Collection,
             api_model=collection_model,
             api_model_send=collection_model_send,
@@ -64,7 +65,7 @@ class CollectionAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
-        return crud_controller.handle_get(Collection, collection_model, id)
+        return CRUDController.handle_get(Collection, collection_model, id)
 
     @ns.expect(collection_model_send)
     @ns.response(code=200, model=collection_model, description=sui.desc_update(ns.name))        # noqa
@@ -75,7 +76,7 @@ class CollectionAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
-        return crud_controller.handle_patch(
+        return CRUDController.handle_patch(
             model=Collection,
             api_model=collection_model,
             id=id,
@@ -90,7 +91,7 @@ class CollectionAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
-        return crud_controller.handle_delete(Collection, id)
+        return CRUDController.handle_delete(Collection, id)
 
 
 @ns.route("/<int:id>/users/<int:user_id>")
@@ -112,7 +113,7 @@ class UserSharedCollectionAPI(Resource):
             "can_edit": request.get_json().get("can_edit", None)
         }
 
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=CollectionRecipeComposite,
             api_model=collection_user_model,
             api_model_send=collection_user_model_send,
@@ -128,7 +129,7 @@ class UserSharedCollectionAPI(Resource):
     @jwt_required()
     # @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, user_id):
-        return crud_controller.handle_delete(
+        return CRUDController.handle_delete(
             CollectionRecipeComposite,
             (id, user_id)
         )
@@ -151,7 +152,7 @@ class CollectionRecipeAPI(Resource):
             "recipe_id": recipe_id
         }
 
-        return crud_controller.handle_post(
+        return CRUDController.handle_post(
             model=CollectionRecipeComposite,
             api_model=collection_recipe_model,
             api_model_send=collection_recipe_model,
@@ -167,7 +168,7 @@ class CollectionRecipeAPI(Resource):
     @jwt_required()
     # @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, recipe_id):
-        return crud_controller.handle_delete(
+        return CRUDController.handle_delete(
             CollectionRecipeComposite,
             (id, recipe_id)
         )
