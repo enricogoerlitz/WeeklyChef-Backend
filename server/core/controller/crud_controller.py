@@ -96,7 +96,7 @@ def handle_get_list(
         return http_errors.bad_request(e)
 
     except Exception as e:
-        logger.error(f"{str(e)}, {type(e)}")
+        logger.error(f"{str(e)}")
         return http_errors.UNEXPECTED_ERROR_RESULT
 
 
@@ -266,7 +266,7 @@ def _create_model_search(
         return None
 
     search_type = reqargs.get("search_type", searchtype.EQUALS)
-    search_way = reqargs.get("search_way", "or")  # "or" / "and"
+    search_way = reqargs.get("search_way", "and")  # "or" / "and"
 
     if search_type is None:
         return None
@@ -274,7 +274,7 @@ def _create_model_search(
     _validate_search_type(search_type)
     _validate_search_way(search_way)
 
-    fn_search_way: Callable = or_ if search_way == "or" else and_
+    fn_search_way: Callable = and_ if search_way == "and" else or_
     match search_type:
         case searchtype.EQUALS:
             return fn_search_way(*[

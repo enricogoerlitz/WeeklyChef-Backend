@@ -10,7 +10,8 @@ from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
 from server.core.models.api_models.recipe import (
     recipe_model, recipe_model_send,
     recipe_tag_model,
-    recipe_ingredient_model, recipe_ingredient_model_send
+    recipe_ingredient_model, recipe_ingredient_model_send,
+    recipe_model_get_list
 )
 from server.core.models.db_models import (
     Recipe,
@@ -29,6 +30,7 @@ ns = Namespace(
 @ns.route("/")
 class RecipeListAPI(Resource):
 
+    @ns.expect(recipe_model_get_list)
     @ns.response(code=200, model=[recipe_model], description=sui.desc_list(ns.name))            # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
