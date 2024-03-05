@@ -10,6 +10,7 @@ from server.core.models.api_models.recipe import (
     category_model, category_model_send
 )
 from server.core.models.db_models import Category
+from server.services.recipe.controller.category import category_controller
 
 
 ns = Namespace(
@@ -27,10 +28,12 @@ class CategoryListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
+        return category_controller.handle_get_list(request.args)
         return CRUDController.handle_get_list(
             model=Category,
             api_model=category_model,
-            reqargs=request.args
+            reqargs=request.args,
+            search_fields=["name"]
         )
 
     @ns.expect(category_model_send)
@@ -42,6 +45,9 @@ class CategoryListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
+        return category_controller.handle_post(
+            data=request.get_json()
+        )
         return CRUDController.handle_post(
             model=Category,
             api_model=category_model,
@@ -60,6 +66,7 @@ class CategoryAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
+        return category_controller.handle_get(id)
         return CRUDController.handle_get(Category, category_model, id)
 
     @ns.expect(category_model_send)
@@ -71,6 +78,10 @@ class CategoryAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
+        return category_controller.handle_patch(
+            id=id,
+            data=request.get_json()
+        )
         return CRUDController.handle_patch(
             model=Category,
             api_model=category_model,
@@ -86,4 +97,5 @@ class CategoryAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
+        return category_controller.handle_delete(id)
         return CRUDController.handle_delete(Category, id)

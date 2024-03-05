@@ -5,8 +5,8 @@ NORMAL = "normal"
 ADVANCED = "fortgeschritten"
 
 
-ALLOWED_DIFFICULTIES = [
+ALLOWED_DIFFICULTIES = {
     EASY,
     NORMAL,
     ADVANCED
-]
+}

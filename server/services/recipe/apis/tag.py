@@ -10,6 +10,7 @@ from server.core.models.api_models.recipe import (
     tag_model, tag_model_send
 )
 from server.core.models.db_models import Tag
+from server.services.recipe.controller.category import category_controller
 
 
 ns = Namespace(
@@ -27,10 +28,12 @@ class TagListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def get(self):
+        return category_controller.handle_get_list(request.args)
         return CRUDController.handle_get_list(
             model=Tag,
             api_model=tag_model,
-            reqargs=request.args
+            reqargs=request.args,
+            search_fields=["name"]
         )
 
     @ns.expect(tag_model_send)
@@ -42,6 +45,9 @@ class TagListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
+        return category_controller.handle_post(
+            data=request.get_json()
+        )
         return CRUDController.handle_post(
             model=Tag,
             api_model=tag_model,
@@ -61,6 +67,7 @@ class TagAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def get(self, id):
+        return category_controller.handle_get(id)
         return CRUDController.handle_get(Tag, tag_model, id)
 
     @ns.expect(tag_model_send)
@@ -72,6 +79,10 @@ class TagAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
+        return category_controller.handle_patch(
+            id=id,
+            data=request.get_json()
+        )
         return CRUDController.handle_patch(
             model=Tag,
             api_model=tag_model,
@@ -87,4 +98,5 @@ class TagAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
+        return category_controller.handle_delete(id)
         return CRUDController.handle_delete(Tag, id)

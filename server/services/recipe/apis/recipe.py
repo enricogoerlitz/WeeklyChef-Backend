@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from flask import request, send_from_directory
 from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
@@ -18,6 +21,11 @@ from server.core.models.db_models import (
     RecipeTagComposite,
     RecipeIngredient
 )
+from server.services.recipe.controller import (
+    recipe_controller,
+    recipe_ingredient_controller,
+    recipe_tag_controller
+)
 
 
 ns = Namespace(
@@ -36,6 +44,7 @@ class RecipeListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
+        return recipe_controller.handle_get_list(request.args)
         return CRUDController.handle_get_list(
             model=Recipe,
             api_model=recipe_model,
@@ -56,11 +65,18 @@ class RecipeListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
+        recipe = request.get_json()
+        # recipe["ingredients"] = Ingredient.query.filter(Ingredient.id.in_(recipe["ingredients"])).all()  # noqa
+        # muss danach angelegt werden -> RecipeIngredient({recipe_id, ingredient_id, quantity})  # noqa
+        # recipe["tags"] = Tag.query.filter(Tag.id.in_(recipe["tags"])).all()
+        return recipe_controller.handle_post(
+            data=request.get_json()
+        )
         return CRUDController.handle_post(
             model=Recipe,
             api_model=recipe_model,
             api_model_send=recipe_model_send,
-            data=request.get_json(),
+            data=recipe,  # request.get_json(),
             unique_columns=["name"]
         )
 
@@ -75,6 +91,7 @@ class RecipeAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
+        return recipe_controller.handle_get(id)
         return CRUDController.handle_get(Recipe, recipe_model, id)
 
     @ns.expect(recipe_model_send)
@@ -86,6 +103,10 @@ class RecipeAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
+        return recipe_controller.handle_patch(
+            id=id,
+            data=request.get_json()
+        )
         return CRUDController.handle_patch(
             model=Recipe,
             api_model=recipe_model,
@@ -101,6 +122,7 @@ class RecipeAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
+        return recipe_controller.handle_delete(id)
         return CRUDController.handle_delete(Recipe, id)
 
 
@@ -121,6 +143,10 @@ class RecipeTagAPI(Resource):
             "tag_id": tag_id
         }
 
+        return recipe_tag_controller.handle_post(
+            data=data,
+            unique_primarykey=(id, tag_id)
+        )
         return CRUDController.handle_post(
             model=RecipeTagComposite,
             api_model=recipe_tag_model,
@@ -138,6 +164,9 @@ class RecipeTagAPI(Resource):
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, tag_id):
+        return recipe_tag_controller.handle_delete(
+            id=(id, tag_id)
+        )
         return CRUDController.handle_delete(RecipeTagComposite, (id, tag_id))
 
 
@@ -160,6 +189,10 @@ class RecipeIngredientAPI(Resource):
             "quantity": request.get_json().get("quantity")
         }
 
+        return recipe_ingredient_controller.handle_post(
+            data=data,
+            unique_primarykey=(id, ingredient_id)
+        )
         return CRUDController.handle_post(
             model=RecipeIngredient,
             api_model=recipe_ingredient_model,
@@ -176,22 +209,21 @@ class RecipeIngredientAPI(Resource):
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, ingredient_id):
+        return recipe_ingredient_controller.handle_delete(
+            id=(id, ingredient_id)
+        )
         return CRUDController.handle_delete(
             RecipeIngredient, (id, ingredient_id))
 
 
 # TODO: fix this!
 UPLOAD_FOLDER = "/images"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 
 
 def allowed_file(filename):
     return "." in filename and \
            filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-import os  # noqa
-import uuid  # noqa
 
 
 @ns.route("/image")

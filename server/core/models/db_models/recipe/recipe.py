@@ -33,10 +33,14 @@ class Recipe(db.Model):
 
     category = db.relationship("Category", backref="recipe", lazy="select")
     ingredients = db.relationship(
-        "Ingredient",
-        secondary="recipe_ingredient",
-        backref=db.backref("recipe", lazy="dynamic")
+        "RecipeIngredient",
+        backref=db.backref("recipe", lazy="select")
     )
+    # ingredients = db.relationship(
+    #     "Ingredient",
+    #     secondary="recipe_ingredient",
+    #     backref=db.backref("recipe", lazy="dynamic")
+    # )
     tags = db.relationship(
         "Tag",
         secondary="recipe_tag",
@@ -134,6 +138,11 @@ class RecipeIngredient(db.Model):
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)  # noqa
     ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)  # noqa
     quantity = db.Column(db.Integer, nullable=False)
+
+    ingredient = db.relationship(
+        "Ingredient",
+        backref=db.backref("recipe_ingredient", lazy="dynamic")
+    )
 
     __table_args__ = (
         UniqueConstraint("recipe_id", "ingredient_id", name="uq_recipe_ingredient"),  # noqa

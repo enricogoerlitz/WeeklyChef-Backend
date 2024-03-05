@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
 from server.core.controller import crud_controller as CRUDController
+from server.services.recipe.controller import unit_controller
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.recipe import (
@@ -27,10 +28,12 @@ class UnitListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
+        return unit_controller.handle_get_list(request.args)
         return CRUDController.handle_get_list(
             model=Unit,
             api_model=unit_model,
-            reqargs=request.args
+            reqargs=request.args,
+            search_fields=["name"]
         )
 
     @ns.expect(unit_model_send)
@@ -42,6 +45,9 @@ class UnitListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
+        return unit_controller.handle_post(
+            data=request.get_json()
+        )
         return CRUDController.handle_post(
             model=Unit,
             api_model=unit_model,
@@ -61,6 +67,7 @@ class UnitAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
+        return unit_controller.handle_get(id)
         return CRUDController.handle_get(Unit, unit_model, id)
 
     @ns.expect(unit_model_send)
@@ -72,6 +79,10 @@ class UnitAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
+        return unit_controller.handle_patch(
+            id=id,
+            data=request.get_json()
+        )
         return CRUDController.handle_patch(
             model=Unit,
             api_model=unit_model,
@@ -87,4 +98,5 @@ class UnitAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
+        return unit_controller.handle_delete(id)
         return CRUDController.handle_delete(Unit, id)

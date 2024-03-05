@@ -43,6 +43,7 @@ category_model_send = api.model(
 
 
 # TAG MODELS
+
 tag_model = api.model(
     "TagModel", base_name_model_fields)
 
@@ -77,21 +78,6 @@ ingredient_model_send = api.model("IngredientModelSend", {
 
 # RECIPE MODELS
 
-recipe_model = api.model("RecipeModel", {
-    "id": fields.Integer,
-    "name": fields.String,
-    "preperation_description": fields.String,
-    "difficulty": fields.String,
-    "person_count": fields.Integer,
-    "preperation_time_minutes": fields.Integer,
-    "search_description": fields.String,
-    "category_id": fields.Integer,
-    "creator_user_id": fields.Integer,
-    "category": fields.Nested(category_model),
-    "ingredients": fields.List(fields.Nested(ingredient_model)),
-    "tags": fields.List(fields.Nested(tag_model))
-})
-
 recipe_model_send = api.model("RecipeModelSend", {
     "name": fields.String,
     "preperation_description": fields.String,
@@ -114,8 +100,27 @@ recipe_ingredient_model = api.model("RecipeIngredientModel", {
     "quantity": fields.Float
 })
 
+recipe_ingredient_model_joined = api.model("RecipeIngredientModelJoined", {
+    "quantity": fields.Float,
+    "ingredient": fields.Nested(ingredient_model)
+})
+
 recipe_ingredient_model_send = api.model("RecipeIngredientModelSend", {
     "quantity": fields.Float
+})
+
+recipe_model = api.model("RecipeModel", {
+    "id": fields.Integer,
+    "name": fields.String,
+    "preperation_description": fields.String,
+    "difficulty": fields.String,
+    "person_count": fields.Integer,
+    "preperation_time_minutes": fields.Integer,
+    "search_description": fields.String,
+    "creator_user_id": fields.Integer,
+    "category": fields.Nested(category_model),
+    "ingredients": fields.List(fields.Nested(recipe_ingredient_model_joined)),
+    "tags": fields.List(fields.Nested(tag_model))
 })
 
 

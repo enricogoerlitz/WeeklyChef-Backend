@@ -15,6 +15,10 @@ from server.core.models.db_models import (
     Collection,
     CollectionRecipeComposite
 )
+from server.services.recipe.controller.collection import (
+    collection_controller,
+    collection_recipe_controller
+)
 
 
 ns = Namespace(
@@ -32,10 +36,12 @@ class CollectionListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
+        return collection_controller.handle_get_list(request.args)
         return CRUDController.handle_get_list(
             model=Collection,
             api_model=collection_model,
-            reqargs=request.args
+            reqargs=request.args,
+            search_fields=["name"]
         )
 
     @ns.expect(collection_model_send)
@@ -47,6 +53,9 @@ class CollectionListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
+        return collection_controller.handle_post(
+            data=request.get_json()
+        )
         return CRUDController.handle_post(
             model=Collection,
             api_model=collection_model,
@@ -65,6 +74,7 @@ class CollectionAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self, id):
+        return collection_controller.handle_get(id)
         return CRUDController.handle_get(Collection, collection_model, id)
 
     @ns.expect(collection_model_send)
@@ -76,6 +86,10 @@ class CollectionAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
+        return collection_controller.handle_patch(
+            id=id,
+            data=request.get_json()
+        )
         return CRUDController.handle_patch(
             model=Collection,
             api_model=collection_model,
@@ -91,6 +105,7 @@ class CollectionAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
+        return collection_controller.handle_delete(id)
         return CRUDController.handle_delete(Collection, id)
 
 
@@ -113,6 +128,10 @@ class UserSharedCollectionAPI(Resource):
             "can_edit": request.get_json().get("can_edit", None)
         }
 
+        return collection_recipe_controller.handle_post(
+            data=data,
+            unique_primarykey=(id, user_id)
+        )
         return CRUDController.handle_post(
             model=CollectionRecipeComposite,
             api_model=collection_user_model,
@@ -124,11 +143,12 @@ class UserSharedCollectionAPI(Resource):
     @ns.response(code=204, model=None, description=sui.desc_delete("CollectionRecipe"))         # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))           # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     # @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, user_id):
+        return collection_recipe_controller.handle_delete(id=(id, user_id))
         return CRUDController.handle_delete(
             CollectionRecipeComposite,
             (id, user_id)
@@ -152,6 +172,10 @@ class CollectionRecipeAPI(Resource):
             "recipe_id": recipe_id
         }
 
+        return collection_recipe_controller.handle_post(
+            data=data,
+            unique_primarykey=(id, recipe_id)
+        )
         return CRUDController.handle_post(
             model=CollectionRecipeComposite,
             api_model=collection_recipe_model,
@@ -168,6 +192,7 @@ class CollectionRecipeAPI(Resource):
     @jwt_required()
     # @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, recipe_id):
+        return collection_recipe_controller.handle_delete(id=(id, recipe_id))
         return CRUDController.handle_delete(
             CollectionRecipeComposite,
             (id, recipe_id)
