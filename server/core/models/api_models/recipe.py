@@ -1,6 +1,7 @@
 from flask_restx import fields, reqparse
 
 from server.api import api
+from server.core.enums import difficulty
 from server.core.models.api_models.utils import (
     base_name_model_fields,
     base_name_model_fields_send,
@@ -12,11 +13,19 @@ from server.core.models.api_models.utils import (
 
 #   RECIPE GET LIST MODEL
 
+recipe_reqparser = reqparse.RequestParser()
+recipe_reqparser.add_argument(
+    "difficulty",
+    type=str,
+    choices=list(difficulty.ALLOWED_DIFFICULTIES),
+    location="args"
+)
 recipe_model_get_list = reqparse_add_queryparams_doc(
-    parser=reqparse.RequestParser(),
+    parser=recipe_reqparser,
     add_search=True,
     add_pagination=True,
     query_params=[
+        ("search", str),
         ("name", str),
         ("search_description", str),
         ("preparation_description", str)

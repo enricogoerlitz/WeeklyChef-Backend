@@ -1,5 +1,7 @@
+from sqlalchemy import or_
 from flask import Response
 from flask_sqlalchemy.model import Model
+from flask_sqlalchemy.query import Query
 
 from server.api import api
 from server.core.controller.crud_controller import BaseCrudController
@@ -13,6 +15,9 @@ from server.core.models.api_models.recipe import (
     recipe_model_send,
     recipe_tag_model
 )
+from server.core.models.db_models.recipe.tag import Tag
+from server.core.models.db_models.recipe.ingredient import Ingredient
+from server.core.models.db_models.recipe.category import Category
 
 
 class RecipeController(BaseCrudController):
@@ -41,7 +46,43 @@ class RecipeController(BaseCrudController):
         # OVERRIDE
         # HIER zusätzlich suche nach TAG und INGREDIENT einbauen!
         # model_query = ...filter() -> an handle_get_list query übergeben!
-        return super().handle_get_list(reqargs)
+        search = reqargs.get("search")
+        difficulty_search = reqargs.get("difficulty")
+        query: Query = self._model.query
+
+        if search is not None:
+            search_str = f"%{search}%"
+
+            query_recipe = query.filter(
+                or_(
+                    Recipe.name.like(search_str),
+                    Recipe.search_description.like(search_str),
+                    Recipe.preperation_description.like(search_str)
+                )
+            )
+
+            query_tag_search = query \
+                .join(RecipeTagComposite) \
+                .join(Tag) \
+                .filter(Tag.name.like(search_str))
+
+            query_ingredient_search = query \
+                .join(RecipeIngredient) \
+                .join(Ingredient) \
+                .filter(Ingredient.name.like(search_str))
+
+            query_category_search = query.join(Category).filter(
+                Category.name.like(search_str)
+            )
+
+            query = query_recipe.union(query_tag_search) \
+                                .union(query_ingredient_search) \
+                                .union(query_category_search)
+
+        if difficulty_search is not None:
+            query = query.filter(Recipe.difficulty == difficulty_search)
+
+        return super().handle_get_list(reqargs, query=query)
 
 
 recipe_controller = RecipeController(
@@ -55,7 +96,7 @@ recipe_controller = RecipeController(
         "preperation_description"
     ],
     pagination_page_size=20,
-    use_redis=False
+    use_redis=True
 )
 
 

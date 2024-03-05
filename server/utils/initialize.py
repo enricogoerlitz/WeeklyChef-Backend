@@ -200,17 +200,39 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
         db.session.add_all(recipes)
         print("INIT DB DONE")
 
-        recipe = Recipe(
-            name="Spaghetti Carbonara Klassisch",
-            person_count=2,
-            preperation_description=prep_description,
-            preperation_time_minutes=20,
-            difficulty="fortgeschritten",
-            search_description="spaghetti carbonara nudeln klassisch",
-            creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
-            category_id=Category.query.filter_by(name="Hauptspeise").first().id,  # noqa
-        )
-        db.session.add(recipe)
+        extra_recipes = [
+            Recipe(
+                name="Spaghetti Carbonara Klassisch",
+                person_count=2,
+                preperation_description=prep_description,
+                preperation_time_minutes=20,
+                difficulty="fortgeschritten",
+                search_description="spaghetti carbonara nudeln klassisch",
+                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                category_id=Category.query.filter_by(name="Hauptspeise").first().id,  # noqa
+            ),
+            Recipe(
+                name="Fleischbällchen",
+                person_count=2,
+                preperation_description="ball beschreibung 1",
+                preperation_time_minutes=20,
+                difficulty="normal",
+                search_description="fleisch bäll chen",
+                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                category_id=Category.query.filter_by(name="Frühstück").first().id,  # noqa
+            ),
+            Recipe(
+                name="Pesto grün",
+                person_count=2,
+                preperation_description="basilikum bal",
+                preperation_time_minutes=20,
+                difficulty="einfach",
+                search_description="basilikum pesto",
+                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                category_id=Category.query.filter_by(name="Beilage").first().id,  # noqa
+            )
+        ]
+        db.session.add_all(extra_recipes)
 
         recipe_id = Recipe.query.first().id
         recipe_ingredients = [
@@ -233,5 +255,10 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
             ).all()
         ]
         db.session.add_all(recipe_tags)
+
+        db.session.add(RecipeTagComposite(
+            recipe_id=2,
+            tag_id=Tag.query.filter(Tag.name == "Vegan").first().id
+        ))
 
         db.session.commit()

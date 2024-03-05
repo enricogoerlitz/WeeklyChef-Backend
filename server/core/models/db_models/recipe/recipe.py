@@ -12,6 +12,7 @@ from server.utils.decorators import (
     add_from_json_method,
     add__str__method
 )
+from server.logger import logger
 
 
 @add_from_json_method
@@ -36,11 +37,6 @@ class Recipe(db.Model):
         "RecipeIngredient",
         backref=db.backref("recipe", lazy="select")
     )
-    # ingredients = db.relationship(
-    #     "Ingredient",
-    #     secondary="recipe_ingredient",
-    #     backref=db.backref("recipe", lazy="dynamic")
-    # )
     tags = db.relationship(
         "Tag",
         secondary="recipe_tag",
@@ -98,6 +94,7 @@ class Recipe(db.Model):
     @validates("difficulty")
     def validate_difficulty(self, _: str, value: Any) -> str:
         if str(value) not in difficulty.ALLOWED_DIFFICULTIES:
+            logger.error(value)
             err_msg = "The field 'difficulty' must be 'einfach', 'normal' or 'fortgeschritten''"  # noqa
             raise errors.DbModelValidationException(err_msg)
         return value
