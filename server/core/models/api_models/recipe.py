@@ -118,6 +118,10 @@ recipe_ingredient_model_send = api.model("RecipeIngredientModelSend", {
     "quantity": fields.Float
 })
 
+recipe_image_model = api.model("RecipeImageModel", {
+    "id": fields.Integer
+})
+
 recipe_model = api.model("RecipeModel", {
     "id": fields.Integer,
     "name": fields.String,
@@ -129,7 +133,13 @@ recipe_model = api.model("RecipeModel", {
     "creator_user_id": fields.Integer,
     "category": fields.Nested(category_model),
     "ingredients": fields.List(fields.Nested(recipe_ingredient_model_joined)),
-    "tags": fields.List(fields.Nested(tag_model))
+    "tags": fields.List(fields.Nested(tag_model)),
+    "images": fields.List(fields.Nested(recipe_image_model))
+})
+
+recipe_image_model = api.model("RecipeImageCompositeModel", {
+    "recipe_id": fields.Integer,
+    "image_id": fields.Integer
 })
 
 

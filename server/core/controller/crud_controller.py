@@ -1,7 +1,7 @@
 # type: ignore
 from werkzeug import exceptions
-
 from typing import Any, Callable
+from abc import ABC, abstractmethod
 
 from flask_restx import marshal
 from flask import Response
@@ -20,7 +20,25 @@ from server.errors import errors
 from server.utils import helper
 
 
-class BaseCrudController:
+class IController(ABC):
+
+    @abstractmethod
+    def handle_get_list(self): pass
+
+    @abstractmethod
+    def handle_get(self): pass
+
+    @abstractmethod
+    def handle_post(self): pass
+
+    @abstractmethod
+    def handle_patch(self): pass
+
+    @abstractmethod
+    def handle_delete(self): pass
+
+
+class BaseCrudController(IController):
 
     def __init__(
             self,

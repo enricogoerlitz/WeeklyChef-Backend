@@ -42,6 +42,11 @@ class Recipe(db.Model):
         secondary="recipe_tag",
         backref=db.backref("recipe", lazy="dynamic")
     )
+    images = db.relationship(
+        "RecipeImage",
+        secondary="recipe_image",
+        backref=db.backref("recipe", lazy="dynamic")
+    )
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:

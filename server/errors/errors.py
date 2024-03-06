@@ -149,3 +149,37 @@ class ValueErrorGeneral(Exception):
 
     def __init__(self, err_msg: str) -> None:
         super().__init__(err_msg)
+
+
+class ImageNotGivenException(Exception):
+    """
+    When no image with specific name in request.files
+    """
+
+    def __init__(self, image_request_filekey: str) -> None:
+        err_msg = f"When uploading an image, the content for key '{image_request_filekey}' is required."  # noqa
+        super().__init__(err_msg)
+
+
+class ImageNotAllowedFileExtensionException(Exception):
+    """
+    When file extension is not allowed.
+    """
+
+    def __init__(
+            self,
+            file_extension: str,
+            allowed_file_extensions: list
+    ) -> None:
+        err_msg = f"The file extension '{file_extension}' is not allowed. Use {str(allowed_file_extensions)}."  # noqa
+        super().__init__(err_msg)
+
+
+class ImageNotFoundException(Exception):
+    """
+    When image was not found.
+    """
+
+    def __init__(self, id) -> None:
+        err_msg = f"Image with id '{id}' was not found."
+        super().__init__(err_msg)

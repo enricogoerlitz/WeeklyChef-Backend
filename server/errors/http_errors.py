@@ -25,3 +25,7 @@ def not_found(exp: Union[str, Exception]) -> tuple[dict, int]:
 
 def conflict(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"msg": str(exp)}, 409
+
+
+def server_error(exp: str | Exception) -> tuple[dict, int]:
+    return {"msg": str(exp)}, 500

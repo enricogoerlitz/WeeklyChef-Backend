@@ -1,7 +1,4 @@
-import os
-import uuid
-
-from flask import request, send_from_directory
+from flask import request
 from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
@@ -10,16 +7,18 @@ from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
 from server.core.models.api_models.recipe import (
-    recipe_model, recipe_model_send,
-    recipe_tag_model,
-    recipe_ingredient_model, recipe_ingredient_model_send,
-    recipe_model_get_list
+    recipe_image_model, recipe_ingredient_model,
+    recipe_ingredient_model_send, recipe_model,
+    recipe_model_get_list, recipe_model_send,
+    recipe_tag_model
 )
 from server.services.recipe.controller import (
     recipe_controller,
     recipe_ingredient_controller,
-    recipe_tag_controller
+    recipe_tag_controller,
+    image_controller
 )
+from server.services.recipe.controller.recipe import recipe_image_controller
 
 
 ns = Namespace(
@@ -163,57 +162,60 @@ class RecipeIngredientAPI(Resource):
         )
 
 
-# TODO: fix this!
-UPLOAD_FOLDER = "/images"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
-
-
-def allowed_file(filename):
-    return "." in filename and \
-           filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 @ns.route("/image")
-class RecipeImageAPI(Resource):
-
-    @ns.response(code=200, description="List of all image filenames")
-    @ns.response(code=401, description="Unauthorized")
-    @ns.response(code=500, description="Unexpected error")
-    def get(self):
-        filenames = os.listdir(UPLOAD_FOLDER)[1]
-        return send_from_directory(UPLOAD_FOLDER, filenames)
-        return filenames, 200
+class RecipeImagePostAPI(Resource):
 
     @ns.response(code=201, description="Image uploaded successfully")
-    @ns.response(code=401, description="Unauthorized")
-    @ns.response(code=500, description="Unexpected error")
+    @ns.response(code=401, model=error_model, description="Unauthorized")
+    @ns.response(code=500, model=error_model, description="Unexpected error")
     @jwt_required()
     def post(self):
-        if "file" not in request.files:
-            return {"message": "No file part"}, 400
-
-        file = request.files["file"]
-
-        if file.filename == "":
-            return {"message": "No selected file"}, 400
-
-        if file and allowed_file(file.filename):
-            _, file_extension = os.path.splitext(file.filename)
-            filename = str(uuid.uuid4()) + file_extension
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            return {"message": "Image uploaded successfully"}, 201
-        else:
-            return {"message": "Invalid file format"}, 400
+        return image_controller.handle_post(request.files)
 
 
-@ns.route("/image/<filename>")
-class RecipeImageFileAPI(Resource):
+@ns.route("/image/<int:id>")
+class RecipeImageGetAPI(Resource):
 
-    @ns.response(code=200, description="Image file")
-    @ns.response(code=401, description="Unauthorized")
-    @ns.response(code=404, description="Image file not found")
-    @ns.response(code=500, description="Unexpected error")
+    @ns.response(code=200, model=None, description="Image file")
+    @ns.response(code=401, model=error_model, description="Unauthorized")                               # noqa
+    @ns.response(code=404, model=error_model, description="Image file not found")                       # noqa
+    @ns.response(code=500, model=error_model, description="Unexpected error")                           # noqa
     @jwt_required()
     @IsAdminOrStaff
-    def get(self, filename):
-        return send_from_directory(UPLOAD_FOLDER, filename)
+    def get(self, id):
+        return image_controller.handle_get(id)
+
+
+@ns.route("/<int:id>/image/<int:image_id>")
+class RecipeImageAPI(Resource):
+
+    @ns.response(code=201, model=recipe_image_model, description=sui.desc_added("RecipeImage"))             # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                   # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeImage"))                 # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
+    @jwt_required()
+    @IsRecipeCreatorOrAdminOrStaff
+    def post(self, id, image_id):
+        data = {
+            "recipe_id": id,
+            "image_id": image_id
+        }
+
+        return recipe_image_controller.handle_post(
+            data=data,
+            unique_primarykey=(id, image_id)
+        )
+
+    @ns.response(code=204, model=None, description=sui.desc_delete("RecipeImage"))              # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @jwt_required()
+    @IsRecipeCreatorOrAdminOrStaff
+    def delete(self, id, image_id):
+        return recipe_image_controller.handle_delete(
+            id=(id, image_id)
+        )
