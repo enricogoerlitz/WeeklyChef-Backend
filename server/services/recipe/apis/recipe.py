@@ -6,7 +6,6 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
-from server.core.controller import crud_controller as CRUDController
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
@@ -15,11 +14,6 @@ from server.core.models.api_models.recipe import (
     recipe_tag_model,
     recipe_ingredient_model, recipe_ingredient_model_send,
     recipe_model_get_list
-)
-from server.core.models.db_models import (
-    Recipe,
-    RecipeTagComposite,
-    RecipeIngredient
 )
 from server.services.recipe.controller import (
     recipe_controller,
@@ -45,16 +39,6 @@ class RecipeListAPI(Resource):
     @jwt_required()
     def get(self):
         return recipe_controller.handle_get_list(request.args)
-        return CRUDController.handle_get_list(
-            model=Recipe,
-            api_model=recipe_model,
-            reqargs=request.args,
-            search_fields=[
-                "name",
-                "search_description",
-                "preperation_description"
-            ]
-        )
 
     @ns.expect(recipe_model_send)
     @ns.response(code=201, model=recipe_model, description=sui.desc_added(ns.name))             # noqa
@@ -65,19 +49,8 @@ class RecipeListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
-        recipe = request.get_json()
-        # recipe["ingredients"] = Ingredient.query.filter(Ingredient.id.in_(recipe["ingredients"])).all()  # noqa
-        # muss danach angelegt werden -> RecipeIngredient({recipe_id, ingredient_id, quantity})  # noqa
-        # recipe["tags"] = Tag.query.filter(Tag.id.in_(recipe["tags"])).all()
         return recipe_controller.handle_post(
             data=request.get_json()
-        )
-        return CRUDController.handle_post(
-            model=Recipe,
-            api_model=recipe_model,
-            api_model_send=recipe_model_send,
-            data=recipe,  # request.get_json(),
-            unique_columns=["name"]
         )
 
 
@@ -92,7 +65,6 @@ class RecipeAPI(Resource):
     @jwt_required()
     def get(self, id):
         return recipe_controller.handle_get(id)
-        return CRUDController.handle_get(Recipe, recipe_model, id)
 
     @ns.expect(recipe_model_send)
     @ns.response(code=200, model=recipe_model, description=sui.desc_update(ns.name))            # noqa
@@ -107,12 +79,6 @@ class RecipeAPI(Resource):
             id=id,
             data=request.get_json()
         )
-        return CRUDController.handle_patch(
-            model=Recipe,
-            api_model=recipe_model,
-            id=id,
-            data=request.get_json()
-        )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
@@ -123,7 +89,6 @@ class RecipeAPI(Resource):
     @IsAdminOrStaff
     def delete(self, id):
         return recipe_controller.handle_delete(id)
-        return CRUDController.handle_delete(Recipe, id)
 
 
 @ns.route("/<int:id>/tag/<int:tag_id>")
@@ -147,14 +112,6 @@ class RecipeTagAPI(Resource):
             data=data,
             unique_primarykey=(id, tag_id)
         )
-        return CRUDController.handle_post(
-            model=RecipeTagComposite,
-            api_model=recipe_tag_model,
-            api_model_send=recipe_tag_model,
-            data=data,
-            unique_primarykey=(id, tag_id)
-        )
-
 
     @ns.response(code=204, model=None, description=sui.desc_delete("RecipeTag"))                # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
@@ -167,7 +124,6 @@ class RecipeTagAPI(Resource):
         return recipe_tag_controller.handle_delete(
             id=(id, tag_id)
         )
-        return CRUDController.handle_delete(RecipeTagComposite, (id, tag_id))
 
 
 @ns.route("/<int:id>/ingredient/<int:ingredient_id>")
@@ -193,13 +149,6 @@ class RecipeIngredientAPI(Resource):
             data=data,
             unique_primarykey=(id, ingredient_id)
         )
-        return CRUDController.handle_post(
-            model=RecipeIngredient,
-            api_model=recipe_ingredient_model,
-            api_model_send=recipe_ingredient_model_send,
-            data=data,
-            unique_primarykey=(id, ingredient_id)
-        )
 
     @ns.response(code=204, model=None, description=sui.desc_delete("RecipeIngredient"))         # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
@@ -212,8 +161,6 @@ class RecipeIngredientAPI(Resource):
         return recipe_ingredient_controller.handle_delete(
             id=(id, ingredient_id)
         )
-        return CRUDController.handle_delete(
-            RecipeIngredient, (id, ingredient_id))
 
 
 # TODO: fix this!

@@ -3,17 +3,11 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
-from server.core.controller import crud_controller as CRUDController
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.recipe import (
     collection_model, collection_model_send,
-    collection_recipe_model,
     collection_user_model, collection_user_model_send
-)
-from server.core.models.db_models import (
-    Collection,
-    CollectionRecipeComposite
 )
 from server.services.recipe.controller.collection import (
     collection_controller,
@@ -37,12 +31,6 @@ class CollectionListAPI(Resource):
     @jwt_required()
     def get(self):
         return collection_controller.handle_get_list(request.args)
-        return CRUDController.handle_get_list(
-            model=Collection,
-            api_model=collection_model,
-            reqargs=request.args,
-            search_fields=["name"]
-        )
 
     @ns.expect(collection_model_send)
     @ns.response(code=201, model=collection_model, description=sui.desc_added(ns.name))         # noqa
@@ -54,12 +42,6 @@ class CollectionListAPI(Resource):
     @IsAdminOrStaff
     def post(self):
         return collection_controller.handle_post(
-            data=request.get_json()
-        )
-        return CRUDController.handle_post(
-            model=Collection,
-            api_model=collection_model,
-            api_model_send=collection_model_send,
             data=request.get_json()
         )
 
@@ -75,7 +57,6 @@ class CollectionAPI(Resource):
     @jwt_required()
     def get(self, id):
         return collection_controller.handle_get(id)
-        return CRUDController.handle_get(Collection, collection_model, id)
 
     @ns.expect(collection_model_send)
     @ns.response(code=200, model=collection_model, description=sui.desc_update(ns.name))        # noqa
@@ -90,12 +71,6 @@ class CollectionAPI(Resource):
             id=id,
             data=request.get_json()
         )
-        return CRUDController.handle_patch(
-            model=Collection,
-            api_model=collection_model,
-            id=id,
-            data=request.get_json()
-        )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
@@ -106,7 +81,6 @@ class CollectionAPI(Resource):
     @IsAdminOrStaff
     def delete(self, id):
         return collection_controller.handle_delete(id)
-        return CRUDController.handle_delete(Collection, id)
 
 
 @ns.route("/<int:id>/users/<int:user_id>")
@@ -132,13 +106,6 @@ class UserSharedCollectionAPI(Resource):
             data=data,
             unique_primarykey=(id, user_id)
         )
-        return CRUDController.handle_post(
-            model=CollectionRecipeComposite,
-            api_model=collection_user_model,
-            api_model_send=collection_user_model_send,
-            data=data,
-            unique_primarykey=(id, user_id)
-        )
 
     @ns.response(code=204, model=None, description=sui.desc_delete("CollectionRecipe"))         # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
@@ -149,10 +116,6 @@ class UserSharedCollectionAPI(Resource):
     # @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, user_id):
         return collection_recipe_controller.handle_delete(id=(id, user_id))
-        return CRUDController.handle_delete(
-            CollectionRecipeComposite,
-            (id, user_id)
-        )
 
 
 @ns.route("/<int:id>/recipe/<int:recipe_id>")
@@ -176,13 +139,6 @@ class CollectionRecipeAPI(Resource):
             data=data,
             unique_primarykey=(id, recipe_id)
         )
-        return CRUDController.handle_post(
-            model=CollectionRecipeComposite,
-            api_model=collection_recipe_model,
-            api_model_send=collection_recipe_model,
-            data=data,
-            unique_primarykey=(id, recipe_id)
-        )
 
     @ns.response(code=204, model=None, description=sui.desc_delete("CollectionRecipe"))         # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
@@ -193,7 +149,3 @@ class CollectionRecipeAPI(Resource):
     # @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id, recipe_id):
         return collection_recipe_controller.handle_delete(id=(id, recipe_id))
-        return CRUDController.handle_delete(
-            CollectionRecipeComposite,
-            (id, recipe_id)
-        )

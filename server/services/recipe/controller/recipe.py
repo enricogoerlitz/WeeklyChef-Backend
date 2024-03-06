@@ -96,7 +96,7 @@ recipe_controller = RecipeController(
         "preperation_description"
     ],
     pagination_page_size=20,
-    use_redis=True
+    use_redis=False
 )
 
 

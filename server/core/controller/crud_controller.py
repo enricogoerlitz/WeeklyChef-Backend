@@ -63,9 +63,15 @@ class BaseCrudController:
             logger.error(e)
             return http_errors.UNEXPECTED_ERROR_RESULT
 
-    def handle_get_list(self, reqargs: dict, query: Query = None) -> Response:
+    def handle_get_list(
+            self,
+            reqargs: dict,
+            query: Query = None,
+            redis_addition_key: str = None  # like user_id
+    ) -> Response:
         try:
-            redis_key = redis.gen_key(self._model)
+            redis_key = redis.gen_key(
+                self._model, redis_addition_key=redis_addition_key)
             if self._use_redis:
                 obj = redis.get(redis_key)
                 if obj is not None:

@@ -24,11 +24,15 @@ redis = Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 def gen_key(
         model: db.Model,
-        path: str = None
+        path: str = None,
+        redis_addition_key: str = None
 ) -> str:
     try:
         if path is None:
             path = request.full_path
+
+        if redis_addition_key is not None:
+            path += f"/add-key={redis_addition_key}"
 
         return f"{model.__name__}:{path}"
     except Exception as e:

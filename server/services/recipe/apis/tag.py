@@ -3,13 +3,11 @@ from flask_restx import Resource, Namespace
 from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui
-from server.core.controller import crud_controller as CRUDController
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.recipe import (
     tag_model, tag_model_send
 )
-from server.core.models.db_models import Tag
 from server.services.recipe.controller.category import category_controller
 
 
@@ -29,12 +27,6 @@ class TagListAPI(Resource):
     @jwt_required()
     def get(self):
         return category_controller.handle_get_list(request.args)
-        return CRUDController.handle_get_list(
-            model=Tag,
-            api_model=tag_model,
-            reqargs=request.args,
-            search_fields=["name"]
-        )
 
     @ns.expect(tag_model_send)
     @ns.response(code=201, model=tag_model, description=sui.desc_added(ns.name))            # noqa
@@ -47,13 +39,6 @@ class TagListAPI(Resource):
     def post(self):
         return category_controller.handle_post(
             data=request.get_json()
-        )
-        return CRUDController.handle_post(
-            model=Tag,
-            api_model=tag_model,
-            api_model_send=tag_model_send,
-            data=request.get_json(),
-            unique_columns=["name"]
         )
 
 
@@ -68,7 +53,6 @@ class TagAPI(Resource):
     @jwt_required()
     def get(self, id):
         return category_controller.handle_get(id)
-        return CRUDController.handle_get(Tag, tag_model, id)
 
     @ns.expect(tag_model_send)
     @ns.response(code=200, model=tag_model, description=sui.desc_update(ns.name))           # noqa
@@ -83,12 +67,6 @@ class TagAPI(Resource):
             id=id,
             data=request.get_json()
         )
-        return CRUDController.handle_patch(
-            model=Tag,
-            api_model=tag_model,
-            id=id,
-            data=request.get_json()
-        )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                   # noqa
@@ -99,4 +77,3 @@ class TagAPI(Resource):
     @IsAdminOrStaff
     def delete(self, id):
         return category_controller.handle_delete(id)
-        return CRUDController.handle_delete(Tag, id)
