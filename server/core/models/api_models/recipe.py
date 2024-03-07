@@ -142,6 +142,21 @@ recipe_image_model = api.model("RecipeImageCompositeModel", {
     "image_id": fields.Integer
 })
 
+recipe_rating_model = api.model("RecipeRatingModel", {
+    "user_id": fields.Integer,
+    "recipe_id": fields.Integer,
+    "rating": fields.Float
+})
+
+recipe_rating_model_agg = api.model("RecipeRatingModelAggregation", {
+    "rating_avg": fields.Float,
+    "rating_count": fields.Integer
+})
+
+recipe_rating_model_send = api.model("RecipeDatingModelSend", {
+    "rating": fields.Float,
+})
+
 
 # COLLECTION MODELS
 

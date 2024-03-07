@@ -3,7 +3,7 @@ import uuid
 
 from werkzeug.datastructures import FileStorage, ImmutableMultiDict
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, func
 from flask import Response, send_file
 from flask_sqlalchemy.model import Model
 from flask_sqlalchemy.query import Query
@@ -16,13 +16,13 @@ from server.core.controller.crud_controller import (
 )
 from server.core.models.db_models.recipe.recipe import (
     Recipe, RecipeImage, RecipeIngredient,
-    RecipeTagComposite, ReicpeImageComposite
+    RecipeRating, RecipeTagComposite, ReicpeImageComposite
 )
 from server.core.models.api_models.recipe import (
     recipe_image_model, recipe_ingredient_model,
     recipe_ingredient_model_send, recipe_model,
-    recipe_model_send, recipe_tag_model
-)
+    recipe_model_send, recipe_rating_model,
+    recipe_rating_model_send, recipe_tag_model)
 from server.core.models.db_models.recipe.tag import Tag
 from server.core.models.db_models.recipe.ingredient import Ingredient
 from server.core.models.db_models.recipe.category import Category
@@ -176,6 +176,95 @@ class ImageController(IController):
         return file.filename.rsplit(".", 1)[1].lower()
 
 
+class RecipeRatingController(BaseCrudController):
+    _model: RecipeRating
+
+    def __init__(
+            self,
+            model: Model,
+            api_model: api.model,  # type: ignore
+            api_model_send: api.model = None,  # type: ignore
+            unique_columns: list[str] = None,
+            search_fields: list[str] = None,
+            pagination_page_size: int = 20,
+            use_redis: bool = True
+    ) -> None:
+        super().__init__(
+            model,
+            api_model=api_model,
+            api_model_send=api_model_send,
+            unique_columns=unique_columns,
+            search_fields=search_fields,
+            pagination_page_size=pagination_page_size,
+            use_redis=use_redis
+        )
+
+    def handle_get(self, recipe_id: int, reqargs: dict) -> Response:
+        try:
+            self._validate_recipe_existing(recipe_id)
+
+            user_id = reqargs.get("user_id")
+
+            if user_id:
+                return self._handle_get_user_rating(recipe_id, user_id)
+
+            rating_sum = db.session.query(func.sum(self._model.rating)) \
+                .filter(self._model.recipe_id == recipe_id) \
+                .scalar()
+
+            rating_count = db.session.query(func.count(self._model.rating)) \
+                .filter(self._model.recipe_id == recipe_id) \
+                .scalar()
+
+            rating_avg = 0.
+            if rating_count > 0:
+                rating_avg = round(rating_sum / rating_count, 1)
+
+            return {
+                "rating_avg": rating_avg,
+                "rating_count": rating_count
+            }, 200
+
+        except errors.DbModelNotFoundException as e:
+            return http_errors.not_found(e)
+
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
+
+    def _handle_get_user_rating(
+            self,
+            recipe_id: int,
+            user_id: int
+    ) -> Response:
+        user_rating: RecipeRating = self._model.query.filter(
+            and_(
+                self._model.recipe_id == recipe_id,
+                self._model.user_id == user_id
+            )
+        ).first()
+
+        if user_rating is None:
+            return {
+                "rating_avg": 0.,
+                "rating_count": 0
+            }, 200
+
+        return {
+            "rating_avg": user_rating.rating,
+            "rating_count": 1
+        }, 200
+
+    def _validate_recipe_existing(self, recipe_id: int) -> None:
+        is_recipe_existing = Recipe.query.filter(
+            Recipe.id == recipe_id
+        ).count() == 1
+
+        if not is_recipe_existing:
+            err_msg = f"Object {Recipe.__name__} with id = {recipe_id} doesn't exist"  # noqa
+            raise errors.DbModelNotFoundException(err_msg)
+
+
 recipe_controller = RecipeController(
     model=Recipe,
     api_model=recipe_model,
@@ -220,6 +309,17 @@ recipe_image_controller = BaseCrudController(
     model=ReicpeImageComposite,
     api_model=recipe_image_model,
     api_model_send=recipe_image_model,
+    unique_columns=None,
+    search_fields=None,
+    pagination_page_size=20,
+    use_redis=True
+)
+
+
+recipe_rating_controller = RecipeRatingController(
+    model=RecipeRating,
+    api_model=recipe_rating_model,
+    api_model_send=recipe_rating_model_send,
     unique_columns=None,
     search_fields=None,
     pagination_page_size=20,

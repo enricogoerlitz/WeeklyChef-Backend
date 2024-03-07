@@ -1,6 +1,6 @@
 from flask import request
 from flask_restx import Resource, Namespace
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
@@ -18,7 +18,9 @@ from server.services.recipe.controller import (
     recipe_tag_controller,
     image_controller
 )
-from server.services.recipe.controller.recipe import recipe_image_controller
+from server.services.recipe.controller.recipe import (
+    recipe_image_controller,
+    recipe_rating_controller)
 
 
 ns = Namespace(
@@ -219,3 +221,36 @@ class RecipeImageAPI(Resource):
         return recipe_image_controller.handle_delete(
             id=(id, image_id)
         )
+
+
+@ns.route("/<int:id>/rating")
+class RecipeRatingAPI(Resource):
+
+    @jwt_required()
+    def get(self, id):
+        return recipe_rating_controller.handle_get(
+            recipe_id=id,
+            reqargs=request.args
+        )
+
+    @jwt_required()
+    def post(self, id):
+        jwt_identity: dict = get_jwt_identity()
+        user_id = jwt_identity.get("id")
+        data = {
+            "user_id": user_id,
+            "recipe_id": id,
+            "rating": request.get_json().get("rating")
+        }
+
+        return recipe_rating_controller.handle_post(
+            data=data,
+            unique_primarykey=(user_id, id)
+        )
+
+    @jwt_required()
+    # @IsRatingOwnerOrStaffOrAdmin
+    def delete(self, id):
+        jwt_identity: dict = get_jwt_identity()
+        user_id = jwt_identity.get("id")
+        return recipe_rating_controller.handle_delete(id=(user_id, id))
