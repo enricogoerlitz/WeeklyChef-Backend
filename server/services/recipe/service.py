@@ -17,6 +17,7 @@ from server.services.recipe.apis.category import ns as ns_category
 from server.services.recipe.apis.unit import ns as ns_unit
 from server.services.recipe.apis.tag import ns as ns_tag
 from server.services.recipe.apis.collection import ns as ns_collection
+from server.services.recipe.apis.supermarket import ns as ns_supermarket
 
 
 load_dotenv()
@@ -52,6 +53,7 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_category)
     api.add_namespace(ns_unit)
     api.add_namespace(ns_tag)
+    api.add_namespace(ns_supermarket)
 
     # add errorhandler
     @app.errorhandler(500)

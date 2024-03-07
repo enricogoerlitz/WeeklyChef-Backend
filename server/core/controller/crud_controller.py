@@ -111,7 +111,8 @@ class BaseCrudController(IController, AbstractRedisCache):
     def handle_get(
             self,
             id: Any,
-            redis_addition_key: str = None  # like user_id
+            redis_addition_key: str = None,  # like user_id
+            api_response_model: str = None
     ) -> Response:
         try:
             cache_obj = self._get_cache(redis_addition_key)
@@ -125,7 +126,9 @@ class BaseCrudController(IController, AbstractRedisCache):
             #         return obj, 200
 
             obj = self._find_object_by_id(id)
-            response_data = marshal(obj, self._api_model)
+
+            api_response_model = api_response_model if api_response_model else self._api_model  # noqa
+            response_data = marshal(obj, api_response_model)
 
             self._set_cache(response_data, redis_addition_key)
             # if self._use_caching:
@@ -144,7 +147,8 @@ class BaseCrudController(IController, AbstractRedisCache):
             self,
             reqargs: dict,
             query: Query = None,
-            redis_addition_key: str = None  # like user_id
+            redis_addition_key: str = None,  # like user_id
+            api_response_model: str = None
     ) -> Response:
         try:
             cache_obj = self._get_cache(redis_addition_key)
@@ -169,7 +173,8 @@ class BaseCrudController(IController, AbstractRedisCache):
                 reqargs=reqargs
             )
 
-            response_data = marshal(result_data, self._api_model)
+            api_response_model = api_response_model if api_response_model else self._api_model  # noqa
+            response_data = marshal(result_data, api_response_model)
 
             # if self._use_caching:
             #     redis.set(redis_key, response_data)
@@ -325,7 +330,7 @@ class BaseCrudController(IController, AbstractRedisCache):
         return obj
 
     def _create_model_search(self, reqargs: dict) -> Query:
-        if self._search_fields is None:
+        if self._search_fields is None or reqargs is None:
             return None
 
         search_type = reqargs.get("search_type", searchtype.EQUALS)
@@ -372,6 +377,9 @@ class BaseCrudController(IController, AbstractRedisCache):
             model_query: Query,
             reqargs: dict
     ) -> list:
+        if reqargs is None:
+            return model_query.all()
+
         page = reqargs.get("page")
         page_size = reqargs.get("page_size", self._pagination_page_size)
 

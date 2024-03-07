@@ -5,11 +5,10 @@ from flask_jwt_extended.utils import decode_token
 
 from server.core.permissions.general import IsAdminOrStaff
 from server.services.auth.controller import auth_controller
-from server.core.controller import crud_controller as CRUDController
-from server.core.models.db_models.user import User
 from server.core.models.api_models.user import user_model
 from server.core.models.api_models.auth import register_model_send
 from server.core.models.api_models.utils import error_model
+from server.services.auth.controller.user import user_controller
 
 
 ns = Namespace(
@@ -28,9 +27,7 @@ class UserListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def get(self):
-        return CRUDController.handle_get_list(
-            model=User,
-            api_model=user_model,
+        return user_controller.handle_get_list(
             reqargs=request.args
         )
 

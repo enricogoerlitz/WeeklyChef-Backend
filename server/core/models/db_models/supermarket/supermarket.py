@@ -25,6 +25,12 @@ class Supermarket(db.Model):
     district = db.Column(db.String(30), nullable=False)
     owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
 
+    areas = db.relationship(
+        "SupermarketArea",
+        backref="supermarket",
+        lazy="dynamic"
+    )
+
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
         ModelValidator.validate_string(
@@ -82,11 +88,14 @@ class Supermarket(db.Model):
     )
 
 
+@add_from_json_method
+@add_to_dict_method
+@add__str__method
 class SupermarketArea(db.Model):
     __tablename__ = "sarea"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(15), unique=True, nullable=False)
+    name = db.Column(db.String(25), unique=True, nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
     supermarket_id = db.Column(db.Integer, db.ForeignKey("supermarket.id"), nullable=False)  # noqa
 
@@ -115,7 +124,7 @@ class SupermarketArea(db.Model):
             fieldname=key,
             value=value,
             min_length=3,
-            max_length=10
+            max_length=25
         )
         return value
 
@@ -137,6 +146,9 @@ class SupermarketArea(db.Model):
         return value
 
 
+@add_from_json_method
+@add_to_dict_method
+@add__str__method
 class SupermarketAreaIngredientComposite(db.Model):
     __tablename__ = "sarea_ingredient"
 
