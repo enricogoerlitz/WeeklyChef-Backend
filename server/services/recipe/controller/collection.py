@@ -16,7 +16,7 @@ collection_controller = BaseCrudController(
     unique_columns=["name"],
     search_fields=["name"],
     pagination_page_size=20,
-    use_redis=True
+    use_caching=True
 )
 
 collection_recipe_controller = BaseCrudController(
@@ -26,5 +26,5 @@ collection_recipe_controller = BaseCrudController(
     unique_columns=None,
     search_fields=None,
     pagination_page_size=20,
-    use_redis=True
+    use_caching=True
 )

@@ -51,8 +51,14 @@ class RecipeListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
+        jwt_identity = get_jwt_identity()
+        user_id = jwt_identity.get("id")
+
+        data = request.get_json()
+        data["creator_user_id"] = user_id
+
         return recipe_controller.handle_post(
-            data=request.get_json()
+            data=data
         )
 
 
@@ -150,6 +156,20 @@ class RecipeIngredientAPI(Resource):
         return recipe_ingredient_controller.handle_post(
             data=data,
             unique_primarykey=(id, ingredient_id)
+        )
+
+    @ns.expect(recipe_ingredient_model_send)
+    @ns.response(code=200, model=recipe_ingredient_model, description=sui.desc_update("RecipeIngredient"))  # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeIngredient"))            # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
+    @jwt_required()
+    # @IsRatingOwner
+    def patch(self, id, ingredient_id):
+        return recipe_ingredient_controller.handle_patch(
+            id=(id, ingredient_id),
+            data=request.get_json()
         )
 
     @ns.response(code=204, model=None, description=sui.desc_delete("RecipeIngredient"))         # noqa

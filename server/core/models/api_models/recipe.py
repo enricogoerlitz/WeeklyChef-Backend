@@ -104,8 +104,7 @@ recipe_model_send = api.model("RecipeModelSend", {
     "person_count": fields.Integer,
     "preperation_time_minutes": fields.Integer,
     "search_description": fields.String,
-    "category_id": fields.Integer,
-    "creator_user_id": fields.Integer
+    "category_id": fields.Integer
 })
 
 recipe_tag_model = api.model("RecipeTagModel", {

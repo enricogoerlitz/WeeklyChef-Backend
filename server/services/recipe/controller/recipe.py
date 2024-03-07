@@ -12,8 +12,8 @@ from server.db import db
 from server.api import api
 from server.errors import errors, http_errors
 from server.core.controller.crud_controller import (
-    BaseCrudController, IController
-)
+    AbstractRedisCache, BaseCrudController,
+    IController)
 from server.core.models.db_models.recipe.recipe import (
     Recipe, RecipeImage, RecipeIngredient,
     RecipeRating, RecipeTagComposite, ReicpeImageComposite
@@ -48,7 +48,7 @@ class RecipeController(BaseCrudController):
             unique_columns=unique_columns,
             search_fields=search_fields,
             pagination_page_size=pagination_page_size,
-            use_redis=use_redis
+            use_caching=use_redis
         )
 
     def handle_get_list(self, reqargs: dict) -> Response:
@@ -94,9 +94,19 @@ class RecipeController(BaseCrudController):
         return super().handle_get_list(reqargs, query=query)
 
 
-class ImageController(IController):
+class ImageController(IController, AbstractRedisCache):
 
-    def __init__(self) -> None:
+    def __init__(
+            self,
+            use_caching: bool,
+            clear_cache_models: list[Model]
+    ) -> None:
+        AbstractRedisCache.__init__(
+            self,
+            model=RecipeImage,
+            use_caching=use_caching,
+            clear_cache_models=clear_cache_models
+        )
         self._model = RecipeImage
         self._upload_folder = "/images"
         self._image_req_key = "recipe_image"
@@ -139,6 +149,8 @@ class ImageController(IController):
             recipe_image = RecipeImage(path=filepath)
             db.session.add(recipe_image)
             db.session.commit()
+
+            self._clear_cache()
 
             return {"id": recipe_image.id}, 200
 
@@ -196,7 +208,7 @@ class RecipeRatingController(BaseCrudController):
             unique_columns=unique_columns,
             search_fields=search_fields,
             pagination_page_size=pagination_page_size,
-            use_redis=use_redis
+            use_caching=use_redis
         )
 
     def handle_get(self, recipe_id: int, reqargs: dict) -> Response:
@@ -207,6 +219,10 @@ class RecipeRatingController(BaseCrudController):
 
             if user_id:
                 return self._handle_get_user_rating(recipe_id, user_id)
+
+            cache_data = self._get_cache()
+            if cache_data is not None:
+                return cache_data, 200
 
             rating_sum = db.session.query(func.sum(self._model.rating)) \
                 .filter(self._model.recipe_id == recipe_id) \
@@ -220,10 +236,14 @@ class RecipeRatingController(BaseCrudController):
             if rating_count > 0:
                 rating_avg = round(rating_sum / rating_count, 1)
 
-            return {
+            response_data = {
                 "rating_avg": rating_avg,
                 "rating_count": rating_count
-            }, 200
+            }
+
+            self._set_cache(response_data)
+
+            return response_data, 200
 
         except errors.DbModelNotFoundException as e:
             return http_errors.not_found(e)
@@ -287,7 +307,8 @@ recipe_ingredient_controller = BaseCrudController(
     unique_columns=None,
     search_fields=None,
     pagination_page_size=20,
-    use_redis=True
+    use_caching=True,
+    clear_cache_models=[Recipe]
 )
 
 
@@ -298,11 +319,15 @@ recipe_tag_controller = BaseCrudController(
     unique_columns=None,
     search_fields=None,
     pagination_page_size=20,
-    use_redis=True
+    use_caching=True,
+    clear_cache_models=[Recipe]
 )
 
 
-image_controller = ImageController()
+image_controller = ImageController(
+    use_caching=True,
+    clear_cache_models=[Recipe]
+)
 
 
 recipe_image_controller = BaseCrudController(
@@ -312,7 +337,8 @@ recipe_image_controller = BaseCrudController(
     unique_columns=None,
     search_fields=None,
     pagination_page_size=20,
-    use_redis=True
+    use_caching=True,
+    clear_cache_models=[Recipe]
 )
 
 
