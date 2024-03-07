@@ -83,9 +83,13 @@ class RecipeAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
+        data = request.get_json()
+        if "creator_user_id" in data:
+            del data["creator_user_id"]
+
         return recipe_controller.handle_patch(
             id=id,
-            data=request.get_json()
+            data=data
         )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa

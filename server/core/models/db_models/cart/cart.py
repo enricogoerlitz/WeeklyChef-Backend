@@ -3,6 +3,9 @@
 
 Jeder hat einen Einkaufkorb
 Die Einkäufskörbe können aber freigegeben werden
+
+Ein Item im Einkaufskorb entspricht einem Ingredient!
+    - dieses kann, muss aber nicht, zu einem Rezept gehören
 """
 
 from typing import Any
@@ -57,6 +60,9 @@ class Cart(db.Model):
         return value
 
 
+@add_from_json_method
+@add_to_dict_method
+@add__str__method
 class CartItem(db.Model):
     __tablename__ = "cart_item"
 

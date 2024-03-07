@@ -74,6 +74,10 @@ class SupermarketAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def patch(self, id):
+        data = request.get_json()
+        if "owner_user_id" in data:
+            del data["owner_user_id"]
+
         return supermarket_controller.handle_patch(
             id=id,
             data=request.get_json()

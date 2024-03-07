@@ -23,6 +23,11 @@ class Collection(db.Model):
     owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     is_default = db.Column(db.Boolean, nullable=False)
 
+    recipes = db.relationship(
+        "CollectionRecipeComposite",
+        backref=db.backref("collection", lazy="select")
+    )
+
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
         ModelValidator.validate_string(
@@ -44,6 +49,38 @@ class Collection(db.Model):
     @validates("is_default")
     def validate_is_default(self, key: str, value: Any) -> str:
         ModelValidator.validate_boolean(
+            fieldname=key,
+            value=value
+        )
+        return value
+
+
+@add_from_json_method
+@add_to_dict_method
+@add__str__method
+class CollectionRecipeComposite(db.Model):
+    __tablename__ = "collection_recipe"
+
+    collection_id = db.Column(db.Integer, db.ForeignKey("collection.id"), primary_key=True)  # noqa
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)  # noqa
+
+    recipe = db.relationship("Recipe", lazy="select")
+
+    __table_args__ = (
+        UniqueConstraint("collection_id", "recipe_id", name="uq_collection_recipe"),  # noqa
+    )
+
+    @validates("collection_id")
+    def validate_collection_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
+            fieldname=key,
+            value=value
+        )
+        return value
+
+    @validates("recipe_id")
+    def validate_recipe_id(self, key: str, value: Any) -> str:
+        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )
@@ -83,36 +120,6 @@ class UserSharedCollection(db.Model):
     @validates("can_edit")
     def validate_can_edit(self, key: str, value: Any) -> str:
         ModelValidator.validate_boolean(
-            fieldname=key,
-            value=value
-        )
-        return value
-
-
-@add_from_json_method
-@add_to_dict_method
-@add__str__method
-class CollectionRecipeComposite(db.Model):
-    __tablename__ = "collection_recipe"
-
-    collection_id = db.Column(db.Integer, db.ForeignKey("collection.id"), primary_key=True)  # noqa
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)  # noqa
-
-    __table_args__ = (
-        UniqueConstraint("collection_id", "recipe_id", name="uq_collection_recipe"),  # noqa
-    )
-
-    @validates("collection_id")
-    def validate_collection_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_integer(
-            fieldname=key,
-            value=value
-        )
-        return value
-
-    @validates("recipe_id")
-    def validate_recipe_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_integer(
             fieldname=key,
             value=value
         )

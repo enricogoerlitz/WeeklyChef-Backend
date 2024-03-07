@@ -169,16 +169,18 @@ recipe_rating_model_send = api.model("RecipeDatingModelSend", {
 
 # COLLECTION MODELS
 
-collection_model = api.model("Collection", {
+collection_model = api.model("CollectionModel", {
     "id": fields.Integer,
     "name": fields.String,
     "owner_user_id": fields.Integer,
-    "is_default": fields.Boolean
+    "is_default": fields.Boolean,
+    "recipes": fields.List(
+        fields.Nested(api.model("utils", {"recipe": fields.Nested(recipe_model)}))  # noqa
+    )
 })
 
-collection_model_send = api.model("CollectionSend", {
+collection_model_send = api.model("CollectionModelSend", {
     "name": fields.String,
-    "owner_user_id": fields.Integer,
     "is_default": fields.Boolean
 })
 

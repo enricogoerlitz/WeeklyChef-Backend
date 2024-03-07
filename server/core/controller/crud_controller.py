@@ -103,10 +103,6 @@ class BaseCrudController(IController, AbstractRedisCache):
         self._unique_columns = unique_columns
         self._search_fields = search_fields
         self._pagination_page_size = pagination_page_size
-        # self._use_caching = use_caching
-
-        # clear_cache_models = clear_cache_models if clear_cache_models else []
-        # self._clear_cache_models = list(set([self._model] + clear_cache_models))  # noqa
 
     def handle_get(
             self,
@@ -118,12 +114,6 @@ class BaseCrudController(IController, AbstractRedisCache):
             cache_obj = self._get_cache(redis_addition_key)
             if cache_obj is not None:
                 return cache_obj, 200
-            # redis_key = redis.gen_key(
-            #     self._model, redis_addition_key=redis_addition_key)
-            # if self._use_caching:
-            #     obj = redis.get(redis_key)
-            #     if obj is not None:
-            #         return obj, 200
 
             obj = self._find_object_by_id(id)
 
@@ -131,8 +121,6 @@ class BaseCrudController(IController, AbstractRedisCache):
             response_data = marshal(obj, api_response_model)
 
             self._set_cache(response_data, redis_addition_key)
-            # if self._use_caching:
-            #     redis.set(redis_key, response_data)
 
             return response_data, 200
 
@@ -154,12 +142,6 @@ class BaseCrudController(IController, AbstractRedisCache):
             cache_obj = self._get_cache(redis_addition_key)
             if cache_obj is not None:
                 return cache_obj, 200
-            # redis_key = redis.gen_key(
-            #     self._model, redis_addition_key=redis_addition_key)
-            # if self._use_caching:
-            #     obj = redis.get(redis_key)
-            #     if obj is not None:
-            #         return obj, 200
 
             model_query: Query = query if query else self._model.query
 
@@ -176,8 +158,6 @@ class BaseCrudController(IController, AbstractRedisCache):
             api_response_model = api_response_model if api_response_model else self._api_model  # noqa
             response_data = marshal(result_data, api_response_model)
 
-            # if self._use_caching:
-            #     redis.set(redis_key, response_data)
             self._set_cache(response_data, redis_addition_key)
 
             return response_data, 200
@@ -270,28 +250,6 @@ class BaseCrudController(IController, AbstractRedisCache):
             logger.error(e)
             return http_errors.UNEXPECTED_ERROR_RESULT
 
-    # def _get_cache(self, redis_addition_key: str | None) -> Any:
-    #     redis_key = redis.gen_key(
-    #         self._model, redis_addition_key=redis_addition_key)
-    #     if not self._use_caching:
-    #         return None
-
-    #     return redis.get(redis_key)
-
-    # def _set_cache(self, data: Any, redis_addition_key: str) -> None:
-    #     redis_key = redis.gen_key(
-    #         self._model, redis_addition_key=redis_addition_key)
-    #     if self._use_caching:
-    #         redis.set(redis_key, data)
-
-    # def _clear_cache(self) -> None:
-    #     if not self._use_caching:
-    #         return
-
-    #     for model in self._clear_cache_models:
-    #         redis_key_pattern = redis.gen_key(model, "*")
-    #         redis.clear_cache(redis_key_pattern)
-
     def _check_unqiue_column(self, obj: Model) -> None:
         if self._unique_columns is None:
             return
@@ -334,7 +292,7 @@ class BaseCrudController(IController, AbstractRedisCache):
             return None
 
         search_type = reqargs.get("search_type", searchtype.EQUALS)
-        search_way = reqargs.get("search_way", "and")  # "or" / "and"
+        search_way = reqargs.get("search_way", "and")
 
         if search_type is None:
             return None
