@@ -8,8 +8,8 @@ from server.core.models.db_models.recipe.collection import (
 from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.api_models.recipe import (
     collection_model, collection_model_send,
-    collection_recipe_model, collection_user_model,
-    collection_user_model_send)
+    collection_recipe_model, user_shared_collection_model,
+    user_shared_collection_model_send)
 
 
 class CollectionController(BaseCrudController):
@@ -40,7 +40,7 @@ class CollectionController(BaseCrudController):
     def handle_get_list(self, reqargs: dict, user_id: int) -> Response:
         # TODO: Add Try Catch
         # TODO: man sieht auch die, die mit einem geteilt sind!
-        return super().handle_get_list(reqargs=reqargs)
+        # return super().handle_get_list(reqargs=reqargs)
         query_collection_owner = self._model.query.filter(
             self._model.owner_user_id == user_id)
 
@@ -81,8 +81,8 @@ collection_recipe_controller = BaseCrudController(
 
 user_shared_collection_controller = BaseCrudController(
     model=UserSharedCollection,
-    api_model=collection_user_model,
-    api_model_send=collection_user_model_send,
+    api_model=user_shared_collection_model,
+    api_model_send=user_shared_collection_model_send,
     use_caching=True,
     clear_cache_models=[Collection]
 )

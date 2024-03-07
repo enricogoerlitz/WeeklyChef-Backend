@@ -28,9 +28,19 @@ class RecipePlanner(db.Model):
     __tablename__ = "rplanner"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(10), unique=True, nullable=False)
+    name = db.Column(db.String(25), unique=True, nullable=False)
     owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+
+    items = db.relationship("RecipePlannerItem", lazy="select")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "name",
+            "owner_user_id",
+            name="qu_rplanner_name_user_id"
+        ),
+    )
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
@@ -38,7 +48,7 @@ class RecipePlanner(db.Model):
             fieldname=key,
             value=value,
             min_length=1,
-            max_length=10
+            max_length=25
         )
         return value
 
@@ -79,7 +89,7 @@ class RecipePlannerItem(db.Model):
     order_number = db.Column(db.Integer, nullable=False)
     planned_recipe_person_count = db.Column(db.Integer, nullable=False)
 
-    recipe = db.relationship("Recipe", backref="rplanner_item", lazy="joined")
+    recipe = db.relationship("Recipe", lazy="select")
 
     __table_args__ = (
         UniqueConstraint(

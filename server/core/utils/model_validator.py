@@ -196,8 +196,8 @@ def validate_field_required(
 def validate_datetime(
         fieldname: str,
         value: Any,
-        min_datetime: datetime,
-        max_datetime: datetime,
+        min_datetime: datetime = None,
+        max_datetime: datetime = None,
         nullable: bool = False
 ) -> None:
     if nullable and value is None:

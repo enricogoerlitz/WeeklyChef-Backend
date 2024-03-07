@@ -80,7 +80,7 @@ class SupermarketAPI(Resource):
 
         return supermarket_controller.handle_patch(
             id=id,
-            data=request.get_json()
+            data=data
         )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa

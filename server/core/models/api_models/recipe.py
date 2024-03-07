@@ -189,12 +189,12 @@ collection_recipe_model = api.model("CollectionRecipeModel", {
     "recipe_id": fields.Integer
 })
 
-collection_user_model = api.model("CollectionUserModel", {
+user_shared_collection_model = api.model("CollectionUserModel", {
     "collection_id": fields.Integer,
     "user_id": fields.Integer,
     "can_edit": fields.Boolean
 })
 
-collection_user_model_send = api.model("CollectionUserModelSend", {
+user_shared_collection_model_send = api.model("CollectionUserModelSend", {
     "can_edit": fields.Boolean
 })
