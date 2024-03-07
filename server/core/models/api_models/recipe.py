@@ -9,7 +9,7 @@ from server.core.models.api_models.utils import (
 )
 
 
-# GET-LIST MODELS
+# GET QUERY MODELS
 
 #   RECIPE GET LIST MODEL
 
@@ -22,13 +22,23 @@ recipe_reqparser.add_argument(
 )
 recipe_model_get_list = reqparse_add_queryparams_doc(
     parser=recipe_reqparser,
-    add_search=True,
+    add_search_utils=True,
     add_pagination=True,
     query_params=[
         ("search", str),
         ("name", str),
         ("search_description", str),
         ("preparation_description", str)
+    ]
+)
+
+#   RECIPE RATING GET MODEL
+recipe_rating_model_get = reqparse_add_queryparams_doc(
+    parser=reqparse.RequestParser(),
+    add_search_utils=False,
+    add_pagination=False,
+    query_params=[
+        ("user_id", int)
     ]
 )
 

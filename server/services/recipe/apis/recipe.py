@@ -10,8 +10,9 @@ from server.core.models.api_models.recipe import (
     recipe_image_model, recipe_ingredient_model,
     recipe_ingredient_model_send, recipe_model,
     recipe_model_get_list, recipe_model_send,
-    recipe_tag_model
-)
+    recipe_rating_model, recipe_rating_model_agg,
+    recipe_rating_model_get,
+    recipe_rating_model_send, recipe_tag_model)
 from server.services.recipe.controller import (
     recipe_controller,
     recipe_ingredient_controller,
@@ -226,6 +227,12 @@ class RecipeImageAPI(Resource):
 @ns.route("/<int:id>/rating")
 class RecipeRatingAPI(Resource):
 
+    @ns.expect(recipe_rating_model_get)
+    @ns.response(code=200, model=recipe_rating_model_agg, description=sui.desc_get("RecipeRating")) # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeRating"))        # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)
     @jwt_required()
     def get(self, id):
         return recipe_rating_controller.handle_get(
@@ -233,6 +240,12 @@ class RecipeRatingAPI(Resource):
             reqargs=request.args
         )
 
+    @ns.expect(recipe_rating_model_send)
+    @ns.response(code=201, model=recipe_rating_model, description=sui.desc_added("RecipeRating"))   # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeRating"))        # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)
     @jwt_required()
     def post(self, id):
         jwt_identity: dict = get_jwt_identity()
@@ -248,8 +261,30 @@ class RecipeRatingAPI(Resource):
             unique_primarykey=(user_id, id)
         )
 
+    @ns.expect(recipe_rating_model_send)
+    @ns.response(code=200, model=recipe_rating_model, description=sui.desc_update("RecipeRating"))  # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeRating"))        # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
-    # @IsRatingOwnerOrStaffOrAdmin
+    # @IsRatingOwner
+    def patch(self, id):
+        jwt_identity: dict = get_jwt_identity()
+        user_id = jwt_identity.get("id")
+
+        return recipe_rating_controller.handle_patch(
+            id=(user_id, id),
+            data=request.get_json()
+        )
+
+    @ns.response(code=204, model=None, description=sui.desc_delete("RecipeRating"))             # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)
+    @jwt_required()
+    # @IsRatingOwner -> kein staff oder admin, da hier auf user gegangen wir -> dafür /rating/admin/*...  # noqa
     def delete(self, id):
         jwt_identity: dict = get_jwt_identity()
         user_id = jwt_identity.get("id")

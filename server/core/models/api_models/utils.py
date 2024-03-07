@@ -7,7 +7,7 @@ from server.api import api
 
 def reqparse_add_queryparams_doc(
         parser: reqparse.RequestParser,
-        add_search: bool = False,
+        add_search_utils: bool = False,
         add_pagination: bool = True,
         query_params: list[tuple[str, Type]] = None
 ) -> reqparse.RequestParser:
@@ -23,7 +23,7 @@ def reqparse_add_queryparams_doc(
             location="args"
         )
 
-    if add_search:
+    if add_search_utils:
         parser.add_argument(
             "search_type",
             type=str,
