@@ -13,7 +13,7 @@ from flask_sqlalchemy.model import Model
 from server.logger import logger
 from server.db import db
 from server.core.enums import searchtype
-from server import redis
+from server.caching import redis
 from server.api import api
 from server.errors import http_errors
 from server.errors import errors
@@ -92,7 +92,7 @@ class BaseCrudController(IController, AbstractRedisCache):
             read_only_fields: list[str] = None,
             search_fields: list[str] = None,
             pagination_page_size: int = 20,
-            use_caching: bool = True,
+            use_caching: bool = False,
             clear_cache_models: list[Model] = None
     ) -> None:
         AbstractRedisCache.__init__(

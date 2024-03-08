@@ -75,7 +75,6 @@ collection_recipe_controller = CollectionRecipeController(
         "collection_id",
         "recipe_id"
     ],
-    use_caching=True,
     clear_cache_models=[Collection]
 )
 
@@ -91,7 +90,5 @@ user_shared_collection_controller = UserSharedCollectionController(
     unique_columns_together=[
         "collection_id",
         "user_id"
-    ],
-    use_caching=True,
-    clear_cache_models=[Collection]
+    ]
 )

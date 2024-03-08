@@ -73,7 +73,6 @@ cart_item_controller = CartItemController(
         "recipe_id",
         "ingredient_id"
     ],
-    use_caching=True,
     clear_cache_models=[Cart]
 )
 
@@ -88,6 +87,5 @@ user_shared_cart_controller = UserSharedCartController(
     ],
     read_only_fields=["cart_id", "user_id"],
     unique_columns_together=["cart_id", "user_id"],
-    use_caching=True,
     clear_cache_models=[Cart]
 )

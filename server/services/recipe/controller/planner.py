@@ -104,7 +104,6 @@ recipe_planner_item_controller = RecipePlannerItemController(
         "date",
         "order_number"
     ],
-    use_caching=True,
     clear_cache_models=[RecipePlanner]
 )
 
@@ -119,6 +118,5 @@ user_shared_recipe_planner_controller = UserSharedRecipePlannerController(
     ],
     read_only_fields=["rplanner_id", "user_id"],
     unique_columns_together=["rplanner_id", "user_id"],
-    use_caching=True,
     clear_cache_models=[RecipePlanner]
 )

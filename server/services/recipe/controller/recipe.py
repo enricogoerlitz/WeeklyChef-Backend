@@ -5,7 +5,6 @@ from werkzeug.datastructures import FileStorage, ImmutableMultiDict
 
 from sqlalchemy import or_, and_, func
 from flask import Response, send_file
-from flask_sqlalchemy.model import Model
 from flask_sqlalchemy.query import Query
 
 from server.db import db
@@ -89,16 +88,11 @@ class RecipeTagController(BaseCrudController):
 
 class ImageController(IController, AbstractRedisCache):
 
-    def __init__(
-            self,
-            use_caching: bool,
-            clear_cache_models: list[Model]
-    ) -> None:
+    def __init__(self) -> None:
         AbstractRedisCache.__init__(
             self,
             model=RecipeImage,
-            use_caching=use_caching,
-            clear_cache_models=clear_cache_models
+            use_caching=False
         )
         self._model = RecipeImage
         self._upload_folder = "/images"
@@ -292,8 +286,7 @@ recipe_ingredient_controller = RecipeIngredientController(
     ],
     read_only_fields=["recipe_id", "ingredient_id"],
     unique_columns_together=["recipe_id", "ingredient_id"],
-    use_caching=True,
-    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
+    clear_cache_models=[Recipe, Collection, RecipePlanner]
 )
 
 
@@ -307,15 +300,11 @@ recipe_tag_controller = RecipeTagController(
     ],
     read_only_fields=["recipe_id", "tag_id"],
     unique_columns_together=["recipe_id", "tag_id"],
-    use_caching=True,
-    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
+    clear_cache_models=[Recipe, Collection]
 )
 
 
-image_controller = ImageController(
-    use_caching=True,
-    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
-)
+image_controller = ImageController()
 
 
 recipe_image_controller = RecipeImageController(
@@ -328,8 +317,7 @@ recipe_image_controller = RecipeImageController(
     ],
     read_only_fields=["recipe_id", "image_id"],
     unique_columns_together=["recipe_id", "image_id"],
-    use_caching=True,
-    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
+    clear_cache_models=[Recipe, Collection]
 )
 
 

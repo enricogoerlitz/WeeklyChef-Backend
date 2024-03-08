@@ -20,5 +20,5 @@ ingredient_controller = IngredientController(
     unique_columns=["name"],
     search_fields=["name"],
     clear_cache_models=[Recipe, RecipePlanner, Cart, Supermarket],
-    use_caching=True
+    use_caching=False
 )

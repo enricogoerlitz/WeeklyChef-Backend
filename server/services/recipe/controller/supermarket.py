@@ -57,7 +57,7 @@ supermarket_controller = SupermarketController(
     ],
     read_only_fields=["owner_user_id"],
     unique_columns_together=["name", "street"],
-    use_caching=False
+    use_caching=True
 )
 
 
@@ -72,7 +72,6 @@ supermarket_area_controller = SupermarketAreaController(
         ["supermarket_id", "name"],
         ["supermarket_id", "order_number"]
     ],
-    use_caching=True,
     clear_cache_models=[Supermarket]
 )
 
@@ -93,7 +92,6 @@ supermarket_area_ingredient_controller = SupermarketAreaIngredientController(
         "sarea_id",
         "ingredient_id"
     ],
-    use_caching=True,
     clear_cache_models=[Supermarket, SupermarketArea]
 )
 
