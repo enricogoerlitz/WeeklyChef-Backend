@@ -5,7 +5,11 @@ from server.core.models.api_models.recipe import (
 )
 
 
-unit_controller = BaseCrudController(
+class UnitController(BaseCrudController):
+    pass
+
+
+unit_controller = UnitController(
     model=Unit,
     api_model=unit_model,
     api_model_send=unit_model_send,

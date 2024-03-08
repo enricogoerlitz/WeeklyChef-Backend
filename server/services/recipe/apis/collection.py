@@ -1,7 +1,8 @@
 from flask import request
 from flask_restx import Resource, Namespace
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
+from server.utils import jwt
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
@@ -30,12 +31,9 @@ class CollectionListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
-        jwt_identity: dict = get_jwt_identity()
-        user_id = jwt_identity.get("id")
-
         return collection_controller.handle_get_list(
             reqargs=request.args,
-            user_id=user_id
+            user_id=jwt.get_user_id()
         )
 
     @ns.expect(collection_model_send)
@@ -48,15 +46,12 @@ class CollectionListAPI(Resource):
     @IsAdminOrStaff
     # @IsCollectionOwnerOrCanEdit
     def post(self):
-        jwt_identity: dict = get_jwt_identity()
-        user_id = jwt_identity.get("id")
-
-        data = request.get_json()
-        data["owner_user_id"] = user_id
-
-        return collection_controller.handle_post(
-            data=data
+        data = jwt.add_user_id_to_data(
+            data=request.get_json(),
+            fieldname="owner_user_id"
         )
+
+        return collection_controller.handle_post(data)
 
 
 @ns.route("/<int:id>")
@@ -81,13 +76,9 @@ class CollectionAPI(Resource):
     @IsAdminOrStaff
     # @IsCollectionOwnerOrCanEdit
     def patch(self, id):
-        data = request.get_json()
-        if "owner_user_id" in data:
-            del data["owner_user_id"]
-
         return collection_controller.handle_patch(
             id=id,
-            data=data
+            data=request.get_json()
         )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa

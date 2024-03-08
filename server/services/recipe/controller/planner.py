@@ -1,5 +1,4 @@
 from flask import Response
-from flask_sqlalchemy.model import Model
 
 from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.db_models.planner.planner import (
@@ -11,40 +10,15 @@ from server.core.models.api_models.planner import (
     recipe_planner_model_send,
     user_shared_recipe_planner_model,
     user_shared_recipe_planner_model_send)
-from server.api import api
+from server.core.models.db_models.user.user import User
+from server.core.models.db_models.recipe.recipe import Recipe
 
 
 class RecipePlannerController(BaseCrudController):
     _model: RecipePlanner
 
-    def __init__(
-            self,
-            model: Model,
-            api_model: api.model,  # type: ignore
-            api_model_send: api.model = None,  # type: ignore
-            unique_columns: list[str] = None,
-            search_fields: list[str] = None,
-            pagination_page_size: int = 20,
-            unique_columns_together: list[str] = None,
-            use_caching: bool = True,
-            clear_cache_models: list[Model] = None
-    ) -> None:
-        super().__init__(
-            model=model,
-            api_model=api_model,
-            api_model_send=api_model_send,
-            unique_columns=unique_columns,
-            search_fields=search_fields,
-            pagination_page_size=pagination_page_size,
-            unique_columns_together=unique_columns_together,
-            use_caching=use_caching,
-            clear_cache_models=clear_cache_models
-        )
-
     def handle_get_list(self, reqargs: dict, user_id: int) -> Response:
         # TODO: Add Try Catch
-        # TODO: man sieht auch die, die mit einem geteilt sind!
-        # return super().handle_get_list(reqargs=reqargs)
         query_planner_owner = self._model.query.filter(
             self._model.owner_user_id == user_id)
 
@@ -61,20 +35,41 @@ class RecipePlannerController(BaseCrudController):
         )
 
 
+class RecipePlannerItemController(BaseCrudController):
+    pass
+
+
+class UserSharedRecipePlannerController(BaseCrudController):
+    pass
+
+
 recipe_planner_controller = RecipePlannerController(
     model=RecipePlanner,
     api_model=recipe_planner_model,
     api_model_send=recipe_planner_model_send,
     unique_columns_together=["name", "owner_user_id"],
+    foreign_key_columns=[
+        (User, "owner_user_id")
+    ],
+    read_only_fields=["owner_user_id"],
     use_caching=True
 )
 
 
-recipe_planner_item_controller = BaseCrudController(
+recipe_planner_item_controller = RecipePlannerItemController(
     model=RecipePlannerItem,
     api_model=recipe_planner_item_model,
     api_model_send=recipe_planner_item_model_send,
     read_only_fields=["rplanner_id", "recipe_id"],
+    foreign_key_columns=[
+        (RecipePlanner, "rplanner_id"),
+        (Recipe, "recipe_id")
+    ],
+    unique_columns_together=[
+        "rplanner_id",
+        "date",  # TODO: date auf 0 setzen (mm,ss etc)
+        "order_number"
+    ],
     use_caching=True,
     clear_cache_models=[RecipePlanner]
 )
@@ -84,6 +79,12 @@ user_shared_recipe_planner_controller = BaseCrudController(
     model=UserSharedRecipePlanner,
     api_model=user_shared_recipe_planner_model,
     api_model_send=user_shared_recipe_planner_model_send,
+    foreign_key_columns=[
+        (RecipePlanner, "rplanner_id"),
+        (User, "user_id")
+    ],
+    read_only_fields=["rplanner_id", "user_id"],
+    unique_columns_together=["rplanner_id", "user_id"],
     use_caching=True,
     clear_cache_models=[RecipePlanner]
 )

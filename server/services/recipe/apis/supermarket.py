@@ -1,8 +1,8 @@
 from flask import request
 from flask_restx import Resource, Namespace
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
-from server.utils import swagger as sui
+from server.utils import swagger as sui, jwt
 from server.core.models.api_models.supermarket import (
     supermarket_area_ingredinet_model,
     supermarket_area_ingredinet_model_send, supermarket_area_model,
@@ -40,15 +40,12 @@ class SupermarketListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def post(self):
-        jwt_identity = get_jwt_identity()
-        user_id = jwt_identity.get("id")
-
-        data = request.get_json()
-        data["owner_user_id"] = user_id
-
-        return supermarket_controller.handle_post(
-            data=data
+        data = jwt.add_user_id_to_data(
+            data=request.get_json(),
+            fieldname="owner_user_id"
         )
+
+        return supermarket_controller.handle_post(data)
 
 
 @ns.route("/<int:id>")
@@ -74,13 +71,9 @@ class SupermarketAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def patch(self, id):
-        data = request.get_json()
-        if "owner_user_id" in data:
-            del data["owner_user_id"]
-
         return supermarket_controller.handle_patch(
             id=id,
-            data=data
+            data=request.get_json()
         )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa
@@ -117,9 +110,7 @@ class SupermarketAreaListAPI(Resource):
         data = request.get_json()
         data["supermarket_id"] = id
 
-        return supermarket_area_controller.handle_post(
-            data=data
-        )
+        return supermarket_area_controller.handle_post(data)
 
 
 @ns.route("/area/<int:id>")

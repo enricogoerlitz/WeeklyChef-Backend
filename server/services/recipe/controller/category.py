@@ -5,7 +5,11 @@ from server.core.models.api_models.recipe import (
 )
 
 
-category_controller = BaseCrudController(
+class CategoryController(BaseCrudController):
+    pass
+
+
+category_controller = CategoryController(
     model=Category,
     api_model=category_model,
     api_model_send=category_model_send,

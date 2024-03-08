@@ -1,7 +1,8 @@
 from flask import request
 from flask_restx import Resource, Namespace
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
+from server.utils import jwt
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
 from server.core.models.api_models.planner import (
@@ -30,12 +31,9 @@ class RecipePlannerListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
-        jwt_identity = get_jwt_identity()
-        user_id = jwt_identity.get("id")
-
         return recipe_planner_controller.handle_get_list(
             reqargs=request.args,
-            user_id=user_id
+            user_id=jwt.get_user_id()
         )
 
     @ns.expect(recipe_planner_model_send)
@@ -46,15 +44,12 @@ class RecipePlannerListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def post(self):
-        jwt_identity = get_jwt_identity()
-        user_id = jwt_identity.get("id")
-
-        data = request.get_json()
-        data["owner_user_id"] = user_id
-
-        return recipe_planner_controller.handle_post(
-            data=data
+        data = jwt.add_user_id_to_data(
+            data=request.get_json(),
+            fieldname="owner_user_id"
         )
+
+        return recipe_planner_controller.handle_post(data)
 
 
 @ns.route("/<int:id>")
@@ -77,13 +72,9 @@ class RecipePlannerAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def patch(self, id):
-        data = request.get_json()
-        if "owner_user_id" in data:
-            del data["owner_user_id"]
-
         return recipe_planner_controller.handle_patch(
             id=id,
-            data=data
+            data=request.get_json()
         )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa
@@ -124,7 +115,6 @@ class RecipePlannerItemAPI(Resource):
     @jwt_required()
     # @IsRatingOwner
     def patch(self, id):
-        # TODO: READ ONLY: [rplanner_id, recipe_id]
         return recipe_planner_item_controller.handle_patch(
             id=id,
             data=request.get_json()
@@ -156,7 +146,7 @@ class UserSharedRecipePlannerAPI(Resource):
         data = {
             "rplanner_id": id,
             "user_id": user_id,
-            "can_edit": request.get_json().get("can_edit", None)
+            "can_edit": request.get_json().get("can_edit")
         }
 
         return user_shared_recipe_planner_controller.handle_post(

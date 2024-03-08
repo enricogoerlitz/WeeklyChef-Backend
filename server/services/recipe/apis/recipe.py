@@ -1,8 +1,8 @@
 from flask import request
 from flask_restx import Resource, Namespace
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
-from server.utils import swagger as sui
+from server.utils import swagger as sui, jwt
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
 from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
@@ -51,15 +51,12 @@ class RecipeListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
-        jwt_identity = get_jwt_identity()
-        user_id = jwt_identity.get("id")
-
-        data = request.get_json()
-        data["creator_user_id"] = user_id
-
-        return recipe_controller.handle_post(
-            data=data
+        data = jwt.add_user_id_to_data(
+            data=request.get_json(),
+            fieldname="creator_user_id"
         )
+
+        return recipe_controller.handle_post(data)
 
 
 @ns.route("/<int:id>")
@@ -83,13 +80,9 @@ class RecipeAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
-        data = request.get_json()
-        if "creator_user_id" in data:
-            del data["creator_user_id"]
-
         return recipe_controller.handle_patch(
             id=id,
-            data=data
+            data=request.get_json()
         )
 
     @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa
@@ -272,8 +265,7 @@ class RecipeRatingAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)
     @jwt_required()
     def post(self, id):
-        jwt_identity: dict = get_jwt_identity()
-        user_id = jwt_identity.get("id")
+        user_id = jwt.get_user_id()
         data = {
             "user_id": user_id,
             "recipe_id": id,
@@ -294,8 +286,7 @@ class RecipeRatingAPI(Resource):
     @jwt_required()
     # @IsRatingOwner
     def patch(self, id):
-        jwt_identity: dict = get_jwt_identity()
-        user_id = jwt_identity.get("id")
+        user_id = jwt.get_user_id()
 
         return recipe_rating_controller.handle_patch(
             id=(user_id, id),
@@ -310,6 +301,5 @@ class RecipeRatingAPI(Resource):
     @jwt_required()
     # @IsRatingOwner -> kein staff oder admin, da hier auf user gegangen wir -> dafür /rating/admin/*...  # noqa
     def delete(self, id):
-        jwt_identity: dict = get_jwt_identity()
-        user_id = jwt_identity.get("id")
+        user_id = jwt.get_user_id()
         return recipe_rating_controller.handle_delete(id=(user_id, id))

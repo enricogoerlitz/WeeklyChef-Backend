@@ -31,6 +31,14 @@ class Supermarket(db.Model):
         lazy="dynamic"
     )
 
+    __table_args__ = (
+        UniqueConstraint(
+            "name",
+            "street",
+            name="uq_name_street"
+        ),
+    )
+
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
         ModelValidator.validate_string(
@@ -78,14 +86,6 @@ class Supermarket(db.Model):
             value=value
         )
         return value
-
-    __table_args__ = (
-        UniqueConstraint(
-            "name",
-            "street",
-            name="uq_name_street"
-        ),
-    )
 
 
 @add_from_json_method

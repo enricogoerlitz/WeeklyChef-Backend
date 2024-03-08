@@ -9,7 +9,6 @@ from flask_sqlalchemy.model import Model
 from flask_sqlalchemy.query import Query
 
 from server.db import db
-from server.api import api
 from server.errors import errors, http_errors
 from server.core.controller.crud_controller import (
     AbstractRedisCache, BaseCrudController,
@@ -27,34 +26,13 @@ from server.core.models.db_models.recipe.tag import Tag
 from server.core.models.db_models.recipe.ingredient import Ingredient
 from server.core.models.db_models.recipe.category import Category
 from server.logger import logger
+from server.core.models.db_models.user.user import User
 
 
 class RecipeController(BaseCrudController):
-
-    def __init__(
-            self,
-            model: Model,
-            api_model: api.model,  # type: ignore
-            api_model_send: api.model = None,  # type: ignore
-            unique_columns: list[str] = None,
-            search_fields: list[str] = None,
-            pagination_page_size: int = 20,
-            use_redis: bool = True
-    ) -> None:
-        super().__init__(
-            model=model,
-            api_model=api_model,
-            api_model_send=api_model_send,
-            unique_columns=unique_columns,
-            search_fields=search_fields,
-            pagination_page_size=pagination_page_size,
-            use_caching=use_redis
-        )
+    _model: Recipe
 
     def handle_get_list(self, reqargs: dict) -> Response:
-        # OVERRIDE
-        # HIER zusätzlich suche nach TAG und INGREDIENT einbauen!
-        # model_query = ...filter() -> an handle_get_list query übergeben!
         search = reqargs.get("search")
         difficulty_search = reqargs.get("difficulty")
         query: Query = self._model.query
@@ -64,9 +42,9 @@ class RecipeController(BaseCrudController):
 
             query_recipe = query.filter(
                 or_(
-                    Recipe.name.like(search_str),
-                    Recipe.search_description.like(search_str),
-                    Recipe.preperation_description.like(search_str)
+                    self._model.name.like(search_str),
+                    self._model.search_description.like(search_str),
+                    self._model.preperation_description.like(search_str)
                 )
             )
 
@@ -92,6 +70,14 @@ class RecipeController(BaseCrudController):
             query = query.filter(Recipe.difficulty == difficulty_search)
 
         return super().handle_get_list(reqargs, query=query)
+
+
+class RecipeIngredientController(BaseCrudController):
+    pass
+
+
+class RecipeTagController(BaseCrudController):
+    pass
 
 
 class ImageController(IController, AbstractRedisCache):
@@ -188,28 +174,12 @@ class ImageController(IController, AbstractRedisCache):
         return file.filename.rsplit(".", 1)[1].lower()
 
 
+class RecipeImageController(BaseCrudController):
+    pass
+
+
 class RecipeRatingController(BaseCrudController):
     _model: RecipeRating
-
-    def __init__(
-            self,
-            model: Model,
-            api_model: api.model,  # type: ignore
-            api_model_send: api.model = None,  # type: ignore
-            unique_columns: list[str] = None,
-            search_fields: list[str] = None,
-            pagination_page_size: int = 20,
-            use_redis: bool = True
-    ) -> None:
-        super().__init__(
-            model=model,
-            api_model=api_model,
-            api_model_send=api_model_send,
-            unique_columns=unique_columns,
-            search_fields=search_fields,
-            pagination_page_size=pagination_page_size,
-            use_caching=use_redis
-        )
 
     def handle_get(self, recipe_id: int, reqargs: dict) -> Response:
         try:
@@ -295,30 +265,40 @@ recipe_controller = RecipeController(
         "search_description",
         "preperation_description"
     ],
-    pagination_page_size=20,
-    use_redis=True  # CHANGE HERE
+    foreign_key_columns=[
+        (User, "creator_user_id"),
+        (Category, "category_id")
+    ],
+    read_only_fields=["creator_user_id"],
+    use_caching=True  # CHANGE HERE
 )
 
 
-recipe_ingredient_controller = BaseCrudController(
+recipe_ingredient_controller = RecipeIngredientController(
     model=RecipeIngredient,
     api_model=recipe_ingredient_model,
     api_model_send=recipe_ingredient_model_send,
-    unique_columns=None,
-    search_fields=None,
-    pagination_page_size=20,
+    foreign_key_columns=[
+        (Recipe, "recipe_id"),
+        (Ingredient, "ingredient_id")
+    ],
+    read_only_fields=["recipe_id", "ingredient_id"],
+    unique_columns_together=["recipe_id", "ingredient_id"],
     use_caching=True,
     clear_cache_models=[Recipe]
 )
 
 
-recipe_tag_controller = BaseCrudController(
+recipe_tag_controller = RecipeTagController(
     model=RecipeTagComposite,
     api_model=recipe_tag_model,
     api_model_send=recipe_tag_model,
-    unique_columns=None,
-    search_fields=None,
-    pagination_page_size=20,
+    foreign_key_columns=[
+        (Recipe, "recipe_id"),
+        (Tag, "tag_id")
+    ],
+    read_only_fields=["recipe_id", "tag_id"],
+    unique_columns_together=["recipe_id", "tag_id"],
     use_caching=True,
     clear_cache_models=[Recipe]
 )
@@ -330,13 +310,16 @@ image_controller = ImageController(
 )
 
 
-recipe_image_controller = BaseCrudController(
+recipe_image_controller = RecipeImageController(
     model=ReicpeImageComposite,
     api_model=recipe_image_model,
     api_model_send=recipe_image_model,
-    unique_columns=None,
-    search_fields=None,
-    pagination_page_size=20,
+    foreign_key_columns=[
+        (RecipeImage, "image_id"),
+        (Recipe, "recipe_id")
+    ],
+    read_only_fields=["recipe_id", "image_id"],
+    unique_columns_together=["recipe_id", "image_id"],
     use_caching=True,
     clear_cache_models=[Recipe]
 )
@@ -346,8 +329,11 @@ recipe_rating_controller = RecipeRatingController(
     model=RecipeRating,
     api_model=recipe_rating_model,
     api_model_send=recipe_rating_model_send,
-    unique_columns=None,
-    search_fields=None,
-    pagination_page_size=20,
-    use_redis=True
+    foreign_key_columns=[
+        (User, "user_id"),
+        (Recipe, "recipe_id")
+    ],
+    read_only_fields=["user_id", "recipe_id"],
+    unique_columns_together=["user_id", "recipe_id"],
+    use_caching=True
 )

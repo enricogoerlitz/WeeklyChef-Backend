@@ -5,7 +5,11 @@ from server.core.models.api_models.recipe import (
 )
 
 
-ingredient_controller = BaseCrudController(
+class IngredientController(BaseCrudController):
+    pass
+
+
+ingredient_controller = IngredientController(
     model=Collection,
     api_model=ingredient_model,
     api_model_send=ingredient_model_send,

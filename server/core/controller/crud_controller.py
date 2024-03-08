@@ -188,12 +188,12 @@ class BaseCrudController(IController, AbstractRedisCache):
             unique_primarykey: Any = None
     ) -> Response:
         try:
+            obj = self._model.from_json(data, self._api_model_send)
+
+            self._check_foreignkeys_existing(data)
             self._check_unqiue_column(data)
             self._check_unique_columns_together(data)
             self._ckeck_unique_primarykey(unique_primarykey)
-            self._check_foreignkeys_existing(data)
-
-            obj = self._model.from_json(data, self._api_model_send)
 
             db.session.add(obj)
             db.session.commit()
@@ -219,13 +219,15 @@ class BaseCrudController(IController, AbstractRedisCache):
 
     def handle_patch(self, id: Any, data: dict) -> Response:
         try:
+            obj = self._find_object_by_id(id)
             data = self._remove_read_only_fields(data)
 
-            self._check_unqiue_column(data)
-            self._check_unique_columns_together(data)
             self._check_foreignkeys_existing(data)
-
-            obj = self._find_object_by_id(id)
+            self._check_unqiue_column(data)
+            self._check_unique_columns_together(
+                data=data,
+                current_obj=obj
+            )
 
             for key, value in data.items():
                 if not hasattr(obj, key):
@@ -304,7 +306,11 @@ class BaseCrudController(IController, AbstractRedisCache):
                     value=value
                 )
 
-    def _check_unique_columns_together(self, data: dict) -> None:
+    def _check_unique_columns_together(
+            self,
+            data: dict,
+            current_obj: Model = None
+    ) -> None:
         if self._unique_columns_together is None:
             return
 
@@ -317,6 +323,11 @@ class BaseCrudController(IController, AbstractRedisCache):
 
         if result_count == 0:
             return
+
+        if result_count == 1 and current_obj is not None:
+            result_model = self._model.query.filter_by(**filter_kwargs).first()
+            if result_model == current_obj:
+                return
 
         err_fields = str(filter_kwargs)
         err_msg = f"The given fields are alredy existing with these values: {err_fields}."  # noqa

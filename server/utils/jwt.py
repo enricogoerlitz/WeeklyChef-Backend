@@ -42,7 +42,11 @@ class JsonWebTokenDTO:
         }
 
 
-def add_user_id_to_data(data: dict, fieldname: str) -> dict:
+def get_user_id() -> int:
     jwt_identity = get_jwt_identity()
-    data[fieldname] = jwt_identity.get("id")
+    return jwt_identity.get("id")
+
+
+def add_user_id_to_data(data: dict, fieldname: str) -> dict:
+    data[fieldname] = get_user_id()
     return data

@@ -1,7 +1,5 @@
 from flask import Response
-from flask_sqlalchemy.model import Model
 
-from server.api import api
 from server.core.models.db_models.recipe.collection import (
     Collection, CollectionRecipeComposite,
     UserSharedCollection)
@@ -10,37 +8,15 @@ from server.core.models.api_models.recipe import (
     collection_model, collection_model_send,
     collection_recipe_model, user_shared_collection_model,
     user_shared_collection_model_send)
+from server.core.models.db_models.user.user import User
+from server.core.models.db_models.recipe.recipe import Recipe
 
 
 class CollectionController(BaseCrudController):
     _model: Collection
 
-    def __init__(
-            self,
-            model: Model,
-            api_model: api.model,  # type: ignore
-            api_model_send: api.model = None,  # type: ignore
-            unique_columns: list[str] = None,
-            search_fields: list[str] = None,
-            pagination_page_size: int = 20,
-            use_caching: bool = True,
-            clear_cache_models: list[Model] = None
-    ) -> None:
-        super().__init__(
-            model=model,
-            api_model=api_model,
-            api_model_send=api_model_send,
-            unique_columns=unique_columns,
-            search_fields=search_fields,
-            pagination_page_size=pagination_page_size,
-            use_caching=use_caching,
-            clear_cache_models=clear_cache_models
-        )
-
     def handle_get_list(self, reqargs: dict, user_id: int) -> Response:
         # TODO: Add Try Catch
-        # TODO: man sieht auch die, die mit einem geteilt sind!
-        # return super().handle_get_list(reqargs=reqargs)
         query_collection_owner = self._model.query.filter(
             self._model.owner_user_id == user_id)
 
@@ -57,32 +33,60 @@ class CollectionController(BaseCrudController):
         )
 
 
+class CollectionRecipeController(BaseCrudController):
+    pass
+
+
+class UserSharedCollectionController(BaseCrudController):
+    pass
+
+
 collection_controller = CollectionController(
     model=Collection,
     api_model=collection_model,
     api_model_send=collection_model_send,
-    unique_columns=["name"],
     search_fields=["name"],
-    pagination_page_size=20,
+    unique_columns_together=[
+        "name",
+        "owner_user_id"
+    ],
+    foreign_key_columns=[
+        (User, "owner_user_id")
+    ],
+    read_only_fields=["owner_user_id"],
     use_caching=True
 )
 
-collection_recipe_controller = BaseCrudController(
+
+collection_recipe_controller = CollectionRecipeController(
     model=CollectionRecipeComposite,
     api_model=collection_recipe_model,
     api_model_send=collection_recipe_model,
-    unique_columns=None,
-    search_fields=None,
-    pagination_page_size=20,
+    foreign_key_columns=[
+        (Collection, "collection_id"),
+        (Recipe, "recipe_id")
+    ],
+    unique_columns_together=[
+        "collection_id",
+        "recipe_id"
+    ],
     use_caching=True,
     clear_cache_models=[Collection]
 )
 
 
-user_shared_collection_controller = BaseCrudController(
+user_shared_collection_controller = UserSharedCollectionController(
     model=UserSharedCollection,
     api_model=user_shared_collection_model,
     api_model_send=user_shared_collection_model_send,
+    foreign_key_columns=[
+        (Collection, "collection_id"),
+        (User, "user_id")
+    ],
+    unique_columns_together=[
+        "collection_id",
+        "user_id"
+    ],
     use_caching=True,
     clear_cache_models=[Collection]
 )
