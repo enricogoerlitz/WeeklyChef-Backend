@@ -10,27 +10,32 @@ from server.core.models.api_models.cart import (
 from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.recipe import Recipe
 from server.core.models.db_models.recipe.ingredient import Ingredient
+from server.errors import http_errors
+from server.logger import logger
 
 
 class CartController(BaseCrudController):
     _model: Cart
 
     def handle_get_list(self, reqargs: dict, user_id: int) -> Response:
-        # TODO: Add Try Catch
-        query_cart_owner = self._model.query.filter(
-            self._model.owner_user_id == user_id)
+        try:
+            query_cart_owner = self._model.query.filter(
+                self._model.owner_user_id == user_id)
 
-        query_cart_shared = self._model.query \
-            .join(UserSharedCart) \
-            .filter(UserSharedCart.user_id == user_id)
+            query_cart_shared = self._model.query \
+                .join(UserSharedCart) \
+                .filter(UserSharedCart.user_id == user_id)
 
-        query = query_cart_owner.union(query_cart_shared)
+            query = query_cart_owner.union(query_cart_shared)
 
-        return super().handle_get_list(
-            reqargs=reqargs,
-            query=query,
-            redis_addition_key=f"uid:{user_id}"
-        )
+            return super().handle_get_list(
+                reqargs=reqargs,
+                query=query,
+                redis_addition_key=f"uid:{user_id}"
+            )
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
 
 
 class CartItemController(BaseCrudController):

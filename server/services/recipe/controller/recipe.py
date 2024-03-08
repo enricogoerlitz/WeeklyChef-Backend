@@ -33,43 +33,47 @@ class RecipeController(BaseCrudController):
     _model: Recipe
 
     def handle_get_list(self, reqargs: dict) -> Response:
-        search = reqargs.get("search")
-        difficulty_search = reqargs.get("difficulty")
-        query: Query = self._model.query
+        try:
+            search = reqargs.get("search")
+            difficulty_search = reqargs.get("difficulty")
+            query: Query = self._model.query
 
-        if search is not None:
-            search_str = f"%{search}%"
+            if search is not None:
+                search_str = f"%{search}%"
 
-            query_recipe = query.filter(
-                or_(
-                    self._model.name.like(search_str),
-                    self._model.search_description.like(search_str),
-                    self._model.preperation_description.like(search_str)
+                query_recipe = query.filter(
+                    or_(
+                        self._model.name.like(search_str),
+                        self._model.search_description.like(search_str),
+                        self._model.preperation_description.like(search_str)
+                    )
                 )
-            )
 
-            query_tag_search = query \
-                .join(RecipeTagComposite) \
-                .join(Tag) \
-                .filter(Tag.name.like(search_str))
+                query_tag_search = query \
+                    .join(RecipeTagComposite) \
+                    .join(Tag) \
+                    .filter(Tag.name.like(search_str))
 
-            query_ingredient_search = query \
-                .join(RecipeIngredient) \
-                .join(Ingredient) \
-                .filter(Ingredient.name.like(search_str))
+                query_ingredient_search = query \
+                    .join(RecipeIngredient) \
+                    .join(Ingredient) \
+                    .filter(Ingredient.name.like(search_str))
 
-            query_category_search = query.join(Category).filter(
-                Category.name.like(search_str)
-            )
+                query_category_search = query.join(Category).filter(
+                    Category.name.like(search_str)
+                )
 
-            query = query_recipe.union(query_tag_search) \
-                                .union(query_ingredient_search) \
-                                .union(query_category_search)
+                query = query_recipe.union(query_tag_search) \
+                                    .union(query_ingredient_search) \
+                                    .union(query_category_search)
 
-        if difficulty_search is not None:
-            query = query.filter(Recipe.difficulty == difficulty_search)
+            if difficulty_search is not None:
+                query = query.filter(Recipe.difficulty == difficulty_search)
 
-        return super().handle_get_list(reqargs, query=query)
+            return super().handle_get_list(reqargs, query=query)
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
 
 
 class RecipeIngredientController(BaseCrudController):

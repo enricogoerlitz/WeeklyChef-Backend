@@ -11,6 +11,8 @@ from server.core.models.api_models.supermarket import (
     supermarket_model, supermarket_model_send, supermarket_user_edit_model)
 from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.ingredient import Ingredient
+from server.errors import http_errors
+from server.logger import logger
 
 
 class SupermarketController(BaseCrudController):
@@ -25,14 +27,17 @@ class SupermarketAreaController(BaseCrudController):
             reqargs: dict,
             supermarket_id: int
     ) -> Response:
-        # TODO: Add try catch
-        query = self._model.query.filter(
-            self._model.supermarket_id == supermarket_id)
+        try:
+            query = self._model.query.filter(
+                self._model.supermarket_id == supermarket_id)
 
-        return super().handle_get_list(
-            reqargs=reqargs,
-            query=query
-        )
+            return super().handle_get_list(
+                reqargs=reqargs,
+                query=query
+            )
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
 
 
 class SupermarketAreaIngredientController(BaseCrudController):
@@ -63,8 +68,10 @@ supermarket_area_controller = SupermarketAreaController(
     foreign_key_columns=[
         (Supermarket, "supermarket_id")
     ],
-    unique_columns_together=["supermarket_id", "name"],
-    # unique_columns_together=["supermarket_id", "order_number"]  # TODO: ZWEI # noqa
+    unique_columns_together=[
+        ["supermarket_id", "name"],
+        ["supermarket_id", "order_number"]
+    ],
     use_caching=True,
     clear_cache_models=[Supermarket]
 )

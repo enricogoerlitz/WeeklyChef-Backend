@@ -12,27 +12,32 @@ from server.core.models.api_models.planner import (
     user_shared_recipe_planner_model_send)
 from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.recipe import Recipe
+from server.errors import http_errors
+from server.logger import logger
 
 
 class RecipePlannerController(BaseCrudController):
     _model: RecipePlanner
 
     def handle_get_list(self, reqargs: dict, user_id: int) -> Response:
-        # TODO: Add Try Catch
-        query_planner_owner = self._model.query.filter(
-            self._model.owner_user_id == user_id)
+        try:
+            query_planner_owner = self._model.query.filter(
+                self._model.owner_user_id == user_id)
 
-        query_planner_shared = self._model.query \
-            .join(UserSharedRecipePlanner) \
-            .filter(UserSharedRecipePlanner.user_id == user_id)
+            query_planner_shared = self._model.query \
+                .join(UserSharedRecipePlanner) \
+                .filter(UserSharedRecipePlanner.user_id == user_id)
 
-        query = query_planner_owner.union(query_planner_shared)
+            query = query_planner_owner.union(query_planner_shared)
 
-        return super().handle_get_list(
-            reqargs=reqargs,
-            query=query,
-            redis_addition_key=f"uid:{user_id}"
-        )
+            return super().handle_get_list(
+                reqargs=reqargs,
+                query=query,
+                redis_addition_key=f"uid:{user_id}"
+            )
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
 
 
 class RecipePlannerItemController(BaseCrudController):
@@ -75,7 +80,7 @@ recipe_planner_item_controller = RecipePlannerItemController(
 )
 
 
-user_shared_recipe_planner_controller = BaseCrudController(
+user_shared_recipe_planner_controller = UserSharedRecipePlannerController(
     model=UserSharedRecipePlanner,
     api_model=user_shared_recipe_planner_model,
     api_model_send=user_shared_recipe_planner_model_send,

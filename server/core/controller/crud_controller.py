@@ -87,7 +87,7 @@ class BaseCrudController(IController, AbstractRedisCache):
             api_model: api.model,
             api_model_send: api.model = None,
             unique_columns: list[str] = None,
-            unique_columns_together: list[str] = None,  # TODO: POST + PATCH
+            unique_columns_together: list[list[str]] | list[str] = None,
             foreign_key_columns: list[tuple[Model, Any]] = None,
             read_only_fields: list[str] = None,
             search_fields: list[str] = None,
@@ -311,27 +311,32 @@ class BaseCrudController(IController, AbstractRedisCache):
             data: dict,
             current_obj: Model = None
     ) -> None:
-        if self._unique_columns_together is None:
+        if self._unique_columns_together is None or len(self._unique_columns_together) == 0:  # noqa
             return
 
-        filter_kwargs = {}
-        for field in self._unique_columns_together:
-            value = data.get(field, None)
-            filter_kwargs |= {field: value}
+        unique_columns_list = ([self._unique_columns_together]
+                               if isinstance(self._unique_columns_together[0], str)  # noqa
+                               else self._unique_columns_together)
 
-        result_count = self._model.query.filter_by(**filter_kwargs).count()
+        for unique_columns in unique_columns_list:
+            filter_kwargs = {}
+            for field in unique_columns:
+                value = data.get(field, None)
+                filter_kwargs |= {field: value}
 
-        if result_count == 0:
-            return
+            result_count = self._model.query.filter_by(**filter_kwargs).count()
 
-        if result_count == 1 and current_obj is not None:
-            result_model = self._model.query.filter_by(**filter_kwargs).first()
-            if result_model == current_obj:
-                return
+            if result_count == 0:
+                continue
 
-        err_fields = str(filter_kwargs)
-        err_msg = f"The given fields are alredy existing with these values: {err_fields}."  # noqa
-        raise errors.DbModelUnqiueConstraintException(msg=err_msg)
+            if result_count == 1 and current_obj is not None:
+                result_model = self._model.query.filter_by(**filter_kwargs).first()  # noqa
+                if result_model == current_obj:
+                    continue
+
+            err_fields = str(filter_kwargs)
+            err_msg = f"The given fields are alredy existing with these values: {err_fields}."  # noqa
+            raise errors.DbModelUnqiueConstraintException(msg=err_msg)
 
     def _ckeck_unique_primarykey(self, unique_primarykeys: tuple[str]) -> None:
         if unique_primarykeys is None:
