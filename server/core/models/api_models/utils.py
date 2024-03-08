@@ -60,5 +60,5 @@ base_name_model_fields_send = {
 
 
 error_model = api.model("ErrorModel", {
-    "msg": fields.String
+    "message": fields.String
 })

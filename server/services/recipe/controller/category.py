@@ -15,6 +15,5 @@ category_controller = CategoryController(
     api_model_send=category_model_send,
     unique_columns=["name"],
     search_fields=["name"],
-    pagination_page_size=20,
     use_caching=True
 )

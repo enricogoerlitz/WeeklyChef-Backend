@@ -27,6 +27,9 @@ from server.core.models.db_models.recipe.ingredient import Ingredient
 from server.core.models.db_models.recipe.category import Category
 from server.logger import logger
 from server.core.models.db_models.user.user import User
+from server.core.models.db_models.recipe.collection import Collection
+from server.core.models.db_models.planner.planner import RecipePlanner
+from server.core.models.db_models.cart.cart import Cart
 
 
 class RecipeController(BaseCrudController):
@@ -274,6 +277,7 @@ recipe_controller = RecipeController(
         (Category, "category_id")
     ],
     read_only_fields=["creator_user_id"],
+    clear_cache_models=[Collection, RecipePlanner, Cart],
     use_caching=True  # CHANGE HERE
 )
 
@@ -289,7 +293,7 @@ recipe_ingredient_controller = RecipeIngredientController(
     read_only_fields=["recipe_id", "ingredient_id"],
     unique_columns_together=["recipe_id", "ingredient_id"],
     use_caching=True,
-    clear_cache_models=[Recipe]
+    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
 )
 
 
@@ -304,13 +308,13 @@ recipe_tag_controller = RecipeTagController(
     read_only_fields=["recipe_id", "tag_id"],
     unique_columns_together=["recipe_id", "tag_id"],
     use_caching=True,
-    clear_cache_models=[Recipe]
+    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
 )
 
 
 image_controller = ImageController(
     use_caching=True,
-    clear_cache_models=[Recipe]
+    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
 )
 
 
@@ -325,7 +329,7 @@ recipe_image_controller = RecipeImageController(
     read_only_fields=["recipe_id", "image_id"],
     unique_columns_together=["recipe_id", "image_id"],
     use_caching=True,
-    clear_cache_models=[Recipe]
+    clear_cache_models=[Recipe, Collection, RecipePlanner, Cart]
 )
 
 

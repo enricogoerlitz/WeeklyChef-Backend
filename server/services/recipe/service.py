@@ -59,10 +59,4 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_planner)
     api.add_namespace(ns_cart)
 
-    # add errorhandler
-    @app.errorhandler(500)
-    def internal_server_error(error):
-        err_msg = error if app.debug else "Unexpected internal error."
-        return {"error": err_msg}, 500
-
     return app
