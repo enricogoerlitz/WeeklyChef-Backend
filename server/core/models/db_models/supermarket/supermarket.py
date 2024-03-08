@@ -156,7 +156,7 @@ class SupermarketAreaIngredientComposite(db.Model):
     ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), primary_key=True)  # noqa
     ingredient_price = db.Column(db.Float(precision=2), nullable=False)
 
-    ingredient = db.relationship("Ingredient", lazy="joined")
+    ingredient = db.relationship("Ingredient", lazy="select")
 
     __table_args__ = (
         UniqueConstraint(

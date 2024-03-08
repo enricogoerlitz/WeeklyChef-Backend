@@ -29,9 +29,15 @@ class Cart(db.Model):
     __tablename__ = "cart"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), unique=True, nullable=False)
+    name = db.Column(db.String(30), nullable=False)
     owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+
+    items = db.relationship("CartItem", lazy="dynamic")
+
+    __table_args__ = (
+        UniqueConstraint("name", "owner_user_id", name="uq_cart_name_user"),
+    )
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
@@ -70,9 +76,11 @@ class CartItem(db.Model):
     cart_id = db.Column(db.Integer, db.ForeignKey("cart.id"), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), nullable=True)  # noqa can be NULL!!!
     ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), nullable=False)  # noqa
-    owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     quantity = db.Column(db.Integer, nullable=False)
     is_done = db.Column(db.Boolean, nullable=False)
+
+    recipe = db.relationship("Recipe", lazy="select")
+    ingredient = db.relationship("Ingredient", lazy="select")
 
     @validates("cart_id")
     def validate_cart_id(self, key: str, value: Any) -> str:
@@ -93,14 +101,6 @@ class CartItem(db.Model):
 
     @validates("ingredient_id")
     def validate_ingredient_id(self, key: str, value: Any) -> str:
-        ModelValidator.validate_integer(
-            fieldname=key,
-            value=value
-        )
-        return value
-
-    @validates("owner_user_id")
-    def validate_owner_user_id(self, key: str, value: Any) -> str:
         ModelValidator.validate_integer(
             fieldname=key,
             value=value
@@ -134,17 +134,14 @@ class UserSharedCart(db.Model):
     """
     __tablename__ = "cart_user"
 
-    rplanner_id = db.Column(db.Integer, db.ForeignKey("rplanner.id"), primary_key=True)  # noqa
+    cart_id = db.Column(db.Integer, db.ForeignKey("cart.id"), primary_key=True)  # noqa
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
-    can_edit = db.Column(db.Boolean, nullable=False)
-
-    planner = db.relationship("RecipePlanner", backref="cart_user", lazy="select")  # noqa
 
     __table_args__ = (
-        UniqueConstraint("rplanner_id", "user_id", name="uq_rplanner_user"),
+        UniqueConstraint("cart_id", "user_id", name="uq_rplanner_user"),
     )
 
-    @validates("rplanner_id")
+    @validates("cart_id")
     def validate_rplanner_id(self, key: str, value: Any) -> str:
         ModelValidator.validate_integer(
             fieldname=key,
@@ -155,14 +152,6 @@ class UserSharedCart(db.Model):
     @validates("user_id")
     def validate_user_id(self, key: str, value: Any) -> str:
         ModelValidator.validate_integer(
-            fieldname=key,
-            value=value
-        )
-        return value
-
-    @validates("can_edit")
-    def validate_can_edit(self, key: str, value: Any) -> str:
-        ModelValidator.validate_boolean(
             fieldname=key,
             value=value
         )
