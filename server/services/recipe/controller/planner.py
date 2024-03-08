@@ -25,6 +25,7 @@ class RecipePlannerController(BaseCrudController):
             unique_columns: list[str] = None,
             search_fields: list[str] = None,
             pagination_page_size: int = 20,
+            unique_columns_together: list[str] = None,
             use_caching: bool = True,
             clear_cache_models: list[Model] = None
     ) -> None:
@@ -35,6 +36,7 @@ class RecipePlannerController(BaseCrudController):
             unique_columns=unique_columns,
             search_fields=search_fields,
             pagination_page_size=pagination_page_size,
+            unique_columns_together=unique_columns_together,
             use_caching=use_caching,
             clear_cache_models=clear_cache_models
         )
@@ -63,6 +65,7 @@ recipe_planner_controller = RecipePlannerController(
     model=RecipePlanner,
     api_model=recipe_planner_model,
     api_model_send=recipe_planner_model_send,
+    unique_columns_together=["name", "owner_user_id"],
     use_caching=True
 )
 
@@ -71,6 +74,7 @@ recipe_planner_item_controller = BaseCrudController(
     model=RecipePlannerItem,
     api_model=recipe_planner_item_model,
     api_model_send=recipe_planner_item_model_send,
+    read_only_fields=["rplanner_id", "recipe_id"],
     use_caching=True,
     clear_cache_models=[RecipePlanner]
 )

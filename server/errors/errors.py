@@ -117,8 +117,14 @@ class DbModelUnqiueConstraintException(Exception):
     When a column with a given value is already existing.
     """
 
-    def __init__(self, filedname: str, value: Any) -> None:
-        err_msg = f"Field '{filedname}' with value '{str(value)}' is already existing."  # noqa
+    def __init__(
+            self,
+            *,
+            filedname: str = None,
+            value: Any = None,
+            msg: str = None
+    ) -> None:
+        err_msg = msg if msg else f"Field '{filedname}' with value '{str(value)}' is already existing."  # noqa
         super().__init__(err_msg)
 
 
@@ -183,3 +189,12 @@ class ImageNotFoundException(Exception):
     def __init__(self, id) -> None:
         err_msg = f"Image with id '{id}' was not found."
         super().__init__(err_msg)
+
+
+class ForeignkeyNotFoundException(Exception):
+    """
+    When foreignkey was not found.
+    """
+
+    def __init__(self, msg) -> None:
+        super().__init__(msg)

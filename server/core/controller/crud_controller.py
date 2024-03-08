@@ -82,10 +82,14 @@ class BaseCrudController(IController, AbstractRedisCache):
 
     def __init__(
             self,
+            *,
             model: Model,
             api_model: api.model,
             api_model_send: api.model = None,
             unique_columns: list[str] = None,
+            unique_columns_together: list[str] = None,  # TODO: POST + PATCH
+            foreign_key_columns: list[tuple[Model, Any]] = None,
+            read_only_fields: list[str] = None,
             search_fields: list[str] = None,
             pagination_page_size: int = 20,
             use_caching: bool = True,
@@ -103,6 +107,9 @@ class BaseCrudController(IController, AbstractRedisCache):
         self._unique_columns = unique_columns
         self._search_fields = search_fields
         self._pagination_page_size = pagination_page_size
+        self._read_only_fields = read_only_fields
+        self._foreign_key_columns = foreign_key_columns
+        self._unique_columns_together = unique_columns_together
 
     def handle_get(
             self,
@@ -181,10 +188,12 @@ class BaseCrudController(IController, AbstractRedisCache):
             unique_primarykey: Any = None
     ) -> Response:
         try:
-            obj = self._model.from_json(data, self._api_model_send)
+            self._check_unqiue_column(data)
+            self._check_unique_columns_together(data)
+            self._ckeck_unique_primarykey(unique_primarykey)
+            self._check_foreignkeys_existing(data)
 
-            self._check_unqiue_column(obj)
-            self._ckeck_unique_primarykey(unique_primarykeys=unique_primarykey)
+            obj = self._model.from_json(data, self._api_model_send)
 
             db.session.add(obj)
             db.session.commit()
@@ -197,6 +206,9 @@ class BaseCrudController(IController, AbstractRedisCache):
                 errors.DbModelSerializationException) as e:
             return http_errors.bad_request(e)
 
+        except errors.ForeignkeyNotFoundException as e:
+            return http_errors.not_found(e)
+
         except (errors.DbModelUnqiueConstraintException,
                 errors.DbModelAlreadyExistingException) as e:
             return http_errors.conflict(e)
@@ -207,6 +219,12 @@ class BaseCrudController(IController, AbstractRedisCache):
 
     def handle_patch(self, id: Any, data: dict) -> Response:
         try:
+            data = self._remove_read_only_fields(data)
+
+            self._check_unqiue_column(data)
+            self._check_unique_columns_together(data)
+            self._check_foreignkeys_existing(data)
+
             obj = self._find_object_by_id(id)
 
             for key, value in data.items():
@@ -225,8 +243,12 @@ class BaseCrudController(IController, AbstractRedisCache):
         except errors.DbModelValidationException as e:
             return http_errors.bad_request(e)
 
-        except errors.DbModelNotFoundException as e:
+        except (errors.DbModelNotFoundException,
+                errors.ForeignkeyNotFoundException) as e:
             return http_errors.not_found(e)
+
+        except errors.DbModelUnqiueConstraintException as e:
+            return http_errors.conflict(e)
 
         except Exception as e:
             logger.error(e)
@@ -250,19 +272,55 @@ class BaseCrudController(IController, AbstractRedisCache):
             logger.error(e)
             return http_errors.UNEXPECTED_ERROR_RESULT
 
-    def _check_unqiue_column(self, obj: Model) -> None:
+    def _check_foreignkeys_existing(self, data: dict) -> None:
+        # checks foreignkey is existing
+        if self._foreign_key_columns is None:
+            return
+
+        model: Model
+        for model, field in self._foreign_key_columns:
+            if field not in data.keys():
+                continue
+
+            id = data[field]
+            obj = model.query.get(id)
+
+            if obj is None:
+                err_msg = f"Foreignkey '{field}={id}' is not existing for model '{model.__name__}'."  # noqa
+                raise errors.ForeignkeyNotFoundException(err_msg)
+
+    def _check_unqiue_column(self, data: dict) -> None:
         if self._unique_columns is None:
             return
 
         for column in self._unique_columns:
-            obj_attr_value = getattr(obj, column)
-            filter_kwargs = {column: obj_attr_value}
+            value = data.get(column)
+            filter_kwargs = {column: value}
             result_count = self._model.query.filter_by(**filter_kwargs).count()
+
             if result_count > 0:
                 raise errors.DbModelUnqiueConstraintException(
                     filedname=column,
-                    value=obj_attr_value
+                    value=value
                 )
+
+    def _check_unique_columns_together(self, data: dict) -> None:
+        if self._unique_columns_together is None:
+            return
+
+        filter_kwargs = {}
+        for field in self._unique_columns_together:
+            value = data.get(field, None)
+            filter_kwargs |= {field: value}
+
+        result_count = self._model.query.filter_by(**filter_kwargs).count()
+
+        if result_count == 0:
+            return
+
+        err_fields = str(filter_kwargs)
+        err_msg = f"The given fields are alredy existing with these values: {err_fields}."  # noqa
+        raise errors.DbModelUnqiueConstraintException(msg=err_msg)
 
     def _ckeck_unique_primarykey(self, unique_primarykeys: tuple[str]) -> None:
         if unique_primarykeys is None:
@@ -369,6 +427,16 @@ class BaseCrudController(IController, AbstractRedisCache):
 
         if int(page_size) < 1:
             raise errors.PaginationPageSizeException(page_size)
+
+    def _remove_read_only_fields(self, data: dict) -> dict:
+        if self._read_only_fields is None:
+            return data
+
+        for field in self._read_only_fields:
+            if field in data:
+                del data[field]
+
+        return data
 
     def _validate_search_type(
             self,

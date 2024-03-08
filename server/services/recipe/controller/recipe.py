@@ -202,7 +202,7 @@ class RecipeRatingController(BaseCrudController):
             use_redis: bool = True
     ) -> None:
         super().__init__(
-            model,
+            model=model,
             api_model=api_model,
             api_model_send=api_model_send,
             unique_columns=unique_columns,

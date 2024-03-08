@@ -25,18 +25,20 @@ class SupermarketAreaController(BaseCrudController):
             unique_columns: list[str] = None,
             search_fields: list[str] = None,
             pagination_page_size: int = 20,
+            foreign_key_columns: list[tuple[Model, typing.Any]] = None,
             use_caching: bool = True,
             clear_cache_models: list[Model] = None
     ) -> None:
         super().__init__(
-            model,
-            api_model,
-            api_model_send,
-            unique_columns,
-            search_fields,
-            pagination_page_size,
-            use_caching,
-            clear_cache_models
+            model=model,
+            api_model=api_model,
+            api_model_send=api_model_send,
+            unique_columns=unique_columns,
+            search_fields=search_fields,
+            pagination_page_size=pagination_page_size,
+            foreign_key_columns=foreign_key_columns,
+            use_caching=use_caching,
+            clear_cache_models=clear_cache_models
         )
 
     def handle_get_list(
@@ -89,6 +91,9 @@ supermarket_area_controller = SupermarketAreaController(
     model=SupermarketArea,
     api_model=supermarket_area_model,
     api_model_send=supermarket_area_model_send,
+    foreign_key_columns=[
+        (Supermarket, "supermarket_id")
+    ],
     use_caching=True,
     clear_cache_models=[Supermarket]
 )
