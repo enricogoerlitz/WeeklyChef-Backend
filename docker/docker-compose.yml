@@ -2,10 +2,10 @@ version: "3"
 name: "weeklychef-backend"
 
 services:
-  database:
+  database-recipe-service:
     build:
       context: .
-      dockerfile: dockerfile.database
+      dockerfile: dockerfile.db.recipe
     ports:
       - "3307:3306"
     environment:
@@ -14,7 +14,21 @@ services:
       MYSQL_USER: serviceuser
       MYSQL_PASSWORD: devpassword
     volumes:
-      - mysql-data:/Users/enricogoerlitz/mysql
+      - db-recipe-data:/Users/enricogoerlitz/weeklychef/mysql
+
+  database-auth-service:
+    build:
+      context: .
+      dockerfile: dockerfile.db.auth
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: dbrootpassword
+      MYSQL_DATABASE: weeklychef
+      MYSQL_USER: serviceuser
+      MYSQL_PASSWORD: devpassword
+    volumes:
+      - db-auth-data:/Users/enricogoerlitz/weeklychef/mysql
 
   redis:
     build:
@@ -33,7 +47,7 @@ services:
       - "5001:5001"
     environment:
       DEBUG: true
-      SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database:3306/weeklychef"
+      SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database-auth-service:3306/weeklychef"
       SQLALCHEMY_TRACK_MODIFICATIONS: false
       JWT_SECRET_KEY: "f1ae9b76935d89426cec6993698e865c1a12574ac9deb393dcdbc8f21eb76998"
       JWT_ACCESS_TOKEN_EXPIRES_MINUTES: 43200
@@ -46,7 +60,7 @@ services:
     volumes:
       - /Users/enricogoerlitz/LDesktop/Dev-Projects/Web-Development/WeeklyChef-Backend/server:/server
     depends_on:
-      - database
+      - database-auth-service
       - redis
 
   recipe-service:
@@ -57,7 +71,7 @@ services:
       - "5002:5002"
     environment:
       DEBUG: true
-      SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database:3306/weeklychef"
+      SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database-recipe-service:3306/weeklychef"
       SQLALCHEMY_TRACK_MODIFICATIONS: false
       JWT_SECRET_KEY: "f1ae9b76935d89426cec6993698e865c1a12574ac9deb393dcdbc8f21eb76998"
       JWT_ACCESS_TOKEN_EXPIRES_MINUTES: 43200
@@ -69,10 +83,11 @@ services:
       REDIS_PORT: 6379
     volumes:
       - /Users/enricogoerlitz/LDesktop/Dev-Projects/Web-Development/WeeklyChef-Backend/server:/server
-      - recipe-images:/images
+      - recipe-images:/Users/enricogoerlitz/weeklychef/images
     depends_on:
       - auth-service
 
 volumes:
-  mysql-data:
+  db-recipe-data:
+  db-auth-data:
   recipe-images:

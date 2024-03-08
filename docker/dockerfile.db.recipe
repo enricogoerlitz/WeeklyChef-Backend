@@ -1,0 +1,10 @@
+FROM mysql:latest
+
+ENV MYSQL_ROOT_PASSWORD=dbrootpassword
+ENV MYSQL_DATABASE=weeklychef
+ENV MYSQL_USER=serviceuser
+ENV MYSQL_PASSWORD=devpassword
+
+EXPOSE 3306
+
+VOLUME /Users/enricogoerlitz/mysql
