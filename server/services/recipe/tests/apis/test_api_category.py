@@ -132,9 +132,9 @@ def test_category_get_list_authorization(
 
         # when
         response_without = client.get(api_route)
-        response_std = client.get(api_route, headers=std_headers)
         response_staff = client.get(api_route, headers=staff_headers)
         response_admin = client.get(api_route, headers=admin_headers)
+        response_std = client.get(api_route, headers=std_headers)
 
         result_data_std = json.loads(response_std.data)
         result_data_staff = json.loads(response_staff.data)
@@ -241,13 +241,13 @@ def test_category_post_invalid_payload(
         assert response_name_to_short.status_code == 400
         assert response_name_to_long.status_code == 400
 
-        assert "msg" in response_name_is_null_data
-        assert "msg" in response_name_to_short_data
-        assert "msg" in response_name_to_long_data
+        assert "message" in response_name_is_null_data
+        assert "message" in response_name_to_short_data
+        assert "message" in response_name_to_long_data
 
-        assert "name" in response_name_is_null_data["msg"]
-        assert "name" in response_name_to_short_data["msg"]
-        assert "name" in response_name_to_long_data["msg"]
+        assert "name" in response_name_is_null_data["message"]
+        assert "name" in response_name_to_short_data["message"]
+        assert "name" in response_name_to_long_data["message"]
 
 
 # TEST UPDATE
@@ -357,11 +357,11 @@ def test_category_put_invalid_payload(
         assert response_name_to_short.status_code == 400
         assert response_name_to_long.status_code == 400
 
-        assert "msg" in response_name_to_short_data
-        assert "msg" in response_name_to_long_data
+        assert "message" in response_name_to_short_data
+        assert "message" in response_name_to_long_data
 
-        assert "name" in response_name_to_short_data["msg"]
-        assert "name" in response_name_to_long_data["msg"]
+        assert "name" in response_name_to_short_data["message"]
+        assert "name" in response_name_to_long_data["message"]
 
 
 # TEST DELETE

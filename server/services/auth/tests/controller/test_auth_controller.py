@@ -88,9 +88,9 @@ def test_handle_register_missing_data(app: Flask):
         assert status_code_missing_email == 400
         assert status_code_missing_password == 400
 
-        assert "msg" in result_data_missing_username
-        assert "msg" in result_data_missing_email
-        assert "msg" in result_data_missing_password
+        assert "message" in result_data_missing_username
+        assert "message" in result_data_missing_email
+        assert "message" in result_data_missing_password
 
 
 def test_handle_register_user_already_existing(app: Flask):
@@ -121,8 +121,8 @@ def test_handle_register_user_already_existing(app: Flask):
         assert status_code_username_existing == 409
         assert status_code_email_existing == 409
 
-        assert "msg" in result_data_username_existing
-        assert "msg" in result_data_email_existing
+        assert "message" in result_data_username_existing
+        assert "message" in result_data_email_existing
 
 
 def test_handle_login(app: Flask):
@@ -187,7 +187,7 @@ def test_handle_login_missing_username_or_email(app: Flask):
         result_data, status_code = auth_controller.handle_login(data)
 
         expected_data = {
-            "msg": "The field 'username or email' is required but was null."
+            "message": "The field 'username or email' is required but was null."
         }
 
         # then
@@ -219,7 +219,7 @@ def test_handle_login_invalid_credentials(app: Flask):
              data_wrong_password)
 
         expected_data = {
-            "msg": "User credentials are invalid."
+            "message": "User credentials are invalid."
         }
 
         # then

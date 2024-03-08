@@ -44,7 +44,7 @@ class AbstractRedisCache:
             self,
             model: Model,
             use_caching: bool,
-            clear_cache_models: list[Model]
+            clear_cache_models: list[Model] = None
     ) -> None:
         self._main_model = model
         self._use_caching = use_caching

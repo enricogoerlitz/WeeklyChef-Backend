@@ -93,8 +93,8 @@ def test_register_post_user_already_existing(
         assert response_username_existing.status_code == 409
         assert response_email_existing.status_code == 409
 
-        assert "msg" in result_data_username_existing
-        assert "msg" in result_data_email_existing
+        assert "message" in result_data_username_existing
+        assert "message" in result_data_email_existing
 
 
 def test_register_post_missing_data(
@@ -133,9 +133,9 @@ def test_register_post_missing_data(
         assert response_missing_email.status_code == 400
         assert response_missing_password.status_code == 400
 
-        assert "msg" in result_data_missing_username
-        assert "msg" in result_data_missing_email
-        assert "msg" in result_data_missing_password
+        assert "message" in result_data_missing_username
+        assert "message" in result_data_missing_email
+        assert "message" in result_data_missing_password
 
 
 # TEST LOGIN
@@ -214,7 +214,7 @@ def test_login_post_missing_username_or_email(
 
         # then
         assert response.status_code == 400
-        assert "msg" in result_data
+        assert "message" in result_data
 
 
 def test_login_post_invalid_credentials(
@@ -248,5 +248,5 @@ def test_login_post_invalid_credentials(
         assert response_wrong_username.status_code == 401
         assert response_wrong_password.status_code == 401
 
-        assert result_data_wrong_username["msg"] == "User credentials are invalid."  # noqa
-        assert result_data_wrong_password["msg"] == "User credentials are invalid."  # noqa
+        assert result_data_wrong_username["message"] == "User credentials are invalid."  # noqa
+        assert result_data_wrong_password["message"] == "User credentials are invalid."  # noqa
