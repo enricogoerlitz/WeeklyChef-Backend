@@ -7,7 +7,7 @@ recipe_planner_item_model = api.model("RecipePlannerItemModel", {
     "id": fields.Integer,
     "rplanner_id": fields.Integer,
     "recipe_id": fields.Integer,
-    "date": fields.DateTime,
+    "date": fields.Date,
     "label": fields.String,
     "order_number": fields.Integer,
     "planned_recipe_person_count": fields.Integer,
@@ -18,7 +18,7 @@ recipe_planner_item_model = api.model("RecipePlannerItemModel", {
 recipe_planner_item_model_send = api.model("RecipePlannerItemModelSend", {
     "rplanner_id": fields.Integer,
     "recipe_id": fields.Integer,
-    "date": fields.DateTime,
+    "date": fields.Date,
     "label": fields.String,
     "order_number": fields.Integer,
     "planned_recipe_person_count": fields.Integer,

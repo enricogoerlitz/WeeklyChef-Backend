@@ -84,7 +84,7 @@ class RecipePlannerItem(db.Model):
     id = db.Column(db.Integer,  primary_key=True)
     rplanner_id = db.Column(db.Integer, db.ForeignKey("rplanner.id"), nullable=False)  # noqa
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), nullable=False)  # noqa
-    date = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.Date, nullable=False)
     label = db.Column(db.String(20), nullable=False, default="")
     order_number = db.Column(db.Integer, nullable=False)
     planned_recipe_person_count = db.Column(db.Integer, nullable=False)
@@ -124,7 +124,7 @@ class RecipePlannerItem(db.Model):
         )
 
         value: datetime = parser.parse(value)
-        value = value.replace(hour=0, minute=0, second=0, microsecond=0)
+        value = value.replace(hour=0, minute=0, second=0, microsecond=0).date()
 
         return value
 

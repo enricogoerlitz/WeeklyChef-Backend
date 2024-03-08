@@ -1,3 +1,7 @@
+from typing import Any
+from datetime import date
+from dateutil import parser
+
 from flask import Response
 
 from server.core.controller.crud_controller import BaseCrudController
@@ -41,7 +45,32 @@ class RecipePlannerController(BaseCrudController):
 
 
 class RecipePlannerItemController(BaseCrudController):
-    pass
+    _model: RecipePlannerItem
+
+    def handle_post(
+            self,
+            data: dict,
+            unique_primarykey: Any = None
+    ) -> Response:
+        return super().handle_post(
+            data=self._transform_date(data),
+            unique_primarykey=unique_primarykey
+        )
+
+    def handle_patch(self, id: Any, data: dict) -> Response:
+        return super().handle_patch(
+            id=id,
+            data=self._transform_date(data)
+        )
+
+    def _transform_date(self, data: dict) -> dict:
+        try:
+            date_value: date = parser.parse(data["date"]).date()
+            data["date"] = date_value.strftime("%Y-%m-%d")
+            return data
+        except Exception:
+            # if date is invalid, the validation will executed in super()
+            return data
 
 
 class UserSharedRecipePlannerController(BaseCrudController):
@@ -72,7 +101,7 @@ recipe_planner_item_controller = RecipePlannerItemController(
     ],
     unique_columns_together=[
         "rplanner_id",
-        "date",  # TODO: date auf 0 setzen (mm,ss etc)
+        "date",
         "order_number"
     ],
     use_caching=True,
