@@ -8,7 +8,6 @@ from server.core.models.api_models.recipe import (
     collection_model, collection_model_send,
     collection_recipe_model, user_shared_collection_model,
     user_shared_collection_model_send)
-from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.recipe import Recipe
 from server.errors import http_errors
 from server.logger import logger
@@ -55,9 +54,9 @@ collection_controller = CollectionController(
         "name",
         "owner_user_id"
     ],
-    foreign_key_columns=[
-        (User, "owner_user_id")
-    ],
+    # foreign_key_columns=[
+    #     (User, "owner_user_id")
+    # ],
     read_only_fields=["owner_user_id"],
     use_caching=True
 )
@@ -84,8 +83,8 @@ user_shared_collection_controller = UserSharedCollectionController(
     api_model=user_shared_collection_model,
     api_model_send=user_shared_collection_model_send,
     foreign_key_columns=[
-        (Collection, "collection_id"),
-        (User, "user_id")
+        (Collection, "collection_id")
+        # (User, "user_id")
     ],
     unique_columns_together=[
         "collection_id",

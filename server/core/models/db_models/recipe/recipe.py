@@ -29,7 +29,8 @@ class Recipe(db.Model):
     difficulty = db.Column(db.String(15), nullable=False)
     search_description = db.Column(db.String(75), nullable=False)
 
-    creator_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
+    creator_user_id = db.Column(db.Integer, nullable=False)  # noqa
+    # creator_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)  # noqa
 
     category = db.relationship("Category", backref="recipe", lazy="select")
@@ -213,7 +214,8 @@ class RecipeTagComposite(db.Model):
 class RecipeRating(db.Model):
     __tablename__ = "recipe_rating"
 
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
+    user_id = db.Column(db.Integer, primary_key=True)  # noqa
+    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)  # noqa
     rating = db.Column(db.Float(precision=2), nullable=False)
 

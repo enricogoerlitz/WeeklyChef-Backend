@@ -25,7 +25,6 @@ from server.core.models.db_models.recipe.tag import Tag
 from server.core.models.db_models.recipe.ingredient import Ingredient
 from server.core.models.db_models.recipe.category import Category
 from server.logger import logger
-from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.collection import Collection
 from server.core.models.db_models.planner.planner import RecipePlanner
 from server.core.models.db_models.cart.cart import Cart
@@ -267,7 +266,7 @@ recipe_controller = RecipeController(
         "preperation_description"
     ],
     foreign_key_columns=[
-        (User, "creator_user_id"),
+        # (User, "creator_user_id"),
         (Category, "category_id")
     ],
     read_only_fields=["creator_user_id"],
@@ -326,7 +325,7 @@ recipe_rating_controller = RecipeRatingController(
     api_model=recipe_rating_model,
     api_model_send=recipe_rating_model_send,
     foreign_key_columns=[
-        (User, "user_id"),
+        # (User, "user_id"),
         (Recipe, "recipe_id")
     ],
     read_only_fields=["user_id", "recipe_id"],

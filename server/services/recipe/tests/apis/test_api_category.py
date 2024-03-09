@@ -3,7 +3,7 @@ import json
 from flask import Flask, testing
 
 from server.db import db
-from server.core.models.db_models import Category
+from server.core.models.db_models.recipe import Category
 
 
 ROUTE = "/api/v1/category"

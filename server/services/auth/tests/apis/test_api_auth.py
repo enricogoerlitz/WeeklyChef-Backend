@@ -4,7 +4,7 @@ from flask import Flask, testing
 from flask_jwt_extended.utils import decode_token
 
 from server.db import db
-from server.core.models.db_models import User
+from server.core.models.db_models.user import User
 
 
 ROUTE = "/api/v1/auth"

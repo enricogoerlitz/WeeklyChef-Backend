@@ -14,7 +14,6 @@ from server.core.models.api_models.planner import (
     recipe_planner_model_send,
     user_shared_recipe_planner_model,
     user_shared_recipe_planner_model_send)
-from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.recipe import Recipe
 from server.errors import http_errors
 from server.logger import logger
@@ -82,9 +81,9 @@ recipe_planner_controller = RecipePlannerController(
     api_model=recipe_planner_model,
     api_model_send=recipe_planner_model_send,
     unique_columns_together=["name", "owner_user_id"],
-    foreign_key_columns=[
-        (User, "owner_user_id")
-    ],
+    # foreign_key_columns=[
+    #     (User, "owner_user_id")
+    # ],
     read_only_fields=["owner_user_id"],
     use_caching=True
 )
@@ -113,8 +112,8 @@ user_shared_recipe_planner_controller = UserSharedRecipePlannerController(
     api_model=user_shared_recipe_planner_model,
     api_model_send=user_shared_recipe_planner_model_send,
     foreign_key_columns=[
-        (RecipePlanner, "rplanner_id"),
-        (User, "user_id")
+        (RecipePlanner, "rplanner_id")
+        # (User, "user_id")
     ],
     read_only_fields=["rplanner_id", "user_id"],
     unique_columns_together=["rplanner_id", "user_id"],

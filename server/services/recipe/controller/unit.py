@@ -1,5 +1,5 @@
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.db_models import Unit
+from server.core.models.db_models.recipe import Unit
 from server.core.models.api_models.recipe import (
     unit_model, unit_model_send,
 )

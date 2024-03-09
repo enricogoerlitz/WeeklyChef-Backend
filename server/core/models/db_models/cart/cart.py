@@ -30,7 +30,8 @@ class Cart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
-    owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
+    owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
+    # owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     items = db.relationship("CartItem", lazy="dynamic")
@@ -135,7 +136,8 @@ class UserSharedCart(db.Model):
     __tablename__ = "cart_user"
 
     cart_id = db.Column(db.Integer, db.ForeignKey("cart.id"), primary_key=True)  # noqa
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
+    user_id = db.Column(db.Integer, primary_key=True)  # noqa
+    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
 
     __table_args__ = (
         UniqueConstraint("cart_id", "user_id", name="uq_rplanner_user"),

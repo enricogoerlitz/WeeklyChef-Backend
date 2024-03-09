@@ -20,7 +20,8 @@ class Collection(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
+    owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
+    # owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     is_default = db.Column(db.Boolean, nullable=False)
 
     recipes = db.relationship(
@@ -94,7 +95,8 @@ class UserSharedCollection(db.Model):
     __tablename__ = "collection_user"
 
     collection_id = db.Column(db.Integer, db.ForeignKey("collection.id"), primary_key=True)  # noqa
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
+    user_id = db.Column(db.Integer, primary_key=True)  # noqa
+    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
     can_edit = db.Column(db.Boolean, nullable=False)
 
     __table_args__ = (

@@ -8,8 +8,7 @@ from flask_cors import CORS
 from server.db import db
 from server.api import api
 from server.utils.jwt import jwt_manager
-from server.utils.initialize import initialize_database
-from server.core.models.db_models import *  # noqa - import all models for table initfrom server.api import api
+from server.core.models.db_models import (user, recipe, planner, cart, supermarket)  # noqa - import all models for table initfrom server.api import api
 from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
 from server.services.auth.apis.auth import ns as ns_auth
 from server.services.auth.apis.user import ns as ns_user
@@ -19,6 +18,9 @@ from server.services.recipe.apis.category import ns as ns_category
 from server.services.recipe.apis.unit import ns as ns_unit
 from server.services.recipe.apis.tag import ns as ns_tag
 from server.services.recipe.apis.collection import ns as ns_collection
+from server.services.recipe.apis.supermarket import ns as ns_supermarket
+from server.services.recipe.apis.planner import ns as ns_planner
+from server.services.recipe.apis.cart import ns as ns_cart
 
 
 load_dotenv()
@@ -56,6 +58,9 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_category)
     api.add_namespace(ns_unit)
     api.add_namespace(ns_tag)
+    api.add_namespace(ns_supermarket)
+    api.add_namespace(ns_planner)
+    api.add_namespace(ns_cart)
 
     # add errorhandler
     @app.errorhandler(500)
@@ -67,8 +72,5 @@ def create_app(database_uri: str = None) -> Flask:
     with app.app_context():
         db.drop_all()
         db.create_all()
-
-    # initialize db with starting data
-    initialize_database(app=app)
 
     return app

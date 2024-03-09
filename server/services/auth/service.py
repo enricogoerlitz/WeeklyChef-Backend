@@ -9,8 +9,8 @@ from flask_cors import CORS
 from server.db import db
 from server.api import api
 from server.utils.jwt import jwt_manager
-from server.utils.initialize import initialize_database
-from server.core.models.db_models import *  # noqa - import all models for table initfrom server.api import api
+from server.utils.initialize.user_service import initialize_dummy_database
+from server.core.models.db_models import (user)  # noqa - import all models for table initfrom server.api import api
 from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
 from server.services.auth.apis.auth import ns as ns_auth
 from server.services.auth.apis.user import ns as ns_user
@@ -49,18 +49,13 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_auth)
     api.add_namespace(ns_user)
 
-    # add errorhandler
-    @app.errorhandler(500)
-    def internal_server_error(error):
-        err_msg = error if app.debug else "Unexpected internal error."
-        return {"error": err_msg}, 500
+    if os.environ.get("DEBUG", False):
+        # initialize db tables
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
 
-    # initialize db tables
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
-
-    # initialize db with starting data
-    initialize_database(app=app)
+        # initialize db with starting data
+        initialize_dummy_database(app)
 
     return app

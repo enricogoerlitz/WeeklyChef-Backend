@@ -9,7 +9,6 @@ from server.core.models.api_models.supermarket import (
     supermarket_area_ingredinet_model_send, supermarket_area_model,
     supermarket_area_model_send,
     supermarket_model, supermarket_model_send, supermarket_user_edit_model)
-from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.ingredient import Ingredient
 from server.errors import http_errors
 from server.logger import logger
@@ -52,9 +51,9 @@ supermarket_controller = SupermarketController(
     model=Supermarket,
     api_model=supermarket_model,
     api_model_send=supermarket_model_send,
-    foreign_key_columns=[
-        (User, "owner_user_id")
-    ],
+    # foreign_key_columns=[
+    #     (User, "owner_user_id")
+    # ],
     read_only_fields=["owner_user_id"],
     unique_columns_together=["name", "street"],
     use_caching=True
@@ -101,7 +100,7 @@ user_shared_edit_supermarket_controller = UserSharedEditSupermarketController(
     api_model=supermarket_user_edit_model,
     api_model_send=supermarket_user_edit_model,
     foreign_key_columns=[
-        (Supermarket, "supermarket_id"),
-        (User, "user_id")
+        (Supermarket, "supermarket_id")
+        # (User, "user_id")
     ]
 )

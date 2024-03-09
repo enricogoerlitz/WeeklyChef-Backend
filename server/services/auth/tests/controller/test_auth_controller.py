@@ -3,7 +3,7 @@ from flask_jwt_extended.utils import decode_token
 
 from server.db import db
 from server.services.auth.controller import auth_controller
-from server.core.models.db_models import User
+from server.core.models.db_models.user import User
 from server.core.enums import roles
 
 

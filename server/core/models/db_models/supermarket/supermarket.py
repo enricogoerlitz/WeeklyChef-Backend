@@ -23,7 +23,8 @@ class Supermarket(db.Model):
     street = db.Column(db.String(100), nullable=False)
     postcode = db.Column(db.String(15), nullable=False)
     district = db.Column(db.String(30), nullable=False)
-    owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
+    owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
+    # owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
 
     areas = db.relationship(
         "SupermarketArea",
@@ -199,7 +200,8 @@ class UserSharedEditSupermarket(db.Model):
     __tablename__ = "supermarket_edit_user"
 
     supermarket_id = db.Column(db.Integer, db.ForeignKey("supermarket.id"), primary_key=True)  # noqa
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
+    user_id = db.Column(db.Integer, primary_key=True)  # noqa
+    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
 
     __table_args__ = (
         UniqueConstraint(

@@ -7,7 +7,6 @@ from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.api_models.cart import (
     cart_item_model, cart_item_model_send, cart_model,
     cart_model_send, user_shared_cart_model)
-from server.core.models.db_models.user.user import User
 from server.core.models.db_models.recipe.recipe import Recipe
 from server.core.models.db_models.recipe.ingredient import Ingredient
 from server.errors import http_errors
@@ -50,9 +49,9 @@ cart_controller = CartController(
     model=Cart,
     api_model=cart_model,
     api_model_send=cart_model_send,
-    foreign_key_columns=[
-        (User, "owner_user_id")
-    ],
+    # foreign_key_columns=[
+    #     (User, "owner_user_id")
+    # ],
     read_only_fields=["owner_user_id"],
     unique_columns_together=["name", "owner_user_id"],
     use_caching=True
@@ -82,8 +81,8 @@ user_shared_cart_controller = UserSharedCartController(
     api_model=user_shared_cart_model,
     api_model_send=user_shared_cart_model,
     foreign_key_columns=[
-        (Cart, "cart_id"),
-        (User, "user_id")
+        (Cart, "cart_id")
+        # (User, "user_id")
     ],
     read_only_fields=["cart_id", "user_id"],
     unique_columns_together=["cart_id", "user_id"],

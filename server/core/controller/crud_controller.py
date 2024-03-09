@@ -220,8 +220,8 @@ class BaseCrudController(IController, AbstractRedisCache):
     def handle_patch(self, id: Any, data: dict) -> Response:
         try:
             obj = self._find_object_by_id(id)
-            data = self._remove_read_only_fields(data)
 
+            self._check_read_only_fields(data)
             self._check_foreignkeys_existing(data)
             self._check_unqiue_column(data)
             self._check_unique_columns_together(
@@ -242,7 +242,8 @@ class BaseCrudController(IController, AbstractRedisCache):
 
             return marshal(obj, self._api_model), 200
 
-        except errors.DbModelValidationException as e:
+        except (errors.DbModelValidationException,
+                errors.ReadOnlyFieldInPayloadException) as e:
             return http_errors.bad_request(e)
 
         except (errors.DbModelNotFoundException,
@@ -444,15 +445,13 @@ class BaseCrudController(IController, AbstractRedisCache):
         if int(page_size) < 1:
             raise errors.PaginationPageSizeException(page_size)
 
-    def _remove_read_only_fields(self, data: dict) -> dict:
+    def _check_read_only_fields(self, data: dict) -> None:
         if self._read_only_fields is None:
-            return data
+            return
 
         for field in self._read_only_fields:
             if field in data:
-                del data[field]
-
-        return data
+                raise errors.ReadOnlyFieldInPayloadException(field)
 
     def _validate_search_type(
             self,

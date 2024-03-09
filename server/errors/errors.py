@@ -198,3 +198,13 @@ class ForeignkeyNotFoundException(Exception):
 
     def __init__(self, msg) -> None:
         super().__init__(msg)
+
+
+class ReadOnlyFieldInPayloadException(Exception):
+    """
+    When foreignkey was not found.
+    """
+
+    def __init__(self, fieldname) -> None:
+        err_msg = f"The field '{fieldname}' is read only. Please remove this field from payload."  # noqa
+        super().__init__(err_msg)

@@ -3,59 +3,22 @@ import random
 from flask import Flask
 from sqlalchemy import or_
 
-from server.core.models.db_models import (
-    Role, User, Unit, Category, Ingredient,
-    Recipe, RecipeIngredient, RecipeTagComposite, Tag
-)
 from server.db import db
+from server.core.models.db_models.recipe.unit import Unit
+from server.core.models.db_models.recipe.category import Category
+from server.core.models.db_models.recipe.tag import Tag
+from server.core.models.db_models.recipe.ingredient import Ingredient
+from server.core.models.db_models.recipe.recipe import (
+    Recipe, RecipeIngredient, RecipeTagComposite
+)
 
 
-def initialize_database(app: Flask) -> None:
+def initialize_dummy_database(app: Flask) -> None:
     """Create standard user, roles, ..."""
     with app.app_context():
         # >>> AUTH / USER INIT
         # ROLES
-        role_names = ["standard", "admin", "staff"]
-        init_roles = [Role(name=name) for name in role_names]
-        init_roles = [
-            init_role
-            for init_role in init_roles
-            if not init_role.query.filter_by(name=init_role.name).first()
-        ]
-
-        if len(init_roles) > 0:
-            db.session.add_all(init_roles)
-
-        admin_role = Role.query.filter_by(name="admin").first()
-        staff_role = Role.query.filter_by(name="staff").first()
-        std_role = Role.query.filter_by(name="standard").first()
-
-        all_roles = [admin_role, staff_role, std_role]
-        staff_roles = [staff_role, std_role]
-
-        # USERS
-        superuser = User(
-            email="root.email@gmail.com",
-            username="CoolerTeddy",
-            password="password"
-        )
-        staff_user = User(
-            email="root2.email@gmail.com",
-            username="CoolerTeddy2",
-            password="password"
-        )
-        std_user = User(
-            email="root3.email@gmail.com",
-            username="CoolerTeddy3",
-            password="password"
-        )
-        superuser.roles.extend(all_roles)
-        staff_user.roles.extend(staff_roles)
-        std_user.roles.append(std_role)
-
-        init_users = [superuser, staff_user, std_user]
-
-        db.session.add_all(init_users)
+        USER_ID = 1
 
         # >>> RECIPE INIT
         # UNITS
@@ -186,16 +149,16 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
         # RECIPE
         print("INIT DB HERE")
         recipes = [
-                Recipe(
+            Recipe(
                 name=f"Spaghetti Carbonara Klassisch {i}",
                 person_count=2,
                 preperation_description=prep_description,
                 preperation_time_minutes=20,
                 difficulty="fortgeschritten",
                 search_description="spaghetti carbonara nudeln klassisch",
-                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                creator_user_id=USER_ID,  # noqa
                 category_id=Category.query.filter_by(name="Hauptspeise").first().id,  # noqa
-            ) for i in range(1, 10_000)
+            ) for i in range(1, 1_000)
         ]
         db.session.add_all(recipes)
         print("INIT DB DONE")
@@ -208,7 +171,7 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
                 preperation_time_minutes=20,
                 difficulty="fortgeschritten",
                 search_description="spaghetti carbonara nudeln klassisch",
-                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                creator_user_id=USER_ID,  # noqa
                 category_id=Category.query.filter_by(name="Hauptspeise").first().id,  # noqa
             ),
             Recipe(
@@ -218,7 +181,7 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
                 preperation_time_minutes=20,
                 difficulty="normal",
                 search_description="fleisch bäll chen",
-                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                creator_user_id=USER_ID,  # noqa
                 category_id=Category.query.filter_by(name="Frühstück").first().id,  # noqa
             ),
             Recipe(
@@ -228,7 +191,7 @@ zusätzlichem geriebenen Parmesan und frischem gehackten Petersilie garnieren.
                 preperation_time_minutes=20,
                 difficulty="einfach",
                 search_description="basilikum pesto",
-                creator_user_id=User.query.filter_by(username="CoolerTeddy").first().id,  # noqa
+                creator_user_id=USER_ID,  # noqa
                 category_id=Category.query.filter_by(name="Beilage").first().id,  # noqa
             )
         ]

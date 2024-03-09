@@ -9,7 +9,8 @@ from flask_cors import CORS
 from server.db import db
 from server.api import api
 from server.utils.jwt import jwt_manager
-from server.core.models.db_models import *  # noqa - import all models for table initfrom server.api import api
+from server.utils.initialize.recipe_service import initialize_dummy_database
+from server.core.models.db_models import (cart, recipe, planner, supermarket)  # noqa - import all models for table initfrom server.api import api
 from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
 from server.services.recipe.apis.recipe import ns as ns_recipe
 from server.services.recipe.apis.ingredient import ns as ns_ingredient
@@ -58,5 +59,13 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_supermarket)
     api.add_namespace(ns_planner)
     api.add_namespace(ns_cart)
+
+    if os.environ.get("DEBUG", False):
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+
+        # initialize db with starting data
+        initialize_dummy_database(app)
 
     return app
