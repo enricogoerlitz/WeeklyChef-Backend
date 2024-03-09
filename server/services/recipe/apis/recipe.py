@@ -281,7 +281,6 @@ class RecipeRatingAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeRating"))        # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
-    # TODO: @IsRatingCreator
     def patch(self, id):
         user_id = jwt.get_user_id()
 
@@ -296,7 +295,6 @@ class RecipeRatingAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)
     @jwt_required()
-    # TODO: @IsRatingCreator
     def delete(self, id):
         user_id = jwt.get_user_id()
         return recipe_rating_controller.handle_delete(id=(user_id, id))

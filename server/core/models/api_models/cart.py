@@ -15,7 +15,6 @@ cart_item_model = api.model("CartItemModel", {
 })
 
 cart_item_model_send = api.model("CartItemModelSend", {
-    "cart_id": fields.Integer,
     "recipe_id": fields.Integer,
     "ingredient_id": fields.Integer,
     "quantity": fields.Integer,

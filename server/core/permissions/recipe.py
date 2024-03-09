@@ -28,7 +28,7 @@ def IsRecipeCreatorOrAdminOrStaff(func):
             )
         ).count()
 
-        if is_creator_user_count > 0:
+        if is_creator_user_count == 1:
             return func(*args, **kwargs)
 
         return http_errors.unauthorized(

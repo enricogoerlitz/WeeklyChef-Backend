@@ -128,7 +128,7 @@ class CartItem(db.Model):
 @add_from_json_method
 @add_to_dict_method
 @add__str__method
-class UserSharedCart(db.Model):
+class UserSharedEditCart(db.Model):
     """
     Extra Route für planner/shared -> retuns list of Planner shared with me
     """

@@ -14,6 +14,11 @@ from server.services.recipe.controller.collection import (
     collection_controller,
     collection_recipe_controller,
     user_shared_collection_controller)
+from server.core.permissions.collection import (
+    IsCollectionOwner,
+    IsCollectionOwnerOrCanEdit,
+    IsCollectionOwnerOrHasAccess
+)
 
 
 ns = Namespace(
@@ -43,8 +48,6 @@ class CollectionListAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    @IsAdminOrStaff
-    # TODO: @IsCollectionOwnerOrCanEdit
     def post(self):
         data = jwt.add_user_id_to_data(
             data=request.get_json(),
@@ -63,7 +66,7 @@ class CollectionAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsCollectionOwnerOrHasAccess
+    @IsCollectionOwnerOrHasAccess
     def get(self, id):
         return collection_controller.handle_get(id)
 
@@ -75,7 +78,7 @@ class CollectionAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsAdminOrStaff
-    # TODO: @IsCollectionOwnerOrCanEdit
+    @IsCollectionOwnerOrCanEdit
     def patch(self, id):
         return collection_controller.handle_patch(
             id=id,
@@ -88,7 +91,7 @@ class CollectionAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsCollectionOwner
+    @IsCollectionOwner
     def delete(self, id):
         return collection_controller.handle_delete(id)
 
@@ -103,7 +106,7 @@ class CollectionRecipeAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("CollectionRecipe"))    # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
-    # TODO: @IsCollectionOwnerOrCanEdit
+    @IsCollectionOwnerOrCanEdit
     def post(self, id, recipe_id):
         data = {
             "collection_id": id,
@@ -121,7 +124,7 @@ class CollectionRecipeAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsCollectionOwnerOrCanEdit
+    @IsCollectionOwnerOrCanEdit
     def delete(self, id, recipe_id):
         return collection_recipe_controller.handle_delete(id=(id, recipe_id))
 
@@ -137,7 +140,7 @@ class UserSharedCollectionAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))    # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
     @jwt_required()
-    # TODO: @IsCollectionOwner
+    @IsCollectionOwner
     def post(self, id, user_id):
         data = {
             "collection_id": id,
@@ -157,7 +160,7 @@ class UserSharedCollectionAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeIngredient"))            # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
-    # TODO: @IsCollectionOwner
+    @IsCollectionOwner
     def patch(self, id, user_id):
         return user_shared_collection_controller.handle_patch(
             id=(id, user_id),
@@ -170,6 +173,6 @@ class UserSharedCollectionAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsCollectionOwner
+    @IsCollectionOwner
     def delete(self, id, user_id):
         return user_shared_collection_controller.handle_delete(id=(id, user_id))                # noqa

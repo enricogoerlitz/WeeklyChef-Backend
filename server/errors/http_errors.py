@@ -11,7 +11,9 @@ def bad_request(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"message": str(exp)}, 400
 
 
-def unauthorized(exp: Union[str, Exception]) -> tuple[dict, int]:
+def unauthorized(exp: Union[str, Exception] = None) -> tuple[dict, int]:
+    if exp is None:
+        exp = "User is unauthorized for this ressource."
     return {"message": str(exp)}, 401
 
 

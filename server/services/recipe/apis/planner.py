@@ -14,6 +14,11 @@ from server.services.recipe.controller.planner import (
     recipe_planner_controller,
     recipe_planner_item_controller, user_shared_recipe_planner_controller
 )
+from server.core.permissions.planner import (
+    IsRecipePlannerOwner,
+    IsRecipePlannerOwnerOrCanEdit,
+    IsRecipePlannerOwnerOrHasAccess
+)
 
 
 ns = Namespace(
@@ -61,7 +66,7 @@ class RecipePlannerAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwnerOrHasAccess
+    @IsRecipePlannerOwnerOrHasAccess
     def get(self, id):
         return recipe_planner_controller.handle_get(id)  # TODO: here detail model  # noqa
 
@@ -72,7 +77,7 @@ class RecipePlannerAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwnerOrCanEdit
+    @IsRecipePlannerOwnerOrCanEdit
     def patch(self, id):
         return recipe_planner_controller.handle_patch(
             id=id,
@@ -85,7 +90,7 @@ class RecipePlannerAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwner
+    @IsRecipePlannerOwner
     def delete(self, id):
         return recipe_planner_controller.handle_delete(id)
 
@@ -101,7 +106,7 @@ class RecipePlannerItemListAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("SupermarketAreaIngredient"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwnerOrCanEdit
+    @IsRecipePlannerOwnerOrCanEdit
     def post(self):
         return recipe_planner_item_controller.handle_post(
             data=request.get_json()
@@ -117,7 +122,7 @@ class RecipePlannerItemAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))            # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwnerOrCanEdit
+    @IsRecipePlannerOwnerOrCanEdit
     def patch(self, id):
         return recipe_planner_item_controller.handle_patch(
             id=id,
@@ -130,7 +135,7 @@ class RecipePlannerItemAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwnerOrCanEdit
+    @IsRecipePlannerOwnerOrCanEdit
     def delete(self, id):
         return recipe_planner_item_controller.handle_delete(id)
 
@@ -143,7 +148,7 @@ class RecipePlannerChangeOrderAPI(Resource):
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwnerOrCanEdit
+    @IsRecipePlannerOwnerOrCanEdit
     def post(self, id, new_order_number):
         return recipe_planner_item_controller.handle_post_change_order(
             id=id,
@@ -162,7 +167,7 @@ class UserSharedRecipePlannerAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))    # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwner
+    @IsRecipePlannerOwner
     def post(self, id, user_id):
         data = {
             "rplanner_id": id,
@@ -182,7 +187,7 @@ class UserSharedRecipePlannerAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeIngredient"))            # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
-    # TODO: @IsRecipePlannerOwner
+    @IsRecipePlannerOwner
     def patch(self, id, user_id):
         return user_shared_recipe_planner_controller.handle_patch(
             id=(id, user_id),
@@ -195,6 +200,6 @@ class UserSharedRecipePlannerAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # @IsRecipePlannerOwner
+    @IsRecipePlannerOwner
     def delete(self, id, user_id):
         return user_shared_recipe_planner_controller.handle_delete(id=(id, user_id))                # noqa

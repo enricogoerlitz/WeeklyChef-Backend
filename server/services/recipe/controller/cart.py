@@ -1,7 +1,7 @@
 from flask import Response
 
 from server.core.models.db_models.cart import (
-    Cart, CartItem, UserSharedCart
+    Cart, CartItem, UserSharedEditCart
 )
 from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.api_models.cart import (
@@ -23,8 +23,8 @@ class CartController(BaseCrudController):
                 self._model.owner_user_id == user_id)
 
             query_cart_shared = self._model.query \
-                .join(UserSharedCart) \
-                .filter(UserSharedCart.user_id == user_id)
+                .join(UserSharedEditCart) \
+                .filter(UserSharedEditCart.user_id == user_id)
 
             query = query_cart_owner.union(query_cart_shared)
 
@@ -95,7 +95,7 @@ cart_item_controller = CartItemController(
 
 
 user_shared_cart_controller = UserSharedCartController(
-    model=UserSharedCart,
+    model=UserSharedEditCart,
     api_model=user_shared_cart_model,
     api_model_send=user_shared_cart_model,
     foreign_key_columns=[
