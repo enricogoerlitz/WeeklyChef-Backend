@@ -92,7 +92,7 @@ class BaseCrudController(IController, AbstractRedisCache):
             read_only_fields: list[str] = None,
             search_fields: list[str] = None,
             pagination_page_size: int = 20,
-            use_caching: bool = False,
+            use_caching: bool = True,
             clear_cache_models: list[Model] = None
     ) -> None:
         AbstractRedisCache.__init__(
@@ -276,7 +276,6 @@ class BaseCrudController(IController, AbstractRedisCache):
             return http_errors.UNEXPECTED_ERROR_RESULT
 
     def _check_foreignkeys_existing(self, data: dict) -> None:
-        # checks foreignkey is existing
         if self._foreign_key_columns is None:
             return
 

@@ -53,8 +53,7 @@ cart_controller = CartController(
     #     (User, "owner_user_id")
     # ],
     read_only_fields=["owner_user_id"],
-    unique_columns_together=["name", "owner_user_id"],
-    use_caching=True
+    unique_columns_together=["name", "owner_user_id"]
 )
 
 

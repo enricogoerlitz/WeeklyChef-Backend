@@ -3,7 +3,10 @@ from datetime import date
 from dateutil import parser
 
 from flask import Response
+from flask_restx import marshal
+from sqlalchemy import and_
 
+from server.errors import errors
 from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.db_models.planner.planner import (
     RecipePlanner, RecipePlannerItem,
@@ -17,6 +20,7 @@ from server.core.models.api_models.planner import (
 from server.core.models.db_models.recipe.recipe import Recipe
 from server.errors import http_errors
 from server.logger import logger
+from server.db import db
 
 
 class RecipePlannerController(BaseCrudController):
@@ -45,6 +49,56 @@ class RecipePlannerController(BaseCrudController):
 
 class RecipePlannerItemController(BaseCrudController):
     _model: RecipePlannerItem
+
+    def handle_post_change_order(
+            self,
+            id: int,
+            new_order_number: int
+    ) -> Response:
+        try:
+            rp_item_obj: RecipePlannerItem = self._find_object_by_id(id)
+
+            if new_order_number == rp_item_obj.order_number:
+                return marshal(rp_item_obj, self._api_model)
+
+            inc_number = 1
+            if new_order_number > rp_item_obj.order_number:
+                # new_order_number > area_obj.order_number
+                updating_rp_items = self._model.query.filter(
+                    and_(
+                        self._model.rplanner_id == rp_item_obj.rplanner_id,
+                        self._model.order_number > rp_item_obj.order_number,
+                        self._model.order_number <= new_order_number
+                    )
+                ).all()
+                inc_number = -1
+            else:
+                updating_rp_items = self._model.query.filter(
+                    and_(
+                        self._model.rplanner_id == rp_item_obj.rplanner_id,
+                        self._model.order_number < rp_item_obj.order_number,
+                        self._model.order_number >= new_order_number
+                    )
+                ).all()
+
+            updating_rp_item: RecipePlannerItem
+            for updating_rp_item in updating_rp_items:
+                updating_rp_item.order_number += inc_number
+
+            rp_item_obj.order_number = new_order_number
+
+            db.session.commit()
+
+            self._clear_cache()
+
+            return marshal(rp_item_obj, self._api_model)
+
+        except errors.DbModelNotFoundException as e:
+            return http_errors.not_found(e)
+
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
 
     def handle_post(
             self,
@@ -81,11 +135,7 @@ recipe_planner_controller = RecipePlannerController(
     api_model=recipe_planner_model,
     api_model_send=recipe_planner_model_send,
     unique_columns_together=["name", "owner_user_id"],
-    # foreign_key_columns=[
-    #     (User, "owner_user_id")
-    # ],
-    read_only_fields=["owner_user_id"],
-    use_caching=True
+    read_only_fields=["owner_user_id"]
 )
 
 
@@ -93,7 +143,7 @@ recipe_planner_item_controller = RecipePlannerItemController(
     model=RecipePlannerItem,
     api_model=recipe_planner_item_model,
     api_model_send=recipe_planner_item_model_send,
-    read_only_fields=["rplanner_id", "recipe_id"],
+    read_only_fields=["rplanner_id", "recipe_id", "order_number"],
     foreign_key_columns=[
         (RecipePlanner, "rplanner_id"),
         (Recipe, "recipe_id")

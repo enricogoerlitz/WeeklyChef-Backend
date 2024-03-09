@@ -329,6 +329,5 @@ recipe_rating_controller = RecipeRatingController(
         (Recipe, "recipe_id")
     ],
     read_only_fields=["user_id", "recipe_id"],
-    unique_columns_together=["user_id", "recipe_id"],
-    use_caching=True
+    unique_columns_together=["user_id", "recipe_id"]
 )

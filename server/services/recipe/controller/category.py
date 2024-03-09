@@ -16,6 +16,5 @@ category_controller = CategoryController(
     api_model_send=category_model_send,
     unique_columns=["name"],
     search_fields=["name"],
-    clear_cache_models=[Recipe],
-    use_caching=True
+    clear_cache_models=[Recipe]
 )

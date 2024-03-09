@@ -4,10 +4,9 @@ from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui, jwt
 from server.core.models.api_models.supermarket import (
-    supermarket_area_ingredinet_model,
-    supermarket_area_ingredinet_model_send, supermarket_area_model,
-    supermarket_area_model_send,
-    supermarket_model, supermarket_model_detail, supermarket_model_send)
+    supermarket_area_ingredinet_model, supermarket_area_ingredinet_model_send,
+    supermarket_area_model, supermarket_area_model_send, supermarket_model,
+    supermarket_model_detail, supermarket_model_send)
 from server.core.models.api_models.utils import error_model
 from server.services.recipe.controller.supermarket import (
     supermarket_area_controller,
@@ -137,6 +136,21 @@ class SupermarketAreaAPI(Resource):
     @jwt_required()
     def delete(self, id):
         return supermarket_area_controller.handle_delete(id)
+
+
+@ns.route("/area/<int:id>/reorder/<int:new_order_number>")
+class SupermarketAreaChangeOrderAPI(Resource):
+
+    @ns.response(code=201, model=supermarket_area_model, description=sui.desc_added("SupermarketArea"))        # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @jwt_required()
+    def post(self, id, new_order_number):
+        return supermarket_area_controller.handle_post_change_order(
+            id=id,
+            new_order_number=new_order_number
+        )
 
 
 @ns.route("/area/<int:sarea_id>/ingredient/<int:ingredient_id>")

@@ -137,7 +137,6 @@ class UserSharedCart(db.Model):
 
     cart_id = db.Column(db.Integer, db.ForeignKey("cart.id"), primary_key=True)  # noqa
     user_id = db.Column(db.Integer, primary_key=True)  # noqa
-    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
 
     __table_args__ = (
         UniqueConstraint("cart_id", "user_id", name="uq_rplanner_user"),

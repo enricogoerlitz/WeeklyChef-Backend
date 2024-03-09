@@ -63,6 +63,7 @@ supermarket_model = api.model("SupermarketModel", {
     "postcode": fields.String,
     "district": fields.String,
     "owner_user_id": fields.Integer,
+    "areas": fields.List(fields.Nested(supermarket_area_model))
 })
 
 

@@ -54,11 +54,7 @@ collection_controller = CollectionController(
         "name",
         "owner_user_id"
     ],
-    # foreign_key_columns=[
-    #     (User, "owner_user_id")
-    # ],
-    read_only_fields=["owner_user_id"],
-    use_caching=True
+    read_only_fields=["owner_user_id"]
 )
 
 

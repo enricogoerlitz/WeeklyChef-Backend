@@ -24,7 +24,6 @@ class Supermarket(db.Model):
     postcode = db.Column(db.String(15), nullable=False)
     district = db.Column(db.String(30), nullable=False)
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
-    # owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
 
     areas = db.relationship(
         "SupermarketArea",
@@ -112,11 +111,6 @@ class SupermarketArea(db.Model):
             "name",
             name="uq_supermarketid_name"
         ),
-        UniqueConstraint(
-            "supermarket_id",
-            "order_number",
-            name="uq_supermarketid_ordernumber"
-        )
     )
 
     @validates("name")

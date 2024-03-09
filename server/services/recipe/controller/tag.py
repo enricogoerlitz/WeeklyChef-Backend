@@ -17,6 +17,5 @@ tag_controller = TagController(
     api_model_send=tag_model_send,
     unique_columns=["name"],
     search_fields=["name"],
-    clear_cache_models=[Recipe, Collection],
-    use_caching=True
+    clear_cache_models=[Recipe, Collection]
 )

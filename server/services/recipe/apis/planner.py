@@ -130,6 +130,21 @@ class RecipePlannerItemAPI(Resource):
         return recipe_planner_item_controller.handle_delete(id)
 
 
+@ns.route("/item/<int:id>/reorder/<int:new_order_number>")
+class SupermarketAreaChangeOrderAPI(Resource):
+
+    @ns.response(code=201, model=recipe_planner_item_model, description=sui.desc_added("SupermarketArea"))        # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @jwt_required()
+    def post(self, id, new_order_number):
+        return recipe_planner_item_controller.handle_post_change_order(
+            id=id,
+            new_order_number=new_order_number
+        )
+
+
 @ns.route("/<int:id>/access/user/<int:user_id>")
 class UserSharedRecipePlannerAPI(Resource):
 

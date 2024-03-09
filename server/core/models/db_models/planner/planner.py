@@ -30,7 +30,6 @@ class RecipePlanner(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(25), unique=True, nullable=False)
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
-    # owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     items = db.relationship("RecipePlannerItem", lazy="select")
@@ -92,14 +91,7 @@ class RecipePlannerItem(db.Model):
 
     recipe = db.relationship("Recipe", lazy="select")
 
-    __table_args__ = (
-        UniqueConstraint(
-            "rplanner_id",
-            "date",
-            "order_number",
-            name="qu_rplanner_date_ordernum"
-        ),
-    )
+    # Unique together: rplanner_id, date, order_number
 
     @validates("rplanner_id")
     def validate_rplanner_id(self, key: str, value: Any) -> str:
@@ -163,7 +155,6 @@ class UserSharedRecipePlanner(db.Model):
 
     rplanner_id = db.Column(db.Integer, db.ForeignKey("rplanner.id"), primary_key=True)  # noqa
     user_id = db.Column(db.Integer, primary_key=True)  # noqa
-    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
     can_edit = db.Column(db.Boolean, nullable=False)
 
     planner = db.relationship("RecipePlanner", backref="rplanner_user", lazy="select")  # noqa
