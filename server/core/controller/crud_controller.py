@@ -13,7 +13,7 @@ from flask_sqlalchemy.model import Model
 from server.logger import logger
 from server.db import db
 from server.core.enums import searchtype
-from server.caching import redis
+from server.caching.redis import api_cache
 from server.api import api
 from server.errors import http_errors
 from server.errors import errors
@@ -54,19 +54,19 @@ class AbstractRedisCache:
 
     # protected
     def _get_cache(self, redis_addition_key: str | None) -> Any:
-        redis_key = redis.gen_key(
+        redis_key = api_cache.gen_key(
             self._main_model, redis_addition_key=redis_addition_key)
         if not self._use_caching:
             return None
 
-        return redis.get(redis_key)
+        return api_cache.get(redis_key)
 
     # protected
     def _set_cache(self, data: Any, redis_addition_key: str | None) -> None:
-        redis_key = redis.gen_key(
+        redis_key = api_cache.gen_key(
             self._main_model, redis_addition_key=redis_addition_key)
         if self._use_caching:
-            redis.set(redis_key, data)
+            api_cache.set(redis_key, data)
 
     # protected
     def _clear_cache(self) -> None:
@@ -74,8 +74,8 @@ class AbstractRedisCache:
             return
 
         for model in self._clear_cache_models:
-            redis_key_pattern = redis.gen_key(model, "*")
-            redis.clear_cache(redis_key_pattern)
+            redis_key_pattern = api_cache.gen_key(model, "*")
+            api_cache.clear_cache(redis_key_pattern)
 
 
 class BaseCrudController(IController, AbstractRedisCache):

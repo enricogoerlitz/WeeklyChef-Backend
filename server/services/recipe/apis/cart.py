@@ -103,7 +103,7 @@ class CartClearAPI(Resource):
         return cart_controller.handle_clear_cart(id)
 
 
-@ns.route("(<int:id>/item")
+@ns.route("/<int:id>/item")
 class CartItemListAPI(Resource):
 
     @ns.expect(cart_item_model_send)

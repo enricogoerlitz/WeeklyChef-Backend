@@ -8,7 +8,7 @@ from typing import Type
 
 from flask_restx import Model
 
-from server.caching import redis
+from server.caching.redis import api_cache
 from server.core.models.db_models.planner import (
     RecipePlanner, RecipePlannerItem
 )
@@ -59,8 +59,8 @@ class CachingModel(AbstractCachingComponent):
         self._parent = parent
 
     def reset_cache(self) -> None:
-        redis_key_pattern = redis.gen_key(self._model, "*")
-        redis.clear_cache(redis_key_pattern)
+        redis_key_pattern = api_cache.gen_key(self._model, "*")
+        api_cache.clear_cache(redis_key_pattern)
         print(f"{str(self)}: RESET MODEL CACHE: {redis_key_pattern}")
 
     def __str__(self) -> str:
