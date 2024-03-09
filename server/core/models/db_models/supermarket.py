@@ -27,6 +27,7 @@ class Supermarket(db.Model):
 
     areas = db.relationship(
         "SupermarketArea",
+        cascade="all,delete",
         backref="supermarket",
         lazy="dynamic"
     )
@@ -101,6 +102,7 @@ class SupermarketArea(db.Model):
 
     ingredients = db.relationship(
         "SupermarketAreaIngredientComposite",
+        cascade="all,delete",
         backref="sarea",
         lazy="joined"
     )
@@ -195,7 +197,6 @@ class UserSharedEditSupermarket(db.Model):
 
     supermarket_id = db.Column(db.Integer, db.ForeignKey("supermarket.id"), primary_key=True)  # noqa
     user_id = db.Column(db.Integer, primary_key=True)  # noqa
-    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
 
     __table_args__ = (
         UniqueConstraint(

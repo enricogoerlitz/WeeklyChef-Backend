@@ -32,7 +32,16 @@ class RecipePlanner(db.Model):
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
-    items = db.relationship("RecipePlannerItem", lazy="select")
+    items = db.relationship(
+        "RecipePlannerItem",
+        cascade="all,delete",
+        lazy="select"
+    )
+    acl = db.relationship(
+        "UserSharedRecipePlanner",
+        cascade="all,delete",
+        lazy="select"
+    )
 
     __table_args__ = (
         UniqueConstraint(
@@ -41,14 +50,6 @@ class RecipePlanner(db.Model):
             name="qu_rplanner_name_user_id"
         ),
     )
-
-    @property
-    def acl(self):
-        acl = UserSharedRecipePlanner.query.filter(
-            UserSharedRecipePlanner.rplanner_id == self.id
-        ).all()
-
-        return [access_user.to_dict() for access_user in acl]
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
@@ -164,8 +165,6 @@ class UserSharedRecipePlanner(db.Model):
     rplanner_id = db.Column(db.Integer, db.ForeignKey("rplanner.id"), primary_key=True)  # noqa
     user_id = db.Column(db.Integer, primary_key=True)  # noqa
     can_edit = db.Column(db.Boolean, nullable=False)
-
-    planner = db.relationship("RecipePlanner", backref="rplanner_user", lazy="select")  # noqa
 
     __table_args__ = (
         UniqueConstraint("rplanner_id", "user_id", name="uq_rplanner_user"),

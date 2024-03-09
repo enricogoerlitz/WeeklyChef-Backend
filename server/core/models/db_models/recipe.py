@@ -35,15 +35,18 @@ class Recipe(db.Model):
     category = db.relationship("Category", backref="recipe", lazy="select")
     ingredients = db.relationship(
         "RecipeIngredient",
+        cascade="all,delete",
         backref=db.backref("recipe", lazy="select")
     )
     tags = db.relationship(
         "Tag",
+        cascade="all,delete",
         secondary="recipe_tag",
         backref=db.backref("recipe", lazy="dynamic")
     )
     images = db.relationship(
         "RecipeImage",
+        cascade="all,delete",
         secondary="recipe_image",
         backref=db.backref("recipe", lazy="dynamic")
     )

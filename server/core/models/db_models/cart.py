@@ -33,7 +33,7 @@ class Cart(db.Model):
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
-    items = db.relationship("CartItem", lazy="dynamic")
+    items = db.relationship("CartItem", cascade="all,delete", lazy="dynamic")
 
     __table_args__ = (
         UniqueConstraint("name", "owner_user_id", name="uq_cart_name_user"),

@@ -21,21 +21,18 @@ class Collection(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
-    # owner_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     is_default = db.Column(db.Boolean, nullable=False)
 
     recipes = db.relationship(
         "CollectionRecipeComposite",
+        cascade="all,delete",
         backref=db.backref("collection", lazy="select")
     )
-
-    @property
-    def acl(self):
-        acl = UserSharedCollection.query.filter(
-            UserSharedCollection.collection_id == self.id
-        ).all()
-
-        return [access_user.to_dict() for access_user in acl]
+    acl = db.relationship(
+        "UserSharedCollection",
+        cascade="all,delete",
+        lazy="select"
+    )
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
