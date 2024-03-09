@@ -9,8 +9,9 @@ from server.core.models.api_models.cart import (
     cart_model_send, user_shared_cart_model)
 from server.core.models.db_models.recipe import Recipe
 from server.core.models.db_models.ingredient import Ingredient
-from server.errors import http_errors
+from server.errors import http_errors, errors
 from server.logger import logger
+from server.db import db
 
 
 class CartController(BaseCrudController):
@@ -36,6 +37,27 @@ class CartController(BaseCrudController):
             logger.error(e)
             return http_errors.UNEXPECTED_ERROR_RESULT
 
+    def handle_clear_cart(self, cart_id: int):
+        try:
+            # Validate correct Cart
+            _ = self._find_object_by_id(cart_id)
+
+            db.session.query(CartItem) \
+                .filter(CartItem.cart_id == cart_id) \
+                .delete()
+            db.session.commit()
+
+            self._clear_cache()
+
+            return "", 204
+
+        except errors.DbModelNotFoundException as e:
+            return http_errors.not_found(e)
+
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
+
 
 class CartItemController(BaseCrudController):
     pass
@@ -49,9 +71,6 @@ cart_controller = CartController(
     model=Cart,
     api_model=cart_model,
     api_model_send=cart_model_send,
-    # foreign_key_columns=[
-    #     (User, "owner_user_id")
-    # ],
     read_only_fields=["owner_user_id"],
     unique_columns_together=["name", "owner_user_id"]
 )
@@ -81,7 +100,6 @@ user_shared_cart_controller = UserSharedCartController(
     api_model_send=user_shared_cart_model,
     foreign_key_columns=[
         (Cart, "cart_id")
-        # (User, "user_id")
     ],
     read_only_fields=["cart_id", "user_id"],
     unique_columns_together=["cart_id", "user_id"],

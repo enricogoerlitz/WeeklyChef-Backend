@@ -87,6 +87,19 @@ class CartAPI(Resource):
         return cart_controller.handle_delete(id)
 
 
+@ns.route("/<int:id>/clear")
+class CartClearAPI(Resource):
+
+    @ns.response(code=204, model=None, description=sui.desc_get(ns.name))   # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @jwt_required()
+    # TODO: @IsCartOwnerOrCanEdit
+    def get(self, id):
+        return cart_controller.handle_clear_cart(id)
+
+
 @ns.route("/item")
 class CartItemListAPI(Resource):
 
