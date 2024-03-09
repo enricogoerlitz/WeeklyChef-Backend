@@ -11,7 +11,7 @@ from server.core.models.api_models.supermarket import (
     supermarket_area_ingredinet_model,
     supermarket_area_ingredinet_model_send, supermarket_area_model,
     supermarket_area_model_send,
-    supermarket_model, supermarket_model_send, supermarket_user_edit_model)
+    supermarket_model_detail, supermarket_model_send, supermarket_user_edit_model)
 from server.core.models.db_models.ingredient import Ingredient
 from server.errors import http_errors
 from server.logger import logger
@@ -103,7 +103,7 @@ class UserSharedEditSupermarketController(BaseCrudController):
 
 supermarket_controller = SupermarketController(
     model=Supermarket,
-    api_model=supermarket_model,
+    api_model=supermarket_model_detail,
     api_model_send=supermarket_model_send,
     read_only_fields=["owner_user_id"],
     unique_columns_together=["name", "street"]

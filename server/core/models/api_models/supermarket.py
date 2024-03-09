@@ -56,7 +56,7 @@ supermarket_area_ingredinet_model_send = api.model("SupermarketAreaIngredientMod
 })
 
 
-supermarket_model = api.model("SupermarketModel", {
+supermarket_model_detail = api.model("SupermarketModel", {
     "id": fields.Integer,
     "name": fields.String,
     "street": fields.String,
@@ -64,6 +64,16 @@ supermarket_model = api.model("SupermarketModel", {
     "district": fields.String,
     "owner_user_id": fields.Integer,
     "areas": fields.List(fields.Nested(supermarket_area_model))
+})
+
+
+supermarket_model = api.model("SupermarketModel", {
+    "id": fields.Integer,
+    "name": fields.String,
+    "street": fields.String,
+    "postcode": fields.String,
+    "district": fields.String,
+    "owner_user_id": fields.Integer
 })
 
 

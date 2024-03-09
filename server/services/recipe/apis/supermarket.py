@@ -5,7 +5,8 @@ from flask_jwt_extended import jwt_required
 from server.utils import swagger as sui, jwt
 from server.core.models.api_models.supermarket import (
     supermarket_area_ingredinet_model, supermarket_area_ingredinet_model_send,
-    supermarket_area_model, supermarket_area_model_send, supermarket_model,
+    supermarket_area_model, supermarket_area_model_send,
+    supermarket_model,
     supermarket_model_detail, supermarket_model_send)
 from server.core.models.api_models.utils import error_model
 from server.services.recipe.controller.supermarket import (
@@ -32,7 +33,10 @@ class SupermarketListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
-        return supermarket_controller.handle_get_list(request.args)
+        return supermarket_controller.handle_get_list(
+            reqargs=request.args,
+            api_response_model=supermarket_model
+        )
 
     @ns.expect(supermarket_model_send)
     @ns.response(code=201, model=supermarket_model, description=sui.desc_added(ns.name))        # noqa
@@ -66,7 +70,7 @@ class SupermarketAPI(Resource):
         )
 
     @ns.expect(supermarket_model_send)
-    @ns.response(code=200, model=supermarket_model, description=sui.desc_update(ns.name))       # noqa
+    @ns.response(code=200, model=supermarket_model_detail, description=sui.desc_update(ns.name))       # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa

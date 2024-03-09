@@ -7,7 +7,7 @@ from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
 from server.core.models.api_models.cart import (
     cart_item_model, cart_item_model_send, cart_model,
-    cart_model_send, user_shared_cart_model)
+    cart_model_detail, cart_model_send, user_shared_cart_model)
 from server.services.recipe.controller.cart import (
     cart_controller, cart_item_controller,
     user_shared_cart_controller)
@@ -26,18 +26,19 @@ ns = Namespace(
 @ns.route("/")
 class CartListAPI(Resource):
 
-    @ns.response(code=200, model=[cart_model], description=sui.desc_list(ns.name))       # noqa
+    @ns.response(code=200, model=[cart_model_detail], description=sui.desc_list(ns.name))       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
         return cart_controller.handle_get_list(
             reqargs=request.args,
-            user_id=jwt.get_user_id()
+            user_id=jwt.get_user_id(),
+            api_response_model=cart_model
         )
 
     @ns.expect(cart_model_send)
-    @ns.response(code=201, model=cart_model, description=sui.desc_added(ns.name))        # noqa
+    @ns.response(code=201, model=cart_model_detail, description=sui.desc_added(ns.name))        # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
@@ -55,7 +56,7 @@ class CartListAPI(Resource):
 @ns.route("/<int:id>")
 class CartAPI(Resource):
 
-    @ns.response(code=200, model=cart_model, description=sui.desc_get(ns.name))   # noqa
+    @ns.response(code=200, model=cart_model_detail, description=sui.desc_get(ns.name))   # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
@@ -66,7 +67,7 @@ class CartAPI(Resource):
         return cart_controller.handle_get(id)
 
     @ns.expect(cart_model_send)
-    @ns.response(code=200, model=cart_model, description=sui.desc_update(ns.name))       # noqa
+    @ns.response(code=200, model=cart_model_detail, description=sui.desc_update(ns.name))       # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa

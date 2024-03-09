@@ -25,12 +25,20 @@ cart_item_model_send = api.model("CartItemModelSend", {
 })
 
 
-cart_model = api.model("CartModel", {
+cart_model_detail = api.model("CartModel", {
     "id": fields.Integer,
     "name": fields.String,
     "owner_user_id": fields.Integer,
     "is_active": fields.Boolean,
     "items": fields.List(fields.Nested(cart_item_model))
+})
+
+
+cart_model = api.model("CartModel", {
+    "id": fields.Integer,
+    "name": fields.String,
+    "owner_user_id": fields.Integer,
+    "is_active": fields.Boolean
 })
 
 cart_model_send = api.model("CartModelSend", {

@@ -7,9 +7,9 @@ from server.core.models.api_models.utils import error_model
 from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
 from server.core.models.api_models.recipe import (
     recipe_image_model, recipe_ingredient_model,
-    recipe_ingredient_model_send, recipe_model,
-    recipe_model_get_list, recipe_model_send,
-    recipe_rating_model, recipe_rating_model_agg,
+    recipe_ingredient_model_send, recipe_model_detail,
+    recipe_model_get_list, recipe_model,
+    recipe_model_send, recipe_rating_model, recipe_rating_model_agg,
     recipe_rating_model_get,
     recipe_rating_model_send, recipe_tag_model)
 from server.services.recipe.controller import (
@@ -39,10 +39,13 @@ class RecipeListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def get(self):
-        return recipe_controller.handle_get_list(request.args)
+        return recipe_controller.handle_get_list(
+            reqargs=request.args,
+            api_response_model=recipe_model
+        )
 
     @ns.expect(recipe_model_send)
-    @ns.response(code=201, model=recipe_model, description=sui.desc_added(ns.name))             # noqa
+    @ns.response(code=201, model=recipe_model_detail, description=sui.desc_added(ns.name))             # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
@@ -60,7 +63,7 @@ class RecipeListAPI(Resource):
 @ns.route("/<int:id>")
 class RecipeAPI(Resource):
 
-    @ns.response(code=200, model=recipe_model, description=sui.desc_get(ns.name))               # noqa
+    @ns.response(code=200, model=recipe_model_detail, description=sui.desc_get(ns.name))               # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
@@ -70,7 +73,7 @@ class RecipeAPI(Resource):
         return recipe_controller.handle_get(id)
 
     @ns.expect(recipe_model_send)
-    @ns.response(code=200, model=recipe_model, description=sui.desc_update(ns.name))            # noqa
+    @ns.response(code=200, model=recipe_model_detail, description=sui.desc_update(ns.name))            # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa

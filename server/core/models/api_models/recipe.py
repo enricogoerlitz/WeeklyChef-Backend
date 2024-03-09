@@ -140,6 +140,18 @@ recipe_model = api.model("RecipeModel", {
     "preperation_time_minutes": fields.Integer,
     "search_description": fields.String,
     "creator_user_id": fields.Integer,
+    "category_id": fields.Integer
+})
+
+recipe_model_detail = api.model("RecipeModel", {
+    "id": fields.Integer,
+    "name": fields.String,
+    "preperation_description": fields.String,
+    "difficulty": fields.String,
+    "person_count": fields.Integer,
+    "preperation_time_minutes": fields.Integer,
+    "search_description": fields.String,
+    "creator_user_id": fields.Integer,
     "category": fields.Nested(category_model),
     "ingredients": fields.List(fields.Nested(recipe_ingredient_model_joined)),
     "tags": fields.List(fields.Nested(tag_model)),

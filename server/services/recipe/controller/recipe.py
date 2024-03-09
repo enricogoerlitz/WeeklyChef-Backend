@@ -18,7 +18,7 @@ from server.core.models.db_models.recipe import (
 )
 from server.core.models.api_models.recipe import (
     recipe_image_model, recipe_ingredient_model,
-    recipe_ingredient_model_send, recipe_model,
+    recipe_ingredient_model_send, recipe_model_detail,
     recipe_model_send, recipe_rating_model,
     recipe_rating_model_send, recipe_tag_model)
 from server.core.models.db_models.tag import Tag
@@ -33,7 +33,11 @@ from server.core.models.db_models.cart import Cart
 class RecipeController(BaseCrudController):
     _model: Recipe
 
-    def handle_get_list(self, reqargs: dict) -> Response:
+    def handle_get_list(
+            self,
+            reqargs: dict,
+            api_response_model: db.Model = None  # type: ignore
+    ) -> Response:
         try:
             search = reqargs.get("search")
             difficulty_search = reqargs.get("difficulty")
@@ -71,7 +75,8 @@ class RecipeController(BaseCrudController):
             if difficulty_search is not None:
                 query = query.filter(Recipe.difficulty == difficulty_search)
 
-            return super().handle_get_list(reqargs, query=query)
+            return super().handle_get_list(
+                reqargs, query=query, api_response_model=api_response_model)
         except Exception as e:
             logger.error(e)
             return http_errors.UNEXPECTED_ERROR_RESULT
@@ -257,7 +262,7 @@ class RecipeRatingController(BaseCrudController):
 
 recipe_controller = RecipeController(
     model=Recipe,
-    api_model=recipe_model,
+    api_model=recipe_model_detail,
     api_model_send=recipe_model_send,
     unique_columns=["name"],
     search_fields=[

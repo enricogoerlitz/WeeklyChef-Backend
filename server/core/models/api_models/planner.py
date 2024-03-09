@@ -31,13 +31,20 @@ recipe_planner_item_model_send = api.model("RecipePlannerItemModelSend", {
 })
 
 
-recipe_planner_model = api.model("RecipePlannerModel", {
+recipe_planner_model_detail = api.model("RecipePlannerModel", {
     "id": fields.Integer,
     "name": fields.String,
     "owner_user_id": fields.Integer,
     "is_active": fields.Boolean,
     "items": fields.List(fields.Nested(recipe_planner_item_model)),
     "acl": fields.List(fields.Nested(acl_model))
+})
+
+recipe_planner_model = api.model("RecipePlannerModel", {
+    "id": fields.Integer,
+    "name": fields.String,
+    "owner_user_id": fields.Integer,
+    "is_active": fields.Boolean
 })
 
 
