@@ -29,6 +29,14 @@ class Collection(db.Model):
         backref=db.backref("collection", lazy="select")
     )
 
+    @property
+    def acl(self):
+        acl = UserSharedCollection.query.filter(
+            UserSharedCollection.collection_id == self.id
+        ).all()
+
+        return [access_user.to_dict() for access_user in acl]
+
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
         ModelValidator.validate_string(
@@ -96,7 +104,6 @@ class UserSharedCollection(db.Model):
 
     collection_id = db.Column(db.Integer, db.ForeignKey("collection.id"), primary_key=True)  # noqa
     user_id = db.Column(db.Integer, primary_key=True)  # noqa
-    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
     can_edit = db.Column(db.Boolean, nullable=False)
 
     __table_args__ = (

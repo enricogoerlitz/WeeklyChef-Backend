@@ -134,7 +134,7 @@ class CartItemAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
     @IsCartOwnerOrCanEdit
-    def patch(self, _, item_id):
+    def patch(self, id, item_id):
         return cart_item_controller.handle_patch(
             id=item_id,
             data=request.get_json()
@@ -147,8 +147,8 @@ class CartItemAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsCartOwnerOrCanEdit
-    def delete(self, id):
-        return cart_item_controller.handle_delete(id)
+    def delete(self, id, item_id):
+        return cart_item_controller.handle_delete(item_id)
 
 
 @ns.route("/<int:id>/access/edit/user/<int:user_id>")

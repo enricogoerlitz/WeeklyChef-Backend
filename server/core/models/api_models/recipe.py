@@ -7,6 +7,7 @@ from server.core.models.api_models.utils import (
     base_name_model_fields_send,
     reqparse_add_queryparams_doc
 )
+from server.core.models.api_models.utils import acl_model
 
 
 # GET QUERY MODELS
@@ -80,7 +81,6 @@ ingredient_model = api.model("IngredientModel", {
     "quantity_per_unit": fields.Float,
     "is_spices": fields.Boolean,
     "search_description": fields.String,
-    "unit_id": fields.Integer,
     "unit": fields.Nested(unit_model)
 })
 
@@ -146,6 +146,7 @@ recipe_model = api.model("RecipeModel", {
     "images": fields.List(fields.Nested(recipe_image_model))
 })
 
+
 recipe_image_model = api.model("RecipeImageCompositeModel", {
     "recipe_id": fields.Integer,
     "image_id": fields.Integer
@@ -169,14 +170,33 @@ recipe_rating_model_send = api.model("RecipeDatingModelSend", {
 
 # COLLECTION MODELS
 
+
+collection_recipe_model = api.model("utils", {
+    "id": fields.Integer,
+    "name": fields.String,
+    "preperation_description": fields.String,
+    "difficulty": fields.String,
+    "person_count": fields.Integer,
+    "preperation_time_minutes": fields.Integer,
+    "search_description": fields.String,
+    "creator_user_id": fields.Integer,
+    "category": fields.Nested(category_model),
+    "tags": fields.List(fields.Nested(tag_model)),
+    "images": fields.List(fields.Nested(recipe_image_model))
+})
+
+
 collection_model = api.model("CollectionModel", {
     "id": fields.Integer,
     "name": fields.String,
     "owner_user_id": fields.Integer,
     "is_default": fields.Boolean,
     "recipes": fields.List(
-        fields.Nested(api.model("utils", {"recipe": fields.Nested(recipe_model)}))  # noqa
-    )
+        fields.Nested(api.model("utils", {
+            "recipe": fields.Nested(collection_recipe_model)
+        }))
+    ),
+    "acl": fields.List(fields.Nested(acl_model))
 })
 
 collection_model_send = api.model("CollectionModelSend", {

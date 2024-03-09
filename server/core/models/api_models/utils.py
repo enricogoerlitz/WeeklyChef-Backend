@@ -62,3 +62,9 @@ base_name_model_fields_send = {
 error_model = api.model("ErrorModel", {
     "message": fields.String
 })
+
+
+acl_model = api.model("utils", {
+    "user_id": fields.Integer,
+    "can_edit": fields.Boolean
+})

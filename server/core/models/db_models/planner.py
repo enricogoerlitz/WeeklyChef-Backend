@@ -42,6 +42,14 @@ class RecipePlanner(db.Model):
         ),
     )
 
+    @property
+    def acl(self):
+        acl = UserSharedRecipePlanner.query.filter(
+            UserSharedRecipePlanner.rplanner_id == self.id
+        ).all()
+
+        return [access_user.to_dict() for access_user in acl]
+
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
         ModelValidator.validate_string(

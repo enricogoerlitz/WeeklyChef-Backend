@@ -1,16 +1,19 @@
 from flask_restx import fields
 from server.api import api
-from server.core.models.api_models.recipe import ingredient_model, recipe_model
+from server.core.models.api_models.recipe import ingredient_model
 
+
+cart_item_recipe_model = api.model("utils", {
+    "id": fields.Integer,
+    "name": fields.String
+})
 
 cart_item_model = api.model("CartItemModel", {
     "id": fields.Integer,
     "cart_id": fields.Integer,
-    "recipe_id": fields.Integer,
-    "ingredient_id": fields.Integer,
     "quantity": fields.Integer,
     "is_done": fields.Boolean,
-    "recipe": fields.Nested(recipe_model),  # TODO: only id and name!
+    "recipe": fields.Nested(cart_item_recipe_model),
     "ingredient": fields.Nested(ingredient_model)
 })
 

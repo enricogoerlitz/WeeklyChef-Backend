@@ -30,7 +30,6 @@ class Recipe(db.Model):
     search_description = db.Column(db.String(75), nullable=False)
 
     creator_user_id = db.Column(db.Integer, nullable=False)  # noqa
-    # creator_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # noqa
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)  # noqa
 
     category = db.relationship("Category", backref="recipe", lazy="select")

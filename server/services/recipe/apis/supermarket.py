@@ -118,7 +118,7 @@ class SupermarketAreaListAPI(Resource):
         return supermarket_area_controller.handle_post(data)
 
 
-@ns.route("<int:id>/area/<int:sarea_id>")
+@ns.route("/<int:id>/area/<int:sarea_id>")
 class SupermarketAreaAPI(Resource):
 
     @ns.expect(supermarket_area_model_send)
@@ -129,7 +129,7 @@ class SupermarketAreaAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsSupermarketOwnerOrCanEdit
-    def patch(self, _, sarea_id):
+    def patch(self, id, sarea_id):
         return supermarket_area_controller.handle_patch(
             id=sarea_id,
             data=request.get_json()
@@ -142,11 +142,11 @@ class SupermarketAreaAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsSupermarketOwnerOrCanEdit
-    def delete(self, _, sarea_id):
+    def delete(self, id, sarea_id):
         return supermarket_area_controller.handle_delete(sarea_id)
 
 
-@ns.route("<int:id>/area/<int:sarea_id>/reorder/<int:new_order_number>")
+@ns.route("/<int:id>/area/<int:sarea_id>/reorder/<int:new_order_number>")
 class SupermarketAreaChangeOrderAPI(Resource):
 
     @ns.response(code=201, model=supermarket_area_model, description=sui.desc_added("SupermarketArea"))        # noqa
@@ -155,14 +155,14 @@ class SupermarketAreaChangeOrderAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsSupermarketOwnerOrCanEdit
-    def post(self, _, sarea_id, new_order_number):
+    def post(self, id, sarea_id, new_order_number):
         return supermarket_area_controller.handle_post_change_order(
             id=sarea_id,
             new_order_number=new_order_number
         )
 
 
-@ns.route("<int:id>/area/<int:sarea_id>/ingredient/<int:ingredient_id>")
+@ns.route("/<int:id>/area/<int:sarea_id>/ingredient/<int:ingredient_id>")
 class SupermarketAreaIngredientAPI(Resource):
 
     @ns.expect(supermarket_area_ingredinet_model_send)
@@ -174,7 +174,7 @@ class SupermarketAreaIngredientAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsSupermarketOwnerOrCanEdit
-    def post(self, _, sarea_id, ingredient_id):
+    def post(self, id, sarea_id, ingredient_id):
         data = {
             "sarea_id": sarea_id,
             "ingredient_id": ingredient_id,
@@ -194,7 +194,7 @@ class SupermarketAreaIngredientAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
     @IsSupermarketOwnerOrCanEdit
-    def patch(self, sarea_id, ingredient_id):
+    def patch(self, id, sarea_id, ingredient_id):
         return supermarket_area_ingredient_controller.handle_patch(
             id=(sarea_id, ingredient_id),
             data=request.get_json()

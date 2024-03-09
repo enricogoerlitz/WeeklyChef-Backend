@@ -68,7 +68,7 @@ class RecipePlannerAPI(Resource):
     @jwt_required()
     @IsRecipePlannerOwnerOrHasAccess
     def get(self, id):
-        return recipe_planner_controller.handle_get(id)  # TODO: here detail model  # noqa
+        return recipe_planner_controller.handle_get(id)
 
     @ns.expect(recipe_planner_model_send)
     @ns.response(code=200, model=recipe_planner_model, description=sui.desc_update(ns.name))       # noqa
@@ -95,7 +95,7 @@ class RecipePlannerAPI(Resource):
         return recipe_planner_controller.handle_delete(id)
 
 
-@ns.route("/item")
+@ns.route("/<int:id>/item")
 class RecipePlannerItemListAPI(Resource):
 
     @ns.expect(recipe_planner_item_model_send)
@@ -107,13 +107,13 @@ class RecipePlannerItemListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
-    def post(self):
+    def post(self, id):
         return recipe_planner_item_controller.handle_post(
             data=request.get_json()
         )
 
 
-@ns.route("/item/<int:id>")
+@ns.route("/<int:id>/item/<int:item_id>")
 class RecipePlannerItemAPI(Resource):
     @ns.expect(recipe_planner_item_model_send)
     @ns.response(code=200, model=recipe_planner_item_model, description=sui.desc_update("SupermarketAreaIngredient"))  # noqa
@@ -123,9 +123,9 @@ class RecipePlannerItemAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
-    def patch(self, id):
+    def patch(self, id, item_id):
         return recipe_planner_item_controller.handle_patch(
-            id=id,
+            id=item_id,
             data=request.get_json()
         )
 
@@ -136,11 +136,11 @@ class RecipePlannerItemAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
-    def delete(self, id):
-        return recipe_planner_item_controller.handle_delete(id)
+    def delete(self, id, item_id):
+        return recipe_planner_item_controller.handle_delete(item_id)
 
 
-@ns.route("/item/<int:id>/reorder/<int:new_order_number>")
+@ns.route("/<int:id>/item/<int:item_id>/reorder/<int:new_order_number>")
 class RecipePlannerChangeOrderAPI(Resource):
 
     @ns.response(code=201, model=recipe_planner_item_model, description=sui.desc_added("SupermarketArea"))        # noqa
@@ -149,9 +149,9 @@ class RecipePlannerChangeOrderAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
-    def post(self, id, new_order_number):
+    def post(self, id, item_id, new_order_number):
         return recipe_planner_item_controller.handle_post_change_order(
-            id=id,
+            id=item_id,
             new_order_number=new_order_number
         )
 
