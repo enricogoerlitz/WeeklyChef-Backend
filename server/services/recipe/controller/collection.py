@@ -1,6 +1,6 @@
 from flask import Response
 
-from server.core.models.db_models.recipe.collection import (
+from server.core.models.db_models.collection import (
     Collection, CollectionRecipeComposite,
     UserSharedCollection)
 from server.core.controller.crud_controller import BaseCrudController
@@ -8,7 +8,7 @@ from server.core.models.api_models.recipe import (
     collection_model, collection_model_send,
     collection_recipe_model, user_shared_collection_model,
     user_shared_collection_model_send)
-from server.core.models.db_models.recipe.recipe import Recipe
+from server.core.models.db_models.recipe import Recipe
 from server.errors import http_errors
 from server.logger import logger
 

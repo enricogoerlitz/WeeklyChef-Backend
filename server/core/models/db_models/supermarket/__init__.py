@@ -1,1 +1,0 @@
-from .supermarket import *  # noqa

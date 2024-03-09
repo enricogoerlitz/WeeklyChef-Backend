@@ -69,6 +69,7 @@ class SupermarketAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def patch(self, id):
         return supermarket_controller.handle_patch(
             id=id,
@@ -81,6 +82,7 @@ class SupermarketAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwner
     def delete(self, id):
         return supermarket_controller.handle_delete(id)
 
@@ -105,6 +107,7 @@ class SupermarketAreaListAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("SupermarketArea"))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def post(self, id):
         data = request.get_json()
         data["supermarket_id"] = id
@@ -122,6 +125,7 @@ class SupermarketAreaAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketArea"))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def patch(self, id):
         return supermarket_area_controller.handle_patch(
             id=id,
@@ -134,6 +138,7 @@ class SupermarketAreaAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def delete(self, id):
         return supermarket_area_controller.handle_delete(id)
 
@@ -146,6 +151,7 @@ class SupermarketAreaChangeOrderAPI(Resource):
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def post(self, id, new_order_number):
         return supermarket_area_controller.handle_post_change_order(
             id=id,
@@ -164,6 +170,7 @@ class SupermarketAreaIngredientAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("SupermarketAreaIngredient"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def post(self, sarea_id, ingredient_id):
         data = {
             "sarea_id": sarea_id,
@@ -183,7 +190,7 @@ class SupermarketAreaIngredientAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))            # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
-    # @IsRatingOwner
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def patch(self, sarea_id, ingredient_id):
         return supermarket_area_ingredient_controller.handle_patch(
             id=(sarea_id, ingredient_id),
@@ -196,6 +203,7 @@ class SupermarketAreaIngredientAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwnerOrCanEdit
     def delete(self, sarea_id, ingredient_id):
         return supermarket_area_ingredient_controller.handle_delete(
             id=(sarea_id, ingredient_id)
@@ -212,6 +220,7 @@ class UserSharedEditSupermarketAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedEditSupermarket"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwner
     def post(self, id, user_id):
         data = {
             "supermarket_id": id,
@@ -229,6 +238,7 @@ class UserSharedEditSupermarketAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("UserSharedEditSupermarket"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsSupermarketOwner
     def delete(self, id, user_id):
         return user_shared_edit_supermarket_controller.handle_delete(
             id=(id, user_id)

@@ -2,11 +2,11 @@ from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.api_models.recipe import (
     ingredient_model, ingredient_model_send
 )
-from server.core.models.db_models.recipe.recipe import Recipe
-from server.core.models.db_models.planner.planner import RecipePlanner
-from server.core.models.db_models.recipe.ingredient import Ingredient
-from server.core.models.db_models.cart.cart import Cart
-from server.core.models.db_models.supermarket.supermarket import Supermarket
+from server.core.models.db_models.recipe import Recipe
+from server.core.models.db_models.planner import RecipePlanner
+from server.core.models.db_models.ingredient import Ingredient
+from server.core.models.db_models.cart import Cart
+from server.core.models.db_models.supermarket import Supermarket
 
 
 class IngredientController(BaseCrudController):

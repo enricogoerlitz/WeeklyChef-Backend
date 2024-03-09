@@ -1,10 +1,10 @@
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.db_models.recipe.tag import Tag
+from server.core.models.db_models.tag import Tag
 from server.core.models.api_models.recipe import (
     tag_model, tag_model_send
 )
-from server.core.models.db_models.recipe.recipe import Recipe
-from server.core.models.db_models.recipe.collection import Collection
+from server.core.models.db_models.recipe import Recipe
+from server.core.models.db_models.collection import Collection
 
 
 class TagController(BaseCrudController):

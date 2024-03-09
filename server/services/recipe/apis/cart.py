@@ -58,6 +58,7 @@ class CartAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsCartOwnerOrCanEdit
     def get(self, id):
         return cart_controller.handle_get(id)
 
@@ -68,6 +69,7 @@ class CartAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsCartOwnerOrCanEdit
     def patch(self, id):
         return cart_controller.handle_patch(
             id=id,
@@ -80,6 +82,7 @@ class CartAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsCartOwner
     def delete(self, id):
         return cart_controller.handle_delete(id)
 
@@ -95,6 +98,7 @@ class CartItemListAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("SupermarketAreaIngredient"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsCartOwnerOrCanEdit
     def post(self):
         return cart_item_controller.handle_post(
             data=request.get_json()
@@ -110,7 +114,7 @@ class CartItemAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))            # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
-    # @IsRatingOwner
+    # TODO: @IsCartOwnerOrCanEdit
     def patch(self, id):
         return cart_item_controller.handle_patch(
             id=id,
@@ -123,6 +127,7 @@ class CartItemAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
+    # TODO: @IsCartOwnerOrCanEdit
     def delete(self, id):
         return cart_item_controller.handle_delete(id)
 
@@ -137,7 +142,7 @@ class UserSharedRecipePlannerAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))    # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
     @jwt_required()
-    # @IsCollectionOwner
+    # TODO: @IsCartOwner
     def post(self, id, user_id):
         data = {
             "cart_id": id,
@@ -155,6 +160,6 @@ class UserSharedRecipePlannerAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    # @IsRecipeCreatorOrAdminOrStaff
+    # TODO: @IsCartOwner
     def delete(self, id, user_id):
         return user_shared_cart_controller.handle_delete(id=(id, user_id))                # noqa

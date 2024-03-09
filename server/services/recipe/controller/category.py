@@ -1,9 +1,9 @@
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.db_models.recipe.category import Category
+from server.core.models.db_models.category import Category
 from server.core.models.api_models.recipe import (
     category_model, category_model_send
 )
-from server.core.models.db_models.recipe.recipe import Recipe
+from server.core.models.db_models.recipe import Recipe
 
 
 class CategoryController(BaseCrudController):

@@ -4,7 +4,7 @@ from flask import request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import and_
 
-from server.core.models.db_models.recipe.recipe import Recipe
+from server.core.models.db_models.recipe import Recipe
 from server.errors import http_errors
 from server.core.enums import roles
 from server.core.permissions.general import unauthorized_error

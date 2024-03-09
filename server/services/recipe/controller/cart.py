@@ -1,14 +1,14 @@
 from flask import Response
 
-from server.core.models.db_models.cart.cart import (
+from server.core.models.db_models.cart import (
     Cart, CartItem, UserSharedCart
 )
 from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.api_models.cart import (
     cart_item_model, cart_item_model_send, cart_model,
     cart_model_send, user_shared_cart_model)
-from server.core.models.db_models.recipe.recipe import Recipe
-from server.core.models.db_models.recipe.ingredient import Ingredient
+from server.core.models.db_models.recipe import Recipe
+from server.core.models.db_models.ingredient import Ingredient
 from server.errors import http_errors
 from server.logger import logger
 

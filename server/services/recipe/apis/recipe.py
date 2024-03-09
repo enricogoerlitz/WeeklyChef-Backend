@@ -4,7 +4,6 @@ from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui, jwt
 from server.core.models.api_models.utils import error_model
-from server.core.permissions.general import IsAdminOrStaff
 from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
 from server.core.models.api_models.recipe import (
     recipe_image_model, recipe_ingredient_model,
@@ -49,7 +48,6 @@ class RecipeListAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    @IsAdminOrStaff
     def post(self):
         data = jwt.add_user_id_to_data(
             data=request.get_json(),
@@ -78,7 +76,7 @@ class RecipeAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    @IsAdminOrStaff
+    @IsRecipeCreatorOrAdminOrStaff
     def patch(self, id):
         return recipe_controller.handle_patch(
             id=id,
@@ -91,7 +89,7 @@ class RecipeAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    @IsAdminOrStaff
+    @IsRecipeCreatorOrAdminOrStaff
     def delete(self, id):
         return recipe_controller.handle_delete(id)
 
@@ -162,7 +160,7 @@ class RecipeIngredientAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeIngredient"))            # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
-    # @IsRatingOwner
+    @IsRecipeCreatorOrAdminOrStaff
     def patch(self, id, ingredient_id):
         return recipe_ingredient_controller.handle_patch(
             id=(id, ingredient_id),
@@ -201,7 +199,6 @@ class RecipeImageGetAPI(Resource):
     @ns.response(code=404, model=error_model, description="Image file not found")                       # noqa
     @ns.response(code=500, model=error_model, description="Unexpected error")                           # noqa
     @jwt_required()
-    @IsAdminOrStaff
     def get(self, id):
         return image_controller.handle_get(id)
 
@@ -284,7 +281,7 @@ class RecipeRatingAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeRating"))        # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
-    # @IsRatingOwner
+    # TODO: @IsRatingCreator
     def patch(self, id):
         user_id = jwt.get_user_id()
 
@@ -299,7 +296,7 @@ class RecipeRatingAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)
     @jwt_required()
-    # @IsRatingOwner -> kein staff oder admin, da hier auf user gegangen wir -> dafür /rating/admin/*...  # noqa
+    # TODO: @IsRatingCreator
     def delete(self, id):
         user_id = jwt.get_user_id()
         return recipe_rating_controller.handle_delete(id=(user_id, id))

@@ -9,19 +9,19 @@ from typing import Type
 from flask_restx import Model
 
 from server.caching import redis
-from server.core.models.db_models.planner.planner import (
+from server.core.models.db_models.planner import (
     RecipePlanner, RecipePlannerItem
 )
-from server.core.models.db_models.recipe.unit import Unit
-from server.core.models.db_models.recipe.tag import Tag
-from server.core.models.db_models.recipe.category import Category
-from server.core.models.db_models.recipe.ingredient import Ingredient
-from server.core.models.db_models.recipe.recipe import Recipe, RecipeIngredient
-from server.core.models.db_models.recipe.collection import (
+from server.core.models.db_models.unit import Unit
+from server.core.models.db_models.tag import Tag
+from server.core.models.db_models.category import Category
+from server.core.models.db_models.ingredient import Ingredient
+from server.core.models.db_models.recipe import Recipe, RecipeIngredient
+from server.core.models.db_models.collection import (
     Collection, CollectionRecipeComposite
 )
-from server.core.models.db_models.cart.cart import Cart, CartItem
-from server.core.models.db_models.supermarket.supermarket import (
+from server.core.models.db_models.cart import Cart, CartItem
+from server.core.models.db_models.supermarket import (
     SupermarketArea,
     SupermarketAreaIngredientComposite)
 

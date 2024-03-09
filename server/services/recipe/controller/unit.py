@@ -1,11 +1,11 @@
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.db_models.recipe import Unit
+from server.core.models.db_models.unit import Unit
 from server.core.models.api_models.recipe import (
     unit_model, unit_model_send,
 )
-from server.core.models.db_models.recipe.ingredient import Ingredient
-from server.core.models.db_models.recipe.recipe import Recipe
-from server.core.models.db_models.planner.planner import RecipePlanner
+from server.core.models.db_models.ingredient import Ingredient
+from server.core.models.db_models.recipe import Recipe
+from server.core.models.db_models.planner import RecipePlanner
 
 
 class UnitController(BaseCrudController):

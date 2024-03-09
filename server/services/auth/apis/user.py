@@ -25,8 +25,8 @@ class UserListAPI(Resource):
     @ns.response(code=401, model=error_model, description="User unauthorized")  # noqa
     @ns.response(code=500, model=error_model, description="List of user models")  # noqa
     @jwt_required()
-    @IsAdminOrStaff
     def get(self):
+        # TODO: ONLY USERNAMES!
         return user_controller.handle_get_list(
             reqargs=request.args
         )
@@ -40,13 +40,14 @@ class UserListAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def post(self):
+        # TODO: CHANGE ROUTE: /admin/user/ !!!
         data, status_code = auth_controller.handle_register(request.get_json())
         if status_code == 200:
             data = decode_token(data["access_token"]).get("sub")
 
         return data, status_code
 
-    # patch for adding / removing roles etc
+    # TODO: patch for adding /admin/user/ removing roles etc
 
 
 @ns.route("/me")

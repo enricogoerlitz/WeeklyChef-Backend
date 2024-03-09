@@ -4,7 +4,7 @@ from sqlalchemy import and_
 
 from server.errors import errors
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.db_models.supermarket.supermarket import (
+from server.core.models.db_models.supermarket import (
     Supermarket, SupermarketArea,
     SupermarketAreaIngredientComposite, UserSharedEditSupermarket)
 from server.core.models.api_models.supermarket import (
@@ -12,7 +12,7 @@ from server.core.models.api_models.supermarket import (
     supermarket_area_ingredinet_model_send, supermarket_area_model,
     supermarket_area_model_send,
     supermarket_model, supermarket_model_send, supermarket_user_edit_model)
-from server.core.models.db_models.recipe.ingredient import Ingredient
+from server.core.models.db_models.ingredient import Ingredient
 from server.errors import http_errors
 from server.logger import logger
 from server.db import db

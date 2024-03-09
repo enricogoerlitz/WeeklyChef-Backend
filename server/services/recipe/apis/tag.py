@@ -35,7 +35,6 @@ class TagListAPI(Resource):
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))       # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
-    @IsAdminOrStaff
     def post(self):
         return category_controller.handle_post(
             data=request.get_json()

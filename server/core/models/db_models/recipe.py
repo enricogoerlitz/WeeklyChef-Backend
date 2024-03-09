@@ -215,7 +215,6 @@ class RecipeRating(db.Model):
     __tablename__ = "recipe_rating"
 
     user_id = db.Column(db.Integer, primary_key=True)  # noqa
-    # user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)  # noqa
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), primary_key=True)  # noqa
     rating = db.Column(db.Float(precision=2), nullable=False)
 

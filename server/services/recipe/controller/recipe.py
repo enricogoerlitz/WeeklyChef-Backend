@@ -12,7 +12,7 @@ from server.errors import errors, http_errors
 from server.core.controller.crud_controller import (
     AbstractRedisCache, BaseCrudController,
     IController)
-from server.core.models.db_models.recipe.recipe import (
+from server.core.models.db_models.recipe import (
     Recipe, RecipeImage, RecipeIngredient,
     RecipeRating, RecipeTagComposite, ReicpeImageComposite
 )
@@ -21,13 +21,13 @@ from server.core.models.api_models.recipe import (
     recipe_ingredient_model_send, recipe_model,
     recipe_model_send, recipe_rating_model,
     recipe_rating_model_send, recipe_tag_model)
-from server.core.models.db_models.recipe.tag import Tag
-from server.core.models.db_models.recipe.ingredient import Ingredient
-from server.core.models.db_models.recipe.category import Category
+from server.core.models.db_models.tag import Tag
+from server.core.models.db_models.ingredient import Ingredient
+from server.core.models.db_models.category import Category
 from server.logger import logger
-from server.core.models.db_models.recipe.collection import Collection
-from server.core.models.db_models.planner.planner import RecipePlanner
-from server.core.models.db_models.cart.cart import Cart
+from server.core.models.db_models.collection import Collection
+from server.core.models.db_models.planner import RecipePlanner
+from server.core.models.db_models.cart import Cart
 
 
 class RecipeController(BaseCrudController):

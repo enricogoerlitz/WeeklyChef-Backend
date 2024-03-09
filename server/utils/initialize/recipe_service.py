@@ -4,11 +4,11 @@ from flask import Flask
 from sqlalchemy import or_
 
 from server.db import db
-from server.core.models.db_models.recipe.unit import Unit
-from server.core.models.db_models.recipe.category import Category
-from server.core.models.db_models.recipe.tag import Tag
-from server.core.models.db_models.recipe.ingredient import Ingredient
-from server.core.models.db_models.recipe.recipe import (
+from server.core.models.db_models.unit import Unit
+from server.core.models.db_models.category import Category
+from server.core.models.db_models.tag import Tag
+from server.core.models.db_models.ingredient import Ingredient
+from server.core.models.db_models.recipe import (
     Recipe, RecipeIngredient, RecipeTagComposite
 )
 

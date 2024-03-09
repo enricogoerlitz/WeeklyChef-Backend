@@ -8,7 +8,7 @@ from sqlalchemy import and_
 
 from server.errors import errors
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.db_models.planner.planner import (
+from server.core.models.db_models.planner import (
     RecipePlanner, RecipePlannerItem,
     UserSharedRecipePlanner)
 from server.core.models.api_models.planner import (
@@ -17,7 +17,7 @@ from server.core.models.api_models.planner import (
     recipe_planner_model_send,
     user_shared_recipe_planner_model,
     user_shared_recipe_planner_model_send)
-from server.core.models.db_models.recipe.recipe import Recipe
+from server.core.models.db_models.recipe import Recipe
 from server.errors import http_errors
 from server.logger import logger
 from server.db import db
