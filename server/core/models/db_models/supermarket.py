@@ -25,7 +25,7 @@ class Supermarket(db.Model):
     district = db.Column(db.String(30), nullable=False)
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
 
-    areas = db.relationship(
+    areas_unsorted = db.relationship(
         "SupermarketArea",
         cascade="all,delete",
         backref="supermarket",
@@ -39,6 +39,13 @@ class Supermarket(db.Model):
             name="uq_name_street"
         ),
     )
+
+    @property
+    def areas(self):
+        return sorted(
+            self.areas_unsorted,
+            key=lambda x: (x.order_number)
+        )
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:

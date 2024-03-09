@@ -32,7 +32,7 @@ class RecipePlanner(db.Model):
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
-    items = db.relationship(
+    items_unsorted = db.relationship(
         "RecipePlannerItem",
         cascade="all,delete",
         lazy="select"
@@ -50,6 +50,13 @@ class RecipePlanner(db.Model):
             name="qu_rplanner_name_user_id"
         ),
     )
+
+    @property
+    def items(self):
+        return sorted(
+            self.items_unsorted,
+            key=lambda x: (x.date, x.order_number)
+        )
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:
