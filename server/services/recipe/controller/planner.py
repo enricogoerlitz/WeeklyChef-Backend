@@ -12,16 +12,16 @@ from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.db_models.planner import (
     RecipePlanner, RecipePlannerItem,
     UserSharedRecipePlanner)
-from server.core.models.api_models.planner import (
-    recipe_planner_item_model,
-    recipe_planner_item_model_send, recipe_planner_model_detail,
-    recipe_planner_model_send,
-    user_shared_recipe_planner_model,
-    user_shared_recipe_planner_model_send)
 from server.core.models.db_models.recipe import Recipe
 from server.errors import http_errors
 from server.logger import logger
 from server.db import db
+from server.core.models.api_models.planner import (
+    recipe_planner_item_model,
+    recipe_planner_item_model_send, recipe_planner_model,
+    recipe_planner_model_detail,
+    recipe_planner_model_send, user_shared_recipe_planner_model,
+    user_shared_recipe_planner_model_send)
 
 
 class RecipePlannerController(BaseCrudController):
@@ -186,13 +186,13 @@ class UserSharedRecipePlannerController(BaseCrudController):
 
 recipe_planner_controller = RecipePlannerController(
     model=RecipePlanner,
-    api_model=recipe_planner_model_detail,
+    api_model=recipe_planner_model,
+    api_model_detail=recipe_planner_model_detail,
     api_model_send=recipe_planner_model_send,
     search_fields=["name"],
     unique_columns_together=["name", "owner_user_id"],
     read_only_fields=["owner_user_id"]
 )
-
 
 recipe_planner_item_controller = RecipePlannerItemController(
     model=RecipePlannerItem,
@@ -211,14 +211,12 @@ recipe_planner_item_controller = RecipePlannerItemController(
     clear_cache_models=[RecipePlanner]
 )
 
-
 user_shared_recipe_planner_controller = UserSharedRecipePlannerController(
     model=UserSharedRecipePlanner,
     api_model=user_shared_recipe_planner_model,
     api_model_send=user_shared_recipe_planner_model_send,
     foreign_key_columns=[
         (RecipePlanner, "rplanner_id")
-        # (User, "user_id")
     ],
     read_only_fields=["rplanner_id", "user_id"],
     unique_columns_together=["rplanner_id", "user_id"],

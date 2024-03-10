@@ -1,6 +1,6 @@
 from server.core.controller.crud_controller import BaseCrudController
 from server.core.models.db_models.tag import Tag
-from server.core.models.api_models.recipe import (
+from server.core.models.api_models.tag import (
     tag_model, tag_model_send
 )
 from server.core.models.db_models.recipe import Recipe
@@ -17,5 +17,6 @@ tag_controller = TagController(
     api_model_send=tag_model_send,
     unique_columns=["name"],
     search_fields=["name"],
-    clear_cache_models=[Recipe, Collection]
+    clear_cache_models=[Recipe, Collection],
+    use_caching=True
 )

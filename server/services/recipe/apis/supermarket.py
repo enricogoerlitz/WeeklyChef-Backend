@@ -4,10 +4,11 @@ from flask_jwt_extended import jwt_required
 
 from server.utils import swagger as sui, jwt
 from server.core.models.api_models.supermarket import (
-    supermarket_area_ingredinet_model, supermarket_area_ingredinet_model_send,
-    supermarket_area_model, supermarket_area_model_send,
-    supermarket_model,
-    supermarket_model_detail, supermarket_model_send)
+    supermarket_area_ingredinet_model,
+    supermarket_area_ingredinet_model_send, supermarket_area_model,
+    supermarket_area_model_send,
+    supermarket_model, supermarket_model_detail, qpp_supermarket_model,
+    supermarket_model_send)
 from server.core.models.api_models.utils import error_model
 from server.services.recipe.controller.supermarket import (
     supermarket_area_controller,
@@ -28,6 +29,7 @@ ns = Namespace(
 @ns.route("/")
 class SupermarketListAPI(Resource):
 
+    @ns.expect(qpp_supermarket_model)
     @ns.response(code=200, model=[supermarket_model], description=sui.desc_list(ns.name))       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa

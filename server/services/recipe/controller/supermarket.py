@@ -9,9 +9,9 @@ from server.core.models.db_models.supermarket import (
     SupermarketAreaIngredientComposite, UserSharedEditSupermarket)
 from server.core.models.api_models.supermarket import (
     supermarket_area_ingredinet_model,
-    supermarket_area_ingredinet_model_send, supermarket_area_model,
-    supermarket_area_model_send,
-    supermarket_model_detail, supermarket_model_send,
+    supermarket_area_ingredinet_model_send,
+    supermarket_area_model, supermarket_area_model_send,
+    supermarket_model, supermarket_model_detail, supermarket_model_send,
     supermarket_user_edit_model)
 from server.core.models.db_models.ingredient import Ingredient
 from server.errors import http_errors
@@ -137,12 +137,12 @@ class UserSharedEditSupermarketController(BaseCrudController):
 
 supermarket_controller = SupermarketController(
     model=Supermarket,
-    api_model=supermarket_model_detail,
+    api_model=supermarket_model,
+    api_model_detail=supermarket_model_detail,
     api_model_send=supermarket_model_send,
     read_only_fields=["owner_user_id"],
     unique_columns_together=["name", "street"]
 )
-
 
 supermarket_area_controller = SupermarketAreaController(
     model=SupermarketArea,
@@ -158,7 +158,6 @@ supermarket_area_controller = SupermarketAreaController(
     read_only_fields=["order_number"],
     clear_cache_models=[Supermarket]
 )
-
 
 supermarket_area_ingredient_controller = SupermarketAreaIngredientController(
     model=SupermarketAreaIngredientComposite,
@@ -178,7 +177,6 @@ supermarket_area_ingredient_controller = SupermarketAreaIngredientController(
     ],
     clear_cache_models=[Supermarket, SupermarketArea]
 )
-
 
 user_shared_edit_supermarket_controller = UserSharedEditSupermarketController(
     model=UserSharedEditSupermarket,

@@ -86,7 +86,8 @@ class BaseCrudController(IController, AbstractRedisCache):
             *,
             model: Model,
             api_model: api.model,
-            api_model_send: api.model = None,
+            api_model_send: api.model,
+            api_model_detail: api.model = None,
             unique_columns: list[str] = None,
             unique_columns_together: list[list[str]] | list[str] = None,
             foreign_key_columns: list[tuple[Model, Any]] = None,
@@ -105,6 +106,7 @@ class BaseCrudController(IController, AbstractRedisCache):
         self._model = model
         self._api_model = api_model
         self._api_model_send = api_model_send
+        self._api_model_detail = api_model_detail if api_model_detail else api_model  # noqa
         self._unique_columns = unique_columns
         self._search_fields = search_fields
         self._pagination_page_size = pagination_page_size
@@ -125,7 +127,7 @@ class BaseCrudController(IController, AbstractRedisCache):
 
             obj = self._find_object_by_id(id)
 
-            api_response_model = api_response_model if api_response_model else self._api_model  # noqa
+            api_response_model = api_response_model if api_response_model else self._api_model_detail  # noqa
             response_data = marshal(obj, api_response_model)
 
             self._set_cache(response_data, redis_addition_key)

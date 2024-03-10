@@ -6,7 +6,7 @@ from server.utils import jwt
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
 from server.core.models.api_models.cart import (
-    cart_item_model, cart_item_model_send, cart_model,
+    cart_item_model, cart_item_model_send,
     cart_model_detail, cart_model_send, user_shared_cart_model)
 from server.services.recipe.controller.cart import (
     cart_controller, cart_item_controller,
@@ -33,8 +33,7 @@ class CartListAPI(Resource):
     def get(self):
         return cart_controller.handle_get_list(
             reqargs=request.args,
-            user_id=jwt.get_user_id(),
-            api_response_model=cart_model
+            user_id=jwt.get_user_id()
         )
 
     @ns.expect(cart_model_send)

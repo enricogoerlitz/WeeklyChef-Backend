@@ -8,9 +8,9 @@ from server.core.permissions.recipe import IsRecipeCreatorOrAdminOrStaff
 from server.core.models.api_models.recipe import (
     recipe_image_model, recipe_ingredient_model,
     recipe_ingredient_model_send, recipe_model_detail,
-    recipe_model_get_list, recipe_model,
+    qpp_recipe_model, recipe_model,
     recipe_model_send, recipe_rating_model, recipe_rating_model_agg,
-    recipe_rating_model_get,
+    qpp_recipe_rating_model,
     recipe_rating_model_send, recipe_tag_model)
 from server.services.recipe.controller import (
     recipe_controller,
@@ -33,7 +33,7 @@ ns = Namespace(
 @ns.route("/")
 class RecipeListAPI(Resource):
 
-    @ns.expect(recipe_model_get_list)
+    @ns.expect(qpp_recipe_model)
     @ns.response(code=200, model=[recipe_model], description=sui.desc_list(ns.name))            # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
@@ -69,7 +69,7 @@ class RecipeAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    def get(id):
+    def get(self, id):
         return recipe_controller.handle_get(id)
 
     @ns.expect(recipe_model_send)
@@ -244,7 +244,7 @@ class RecipeImageAPI(Resource):
 @ns.route("/<int:id>/rating")
 class RecipeRatingAPI(Resource):
 
-    @ns.expect(recipe_rating_model_get)
+    @ns.expect(qpp_recipe_rating_model)
     @ns.response(code=200, model=recipe_rating_model_agg, description=sui.desc_get("RecipeRating")) # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa

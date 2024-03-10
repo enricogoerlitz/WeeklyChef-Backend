@@ -4,9 +4,10 @@ from server.core.models.db_models.collection import (
     Collection, CollectionRecipeComposite,
     UserSharedCollection)
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.api_models.recipe import (
-    collection_model, collection_model_send,
-    collection_recipe_model, user_shared_collection_model,
+from server.core.models.api_models.collection import (
+    collection_model,
+    collection_model_send, collection_recipe_model,
+    user_shared_collection_model,
     user_shared_collection_model_send)
 from server.core.models.db_models.recipe import Recipe
 from server.errors import http_errors
@@ -57,7 +58,6 @@ collection_controller = CollectionController(
     read_only_fields=["owner_user_id"]
 )
 
-
 collection_recipe_controller = CollectionRecipeController(
     model=CollectionRecipeComposite,
     api_model=collection_recipe_model,
@@ -73,14 +73,12 @@ collection_recipe_controller = CollectionRecipeController(
     clear_cache_models=[Collection]
 )
 
-
 user_shared_collection_controller = UserSharedCollectionController(
     model=UserSharedCollection,
     api_model=user_shared_collection_model,
     api_model_send=user_shared_collection_model_send,
     foreign_key_columns=[
         (Collection, "collection_id")
-        # (User, "user_id")
     ],
     unique_columns_together=[
         "collection_id",

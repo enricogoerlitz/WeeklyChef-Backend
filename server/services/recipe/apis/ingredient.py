@@ -5,9 +5,9 @@ from flask_jwt_extended import jwt_required
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
-from server.core.models.api_models.recipe import (
-    ingredient_model, ingredient_model_send
-)
+from server.core.models.api_models.ingredient import (
+    ingredient_model, qpp_ingredient_model,
+    ingredient_model_send)
 from server.services.recipe.controller.ingredient import ingredient_controller
 
 
@@ -21,6 +21,7 @@ ns = Namespace(
 @ns.route("/")
 class IngredientListAPI(Resource):
 
+    @ns.expect(qpp_ingredient_model)
     @ns.response(code=200, model=[ingredient_model], description=sui.desc_list(ns.name))            # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa

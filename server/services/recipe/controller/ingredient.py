@@ -1,5 +1,5 @@
 from server.core.controller.crud_controller import BaseCrudController
-from server.core.models.api_models.recipe import (
+from server.core.models.api_models.ingredient import (
     ingredient_model, ingredient_model_send
 )
 from server.core.models.db_models.recipe import Recipe
@@ -20,5 +20,5 @@ ingredient_controller = IngredientController(
     unique_columns=["name"],
     search_fields=["name"],
     clear_cache_models=[Recipe, RecipePlanner, Cart, Supermarket],
-    use_caching=False
+    use_caching=True
 )

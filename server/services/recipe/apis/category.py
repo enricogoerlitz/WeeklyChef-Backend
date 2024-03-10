@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
-from server.core.models.api_models.recipe import (
+from server.core.models.api_models.category import (
     category_model, category_model_send
 )
 from server.services.recipe.controller.category import category_controller

@@ -3,6 +3,8 @@ from flask_restx import fields
 from server.api import api
 
 
+# API MODELS
+
 role_model = api.model("RoleModel", {
     "id": fields.Integer,
     "name": fields.String

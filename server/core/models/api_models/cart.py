@@ -1,9 +1,11 @@
 from flask_restx import fields
 from server.api import api
-from server.core.models.api_models.recipe import ingredient_model
+from server.core.models.api_models.ingredient import ingredient_model
 
 
-cart_item_recipe_model = api.model("utils", {
+# API MODELS
+
+u_cart_item_recipe_model = api.model("utils", {
     "id": fields.Integer,
     "name": fields.String
 })
@@ -13,7 +15,7 @@ cart_item_model = api.model("CartItemModel", {
     "cart_id": fields.Integer,
     "quantity": fields.Integer,
     "is_done": fields.Boolean,
-    "recipe": fields.Nested(cart_item_recipe_model),
+    "recipe": fields.Nested(u_cart_item_recipe_model),
     "ingredient": fields.Nested(ingredient_model)
 })
 
@@ -24,7 +26,6 @@ cart_item_model_send = api.model("CartItemModelSend", {
     "is_done": fields.Boolean
 })
 
-
 cart_model_detail = api.model("CartModel", {
     "id": fields.Integer,
     "name": fields.String,
@@ -32,7 +33,6 @@ cart_model_detail = api.model("CartModel", {
     "is_active": fields.Boolean,
     "items": fields.List(fields.Nested(cart_item_model))
 })
-
 
 cart_model = api.model("CartModel", {
     "id": fields.Integer,
@@ -45,7 +45,6 @@ cart_model_send = api.model("CartModelSend", {
     "name": fields.String,
     "is_active": fields.Boolean
 })
-
 
 user_shared_cart_model = api.model("UserSharedCartModel", {
     "cart_id": fields.Integer,

@@ -6,7 +6,7 @@ from server.utils import swagger as sui
 from server.services.recipe.controller import unit_controller
 from server.core.models.api_models.utils import error_model
 from server.core.permissions.general import IsAdminOrStaff
-from server.core.models.api_models.recipe import (
+from server.core.models.api_models.unit import (
     unit_model, unit_model_send
 )
 

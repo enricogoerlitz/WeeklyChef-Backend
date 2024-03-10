@@ -18,9 +18,9 @@ from server.core.models.db_models.recipe import (
 )
 from server.core.models.api_models.recipe import (
     recipe_image_model, recipe_ingredient_model,
-    recipe_ingredient_model_send, recipe_model_detail,
-    recipe_model_send, recipe_rating_model,
-    recipe_rating_model_send, recipe_tag_model)
+    recipe_ingredient_model_send, recipe_model,
+    recipe_model_detail, recipe_model_send,
+    recipe_rating_model, recipe_rating_model_send, recipe_tag_model)
 from server.core.models.db_models.tag import Tag
 from server.core.models.db_models.ingredient import Ingredient
 from server.core.models.db_models.category import Category
@@ -264,7 +264,8 @@ class RecipeRatingController(BaseCrudController):
 
 recipe_controller = RecipeController(
     model=Recipe,
-    api_model=recipe_model_detail,
+    api_model=recipe_model,
+    api_model_detail=recipe_model_detail,
     api_model_send=recipe_model_send,
     unique_columns=["name"],
     search_fields=[
@@ -281,7 +282,6 @@ recipe_controller = RecipeController(
     use_caching=True  # CHANGE HERE
 )
 
-
 recipe_ingredient_controller = RecipeIngredientController(
     model=RecipeIngredient,
     api_model=recipe_ingredient_model,
@@ -294,7 +294,6 @@ recipe_ingredient_controller = RecipeIngredientController(
     unique_columns_together=["recipe_id", "ingredient_id"],
     clear_cache_models=[Recipe, Collection, RecipePlanner]
 )
-
 
 recipe_tag_controller = RecipeTagController(
     model=RecipeTagComposite,
@@ -309,9 +308,7 @@ recipe_tag_controller = RecipeTagController(
     clear_cache_models=[Recipe, Collection]
 )
 
-
 image_controller = ImageController()
-
 
 recipe_image_controller = RecipeImageController(
     model=ReicpeImageComposite,
@@ -326,13 +323,11 @@ recipe_image_controller = RecipeImageController(
     clear_cache_models=[Recipe, Collection]
 )
 
-
 recipe_rating_controller = RecipeRatingController(
     model=RecipeRating,
     api_model=recipe_rating_model,
     api_model_send=recipe_rating_model_send,
     foreign_key_columns=[
-        # (User, "user_id"),
         (Recipe, "recipe_id")
     ],
     read_only_fields=["user_id", "recipe_id"],
