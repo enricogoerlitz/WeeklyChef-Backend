@@ -4,6 +4,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from server.db import db
+from server.core.models.db_models.utils import strlen
 from server.core.utils import model_validator as ModelValidator
 from server.utils.decorators import (
     add_to_dict_method,
@@ -19,7 +20,7 @@ class Collection(db.Model):
     __tablename__ = "collection"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(strlen.L50), nullable=False)
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
     is_default = db.Column(db.Boolean, nullable=False)
 
@@ -44,7 +45,7 @@ class Collection(db.Model):
             fieldname=key,
             value=value,
             min_length=1,
-            max_length=50
+            max_length=strlen.L50
         )
         return value
 

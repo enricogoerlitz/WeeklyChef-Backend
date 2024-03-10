@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy.orm import validates
 
 from server.db import db
+from server.core.models.db_models.utils import strlen
 from server.core.utils import model_validator as ModelValidator
 from server.utils.decorators import (
     add_to_dict_method,
@@ -18,12 +19,12 @@ class Ingredient(db.Model):
     __tablename__ = "ingredient"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    displayname = db.Column(db.String(30), nullable=False)
+    name = db.Column(db.String(strlen.L50), unique=True, nullable=False)
+    displayname = db.Column(db.String(strlen.L25), nullable=False)
     default_price = db.Column(db.Float(precision=2), nullable=False)
     quantity_per_unit = db.Column(db.Float(precision=2), nullable=False)
     is_spices = db.Column(db.Boolean, nullable=False)
-    search_description = db.Column(db.String(75), nullable=False)
+    search_description = db.Column(db.String(strlen.L100), nullable=False)
     unit_id = db.Column(db.Integer, db.ForeignKey("unit.id"), nullable=False)
 
     unit = db.relationship("Unit", backref="ingredient", lazy="select")
@@ -34,7 +35,7 @@ class Ingredient(db.Model):
             fieldname=key,
             value=value,
             min_length=4,
-            max_length=50
+            max_length=strlen.L50
         )
         return value
 
@@ -44,7 +45,7 @@ class Ingredient(db.Model):
             fieldname=key,
             value=value,
             min_length=3,
-            max_length=30
+            max_length=strlen.L25
         )
         return value
 
@@ -80,7 +81,7 @@ class Ingredient(db.Model):
             fieldname=key,
             value=value,
             min_length=4,
-            max_length=75
+            max_length=strlen.L75
         )
         return value
 

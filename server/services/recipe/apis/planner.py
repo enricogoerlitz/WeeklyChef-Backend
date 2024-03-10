@@ -6,12 +6,12 @@ from server.utils import jwt
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
 from server.core.models.api_models.planner import (
-    recipe_planner_item_model,
-    recipe_planner_item_model_send, recipe_planner_model,
-    recipe_planner_model_detail,
-    recipe_planner_model_send, user_shared_recipe_planner_model,
-    user_shared_recipe_planner_model_send
-)
+    qpp_recipe_planner_item_model,
+    qpp_recipe_planner_model, recipe_planner_item_model,
+    recipe_planner_item_model_send,
+    recipe_planner_model, recipe_planner_model_detail,
+    recipe_planner_model_send,
+    user_shared_recipe_planner_model, user_shared_recipe_planner_model_send)
 from server.services.recipe.controller.planner import (
     recipe_planner_controller,
     recipe_planner_item_controller, user_shared_recipe_planner_controller
@@ -33,6 +33,7 @@ ns = Namespace(
 @ns.route("/")
 class RecipePlannerListAPI(Resource):
 
+    @ns.expect(qpp_recipe_planner_model)
     @ns.response(code=200, model=[recipe_planner_model_detail], description=sui.desc_list(ns.name))       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
@@ -101,7 +102,7 @@ class RecipePlannerAPI(Resource):
 @ns.route("/<int:id>/item")
 class RecipePlannerItemListAPI(Resource):
 
-    # TODO: except query parser!
+    @ns.expect(qpp_recipe_planner_item_model)
     @ns.response(code=200, model=[recipe_planner_item_model], description=sui.desc_list(ns.name))       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa

@@ -15,7 +15,7 @@ authorizations = {
     }
 }
 
-# http://localhost:8080/swagger-docs
+# http://localhost:{PORT}/swagger-docs
 api = Api(
     version=os.environ.get("SWAGGER_API_VERSION"),
     title=os.environ.get("SWAGGER_API_TITLE"),

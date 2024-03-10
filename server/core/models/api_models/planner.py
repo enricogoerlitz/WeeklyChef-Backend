@@ -1,7 +1,33 @@
-from flask_restx import fields
+from datetime import date
+
+from flask_restx import fields, reqparse
+
 from server.api import api
 from server.core.models.api_models.category import category_model
-from server.core.models.api_models.utils import acl_model
+from server.core.models.api_models.utils import (
+    acl_model, reqparse_add_queryparams_doc
+)
+
+
+# GET QUERY MODELS
+
+qpp_recipe_planner_model = reqparse_add_queryparams_doc(
+    parser=reqparse.RequestParser(),
+    add_search_utils=True,
+    add_pagination=True,
+    query_params=[
+        ("name", str)
+    ]
+)
+
+qpp_recipe_planner_item_model = reqparse_add_queryparams_doc(
+    parser=reqparse.RequestParser(),
+    add_search_utils=False,
+    add_pagination=False,
+    query_params=[
+        ("date_of_week", date)
+    ]
+)
 
 
 # API MODELS

@@ -4,6 +4,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from server.db import db
+from server.core.models.db_models.utils import strlen
 from server.core.utils import model_validator as ModelValidator
 from server.utils.decorators import (
     add_to_dict_method,
@@ -19,10 +20,10 @@ class Supermarket(db.Model):
     __tablename__ = "supermarket"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), nullable=False)
-    street = db.Column(db.String(100), nullable=False)
-    postcode = db.Column(db.String(15), nullable=False)
-    district = db.Column(db.String(30), nullable=False)
+    name = db.Column(db.String(strlen.L25), nullable=False)
+    street = db.Column(db.String(strlen.L100), nullable=False)
+    postcode = db.Column(db.String(strlen.L25), nullable=False)
+    district = db.Column(db.String(strlen.L50), nullable=False)
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
 
     areas_unsorted = db.relationship(
@@ -53,7 +54,7 @@ class Supermarket(db.Model):
             fieldname=key,
             value=value,
             min_length=3,
-            max_length=10
+            max_length=strlen.L25
         )
         return value
 
@@ -63,7 +64,7 @@ class Supermarket(db.Model):
             fieldname=key,
             value=value,
             min_length=3,
-            max_length=100
+            max_length=strlen.L100
         )
         return value
 
@@ -73,7 +74,7 @@ class Supermarket(db.Model):
             fieldname=key,
             value=value,
             min_length=1,
-            max_length=15
+            max_length=strlen.L25
         )
         return value
 
@@ -83,7 +84,7 @@ class Supermarket(db.Model):
             fieldname=key,
             value=value,
             min_length=1,
-            max_length=30
+            max_length=strlen.L50
         )
         return value
 
@@ -103,7 +104,7 @@ class SupermarketArea(db.Model):
     __tablename__ = "sarea"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(25), unique=True, nullable=False)
+    name = db.Column(db.String(strlen.L25), unique=True, nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
     supermarket_id = db.Column(db.Integer, db.ForeignKey("supermarket.id"), nullable=False)  # noqa
 
@@ -128,7 +129,7 @@ class SupermarketArea(db.Model):
             fieldname=key,
             value=value,
             min_length=3,
-            max_length=25
+            max_length=strlen.L25
         )
         return value
 

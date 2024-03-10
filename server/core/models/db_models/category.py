@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy.orm import validates
 
 from server.db import db
+from server.core.models.db_models.utils import strlen
 from server.core.utils import model_validator as ModelValidator
 from server.utils.decorators import (
     add_to_dict_method,
@@ -18,7 +19,7 @@ class Category(db.Model):
     __tablename__ = "category"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), unique=True, nullable=False)
+    name = db.Column(db.String(strlen.L50), unique=True, nullable=False)
 
     @validates("name")
     def validate_name(self, _, value: Any) -> str:
@@ -26,6 +27,6 @@ class Category(db.Model):
             fieldname="name",
             value=value,
             min_length=4,
-            max_length=30
+            max_length=strlen.L50
         )
         return value

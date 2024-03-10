@@ -28,7 +28,6 @@ class SupermarketController(BaseCrudController):
     ) -> Response:
         try:
             search = reqargs.get("search")
-            logger.debug(f"SEARCH: {search}")
 
             if search is None:
                 return super().handle_get_list(

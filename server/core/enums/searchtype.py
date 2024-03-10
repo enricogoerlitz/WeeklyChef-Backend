@@ -1,5 +1,3 @@
-# TODO: REFACTORING -> enum Class!
-
 EQUALS = "equals"
 CONTAINS = "contains"
 STARTS_WITH = "starts_with"

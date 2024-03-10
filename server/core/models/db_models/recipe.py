@@ -4,6 +4,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from server.db import db
+from server.core.models.db_models.utils import strlen
 from server.errors import errors
 from server.core.enums import difficulty
 from server.core.utils import model_validator as ModelValidator
@@ -22,12 +23,12 @@ class Recipe(db.Model):
     __tablename__ = "recipe"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(strlen.L50), unique=True, nullable=False)
     person_count = db.Column(db.Integer, nullable=False)
-    preperation_description = db.Column(db.String(1_000), nullable=False)
+    preperation_description = db.Column(db.String(strlen.L1000), nullable=False)  # noqa
     preperation_time_minutes = db.Column(db.Integer, nullable=False)
-    difficulty = db.Column(db.String(15), nullable=False)
-    search_description = db.Column(db.String(75), nullable=False)
+    difficulty = db.Column(db.String(strlen.L25), nullable=False)
+    search_description = db.Column(db.String(strlen.L75), nullable=False)
 
     creator_user_id = db.Column(db.Integer, nullable=False)  # noqa
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)  # noqa
@@ -57,7 +58,7 @@ class Recipe(db.Model):
             fieldname=key,
             value=value,
             min_length=5,
-            max_length=50
+            max_length=strlen.L50
         )
         return value
 
@@ -81,7 +82,7 @@ class Recipe(db.Model):
             fieldname=key,
             value=value,
             min_length=5,
-            max_length=1_000
+            max_length=strlen.L1000
         )
         return value
 
@@ -113,7 +114,7 @@ class Recipe(db.Model):
             fieldname=key,
             value=value,
             min_length=4,
-            max_length=75
+            max_length=strlen.L75
         )
         return value
 
@@ -258,7 +259,7 @@ class RecipeImage(db.Model):
     __tablename__ = "rimage"
 
     id = db.Column(db.Integer, primary_key=True)
-    path = db.Column(db.String(500), unique=True, nullable=False)
+    path = db.Column(db.String(strlen.L500), unique=True, nullable=False)
 
     @validates("path")
     def validate_path(self, key: str, value: Any) -> str:
@@ -266,7 +267,7 @@ class RecipeImage(db.Model):
             fieldname=key,
             value=value,
             min_length=3,
-            max_length=1_000,
+            max_length=strlen.L500,
         )
         return value
 

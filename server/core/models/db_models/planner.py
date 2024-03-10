@@ -12,6 +12,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from server.db import db
+from server.core.models.db_models.utils import strlen
 from server.core.utils import model_validator as ModelValidator
 from server.utils.decorators import (
     add_to_dict_method,
@@ -27,7 +28,7 @@ class RecipePlanner(db.Model):
     __tablename__ = "rplanner"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(25), unique=True, nullable=False)
+    name = db.Column(db.String(strlen.L25), unique=True, nullable=False)
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
@@ -63,7 +64,7 @@ class RecipePlanner(db.Model):
             fieldname=key,
             value=value,
             min_length=1,
-            max_length=25
+            max_length=strlen.L25
         )
         return value
 
@@ -100,7 +101,7 @@ class RecipePlannerItem(db.Model):
     rplanner_id = db.Column(db.Integer, db.ForeignKey("rplanner.id"), nullable=False)  # noqa
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"), nullable=False)  # noqa
     date = db.Column(db.Date, nullable=False)
-    label = db.Column(db.String(20), nullable=False, default="")
+    label = db.Column(db.String(strlen.L25), nullable=False, default="")
     order_number = db.Column(db.Integer, nullable=False)
     planned_recipe_person_count = db.Column(db.Integer, nullable=False)
 
@@ -141,6 +142,16 @@ class RecipePlannerItem(db.Model):
             fieldname=key,
             value=value,
             min_=1
+        )
+        return value
+
+    @validates("label")
+    def validate_label(self, key: str, value: Any) -> str:
+        ModelValidator.validate_string(
+            fieldname=key,
+            min_length=1,
+            max_length=strlen.L25,
+            value=value
         )
         return value
 

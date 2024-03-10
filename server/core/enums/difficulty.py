@@ -1,5 +1,3 @@
-# TODO: REFACTORING -> enum Class!
-
 EASY = "einfach"
 NORMAL = "normal"
 ADVANCED = "fortgeschritten"

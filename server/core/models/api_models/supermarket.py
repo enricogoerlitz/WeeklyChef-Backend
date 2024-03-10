@@ -10,7 +10,8 @@ qpp_supermarket_model = reqparse_add_queryparams_doc(
     add_search_utils=True,
     add_pagination=True,
     query_params=[
-        ("name", str)
+        ("name", str),
+        ("search", str)
     ]
 )
 
