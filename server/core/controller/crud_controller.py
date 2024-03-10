@@ -54,10 +54,11 @@ class AbstractRedisCache:
 
     # protected
     def _get_cache(self, redis_addition_key: str | None) -> Any:
-        redis_key = api_cache.gen_key(
-            self._main_model, redis_addition_key=redis_addition_key)
         if not self._use_caching:
             return None
+
+        redis_key = api_cache.gen_key(
+            self._main_model, redis_addition_key=redis_addition_key)
 
         return api_cache.get(redis_key)
 

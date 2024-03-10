@@ -36,7 +36,6 @@ recipe_planner_model_detail = api.model("RecipePlannerModel", {
     "name": fields.String,
     "owner_user_id": fields.Integer,
     "is_active": fields.Boolean,
-    "items": fields.List(fields.Nested(recipe_planner_item_model)),
     "acl": fields.List(fields.Nested(acl_model))
 })
 

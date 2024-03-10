@@ -101,6 +101,18 @@ class RecipePlannerAPI(Resource):
 @ns.route("/<int:id>/item")
 class RecipePlannerItemListAPI(Resource):
 
+    # TODO: except query parser!
+    @ns.response(code=200, model=[recipe_planner_item_model], description=sui.desc_list(ns.name))       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @jwt_required()
+    @IsRecipePlannerOwnerOrHasAccess
+    def get(self, id):
+        return recipe_planner_item_controller.handle_get_list(
+            reqargs=request.args,
+            planner_id=id
+        )
+
     @ns.expect(recipe_planner_item_model_send)
     @ns.response(code=201, model=recipe_planner_item_model, description=sui.desc_added("SupermarketAreaIngredient"))     # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa

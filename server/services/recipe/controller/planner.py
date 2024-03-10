@@ -2,6 +2,7 @@ from typing import Any
 from datetime import date
 from dateutil import parser
 
+from datetime import datetime, timedelta
 from flask import Response
 from flask_restx import marshal
 from sqlalchemy import and_
@@ -55,6 +56,38 @@ class RecipePlannerController(BaseCrudController):
 
 class RecipePlannerItemController(BaseCrudController):
     _model: RecipePlannerItem
+
+    def handle_get_list(
+            self,
+            reqargs: dict,
+            planner_id: int
+    ) -> Response:
+        try:
+            date_of_week_str = reqargs.get("date_of_week")
+            date_from, date_to = self._get_date_filter(date_of_week_str)
+
+            query = self._model.query.filter(
+                and_(
+                    self._model.rplanner_id == planner_id,
+                    self._model.date >= date_from,
+                    self._model.date <= date_to
+                )
+            )
+
+            redis_addition_key = f"/date_from={str(date_from)},date_to={str(date_to)}"  # noqa
+
+            return super().handle_get_list(
+                reqargs=reqargs,
+                query=query,
+                redis_addition_key=redis_addition_key
+            )
+
+        except errors.ValueErrorGeneral as e:
+            return http_errors.bad_request(e)
+
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
 
     def handle_post_change_order(
             self,
@@ -130,6 +163,21 @@ class RecipePlannerItemController(BaseCrudController):
         except Exception:
             # if date is invalid, the validation will executed in super()
             return data
+
+    def _get_date_filter(self, date_of_week_str: str = None):
+        try:
+            date_of_week = datetime.today().date()
+            if date_of_week_str is not None:
+                date_of_week = parser.parse(date_of_week_str).date()
+
+            days_since_monday = date_of_week.weekday()
+            monday = date_of_week - timedelta(days=days_since_monday)
+            sunday = monday + timedelta(days=6)
+
+            return monday, sunday
+        except Exception:
+            err_msg = f"Field 'date_of_week' is invalid with value: '{date_of_week_str}'"  # noqa
+            raise errors.ValueErrorGeneral(err_msg)
 
 
 class UserSharedRecipePlannerController(BaseCrudController):

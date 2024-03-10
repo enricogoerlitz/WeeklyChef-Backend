@@ -23,7 +23,7 @@ class Collection(db.Model):
     owner_user_id = db.Column(db.Integer, nullable=False)  # noqa
     is_default = db.Column(db.Boolean, nullable=False)
 
-    recipes = db.relationship(
+    recipes_ = db.relationship(
         "CollectionRecipeComposite",
         cascade="all,delete",
         backref=db.backref("collection", lazy="select")
@@ -33,6 +33,10 @@ class Collection(db.Model):
         cascade="all,delete",
         lazy="select"
     )
+
+    @property
+    def recipes(self):
+        return [r.recipe for r in self.recipes_]
 
     @validates("name")
     def validate_name(self, key: str, value: Any) -> str:

@@ -203,11 +203,12 @@ collection_model = api.model("CollectionModel", {
     "name": fields.String,
     "owner_user_id": fields.Integer,
     "is_default": fields.Boolean,
-    "recipes": fields.List(
-        fields.Nested(api.model("utils", {
-            "recipe": fields.Nested(collection_recipe_model)
-        }))
-    ),
+    # "recipes": fields.List(
+    #     fields.Nested(api.model("utils", {
+    #         "recipe": fields.Nested(collection_recipe_model)
+    #     }))
+    # ),
+    "recipes": fields.List(fields.Nested(collection_recipe_model)),
     "acl": fields.List(fields.Nested(acl_model))
 })
 

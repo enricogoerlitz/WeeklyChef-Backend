@@ -6,7 +6,6 @@ Man kann mehrere Planner erstellen und andere leute einladen
 """
 
 from typing import Any
-from datetime import datetime
 from dateutil import parser
 
 from sqlalchemy import UniqueConstraint
@@ -132,8 +131,7 @@ class RecipePlannerItem(db.Model):
             value=value
         )
 
-        value: datetime = parser.parse(value)
-        value = value.replace(hour=0, minute=0, second=0, microsecond=0).date()
+        value = parser.parse(value).date()
 
         return value
 

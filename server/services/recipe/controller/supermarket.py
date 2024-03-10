@@ -1,6 +1,6 @@
 from flask import Response
 from flask_restx import marshal
-from sqlalchemy import and_
+from sqlalchemy import or_, and_
 
 from server.errors import errors
 from server.core.controller.crud_controller import BaseCrudController
@@ -11,7 +11,8 @@ from server.core.models.api_models.supermarket import (
     supermarket_area_ingredinet_model,
     supermarket_area_ingredinet_model_send, supermarket_area_model,
     supermarket_area_model_send,
-    supermarket_model_detail, supermarket_model_send, supermarket_user_edit_model)
+    supermarket_model_detail, supermarket_model_send,
+    supermarket_user_edit_model)
 from server.core.models.db_models.ingredient import Ingredient
 from server.errors import http_errors
 from server.logger import logger
@@ -19,7 +20,41 @@ from server.db import db
 
 
 class SupermarketController(BaseCrudController):
-    pass
+
+    def handle_get_list(
+            self,
+            reqargs: dict,
+            api_response_model: db.Model = None  # type: ignore
+    ) -> Response:
+        try:
+            search = reqargs.get("search")
+            logger.debug(f"SEARCH: {search}")
+
+            if search is None:
+                return super().handle_get_list(
+                    reqargs=reqargs,
+                    api_response_model=api_response_model
+                )
+
+            search_str = f"%{search}%"
+            query = self._model.query.filter(
+                or_(
+                    Supermarket.name.like(search_str),
+                    Supermarket.street.like(search_str),
+                    Supermarket.postcode.like(search_str),
+                    Supermarket.district.like(search_str)
+                )
+            )
+
+            return super().handle_get_list(
+                reqargs=reqargs,
+                query=query,
+                api_response_model=api_response_model
+            )
+
+        except Exception as e:
+            logger.error(e)
+            return http_errors.UNEXPECTED_ERROR_RESULT
 
 
 class SupermarketAreaController(BaseCrudController):
@@ -55,7 +90,6 @@ class SupermarketAreaController(BaseCrudController):
 
             inc_number = 1
             if new_order_number > area_obj.order_number:
-                # new_order_number > area_obj.order_number
                 updating_areas = self._model.query.filter(
                     and_(
                         self._model.supermarket_id == area_obj.supermarket_id,
@@ -152,6 +186,5 @@ user_shared_edit_supermarket_controller = UserSharedEditSupermarketController(
     api_model_send=supermarket_user_edit_model,
     foreign_key_columns=[
         (Supermarket, "supermarket_id")
-        # (User, "user_id")
     ]
 )
