@@ -4,6 +4,7 @@ from flask import request
 
 from sqlalchemy import and_
 
+from server.errors import errors
 from server.utils import jwt
 from server.errors import http_errors
 from server.core.models.db_models.planner import (
@@ -16,6 +17,13 @@ def IsRecipePlannerOwnerOrHasAccess(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         rplanner_id = request.view_args.get("id")
+
+        if RecipePlanner.query.get(rplanner_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=RecipePlanner,
+                id=rplanner_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = RecipePlanner.query.filter(
             and_(
@@ -45,6 +53,13 @@ def IsRecipePlannerOwnerOrCanEdit(func):
         user_id = jwt.get_user_id()
         rplanner_id = request.view_args.get("id")
 
+        if RecipePlanner.query.get(rplanner_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=RecipePlanner,
+                id=rplanner_id
+            )
+            return http_errors.not_found(e)
+
         is_user_owner = RecipePlanner.query.filter(
             and_(
                 RecipePlanner.id == rplanner_id,
@@ -73,6 +88,13 @@ def IsRecipePlannerOwner(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         rplanner_id = request.view_args.get("id")
+
+        if RecipePlanner.query.get(rplanner_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=RecipePlanner,
+                id=rplanner_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = RecipePlanner.query.filter(
             and_(

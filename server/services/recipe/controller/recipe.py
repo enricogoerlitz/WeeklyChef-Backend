@@ -256,8 +256,10 @@ class RecipeRatingController(BaseCrudController):
         ).count() == 1
 
         if not is_recipe_existing:
-            err_msg = f"Object {Recipe.__name__} with id = {recipe_id} doesn't exist"  # noqa
-            raise errors.DbModelNotFoundException(err_msg)
+            raise errors.DbModelNotFoundException(
+                model=Recipe,
+                id=recipe_id
+            )
 
 
 recipe_controller = RecipeController(

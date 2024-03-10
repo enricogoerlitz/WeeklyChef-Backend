@@ -4,6 +4,7 @@ from flask import request
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import and_
 
+from server.errors import errors
 from server.core.models.db_models.recipe import Recipe
 from server.errors import http_errors
 from server.core.enums import roles
@@ -17,6 +18,13 @@ def IsRecipeCreatorOrAdminOrStaff(func):
         recipe_id = request.view_args.get("id")
         user_id = jwt_identity["id"]
         user_roles = jwt_identity["roles"]
+
+        if Recipe.query.get(recipe_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Recipe,
+                id=recipe_id
+            )
+            return http_errors.not_found(e)
 
         if roles.ADMIN in user_roles or roles.STAFF in user_roles:
             return func(*args, **kwargs)

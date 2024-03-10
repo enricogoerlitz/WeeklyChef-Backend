@@ -357,8 +357,10 @@ class BaseCrudController(IController, AbstractRedisCache):
         obj = self._model.query.get(id)
 
         if not obj:
-            err_msg = f"Object {self._model.__name__} with id = {id} doesn't exist"  # noqa
-            raise errors.DbModelNotFoundException(err_msg)
+            raise errors.DbModelNotFoundException(
+                model=self._model,
+                id=id
+            )
 
         return obj
 

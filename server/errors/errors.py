@@ -1,5 +1,7 @@
 from typing import Any
 
+from flask_sqlalchemy.model import Model
+
 
 class UserAlreadyExistingException(Exception):
     """
@@ -26,8 +28,9 @@ class DbModelNotFoundException(Exception):
     The db model was not found in database.
     """
 
-    def __init__(self, message: str):
-        super().__init__(message)
+    def __init__(self, *, model: Model, id: Any):
+        err_msg = f"Object {model.__name__} with id = {id} doesn't exist."
+        super().__init__(err_msg)
 
 
 class DbModelValidationException(Exception):

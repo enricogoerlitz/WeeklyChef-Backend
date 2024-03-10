@@ -4,6 +4,7 @@ from flask import request
 
 from sqlalchemy import and_
 
+from server.errors import errors
 from server.utils import jwt
 from server.errors import http_errors
 from server.core.models.db_models.supermarket import (
@@ -16,6 +17,13 @@ def IsSupermarketOwnerOrCanEdit(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         supermarket_id = request.view_args.get("id")
+
+        if Supermarket.query.get(supermarket_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Supermarket,
+                id=supermarket_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = Supermarket.query.filter(
             and_(
@@ -44,6 +52,13 @@ def IsSupermarketOwner(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         supermarket_id = request.view_args.get("id")
+
+        if Supermarket.query.get(supermarket_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Supermarket,
+                id=supermarket_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = Supermarket.query.filter(
             and_(

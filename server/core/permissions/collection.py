@@ -4,6 +4,7 @@ from flask import request
 
 from sqlalchemy import and_
 
+from server.errors import errors
 from server.utils import jwt
 from server.errors import http_errors
 from server.core.models.db_models.collection import (
@@ -16,6 +17,13 @@ def IsCollectionOwnerOrHasAccess(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         collection_id = request.view_args.get("id")
+
+        if Collection.query.get(collection_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Collection,
+                id=collection_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = Collection.query.filter(
             and_(
@@ -45,6 +53,13 @@ def IsCollectionOwnerOrCanEdit(func):
         user_id = jwt.get_user_id()
         collection_id = request.view_args.get("id")
 
+        if Collection.query.get(collection_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Collection,
+                id=collection_id
+            )
+            return http_errors.not_found(e)
+
         is_user_owner = Collection.query.filter(
             and_(
                 Collection.id == collection_id,
@@ -73,6 +88,13 @@ def IsCollectionOwner(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         collection_id = request.view_args.get("id")
+
+        if Collection.query.get(collection_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Collection,
+                id=collection_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = Collection.query.filter(
             and_(

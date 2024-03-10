@@ -188,6 +188,7 @@ recipe_planner_controller = RecipePlannerController(
     model=RecipePlanner,
     api_model=recipe_planner_model_detail,
     api_model_send=recipe_planner_model_send,
+    search_fields=["name"],
     unique_columns_together=["name", "owner_user_id"],
     read_only_fields=["owner_user_id"]
 )

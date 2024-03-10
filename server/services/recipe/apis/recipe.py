@@ -69,7 +69,7 @@ class RecipeAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    def get(self, id):
+    def get(id):
         return recipe_controller.handle_get(id)
 
     @ns.expect(recipe_model_send)

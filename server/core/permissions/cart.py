@@ -4,6 +4,7 @@ from flask import request
 
 from sqlalchemy import and_
 
+from server.errors import errors
 from server.utils import jwt
 from server.errors import http_errors
 from server.core.models.db_models.cart import Cart, UserSharedEditCart
@@ -14,6 +15,13 @@ def IsCartOwnerOrCanEdit(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         cart_id = request.view_args.get("id")
+
+        if Cart.query.get(cart_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Cart,
+                id=cart_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = Cart.query.filter(
             and_(
@@ -42,6 +50,13 @@ def IsCartOwner(func):
     def wrapper(*args, **kwargs):
         user_id = jwt.get_user_id()
         cart_id = request.view_args.get("id")
+
+        if Cart.query.get(cart_id) is None:
+            e = errors.DbModelNotFoundException(
+                model=Cart,
+                id=cart_id
+            )
+            return http_errors.not_found(e)
 
         is_user_owner = Cart.query.filter(
             and_(

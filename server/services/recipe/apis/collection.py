@@ -5,7 +5,6 @@ from flask_jwt_extended import jwt_required
 from server.utils import jwt
 from server.utils import swagger as sui
 from server.core.models.api_models.utils import error_model
-from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.recipe import (
     collection_model, collection_model_send,
     user_shared_collection_model, user_shared_collection_model_send
@@ -77,7 +76,6 @@ class CollectionAPI(Resource):
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
-    @IsAdminOrStaff
     @IsCollectionOwnerOrCanEdit
     def patch(self, id):
         return collection_controller.handle_patch(
