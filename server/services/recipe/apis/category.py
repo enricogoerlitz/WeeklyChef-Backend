@@ -33,6 +33,7 @@ class CategoryListAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsAdminOrStaff
@@ -58,6 +59,7 @@ class CategoryAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsAdminOrStaff

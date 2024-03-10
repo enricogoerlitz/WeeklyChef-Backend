@@ -45,10 +45,11 @@ class RecipeListAPI(Resource):
         )
 
     @ns.expect(recipe_model_send)
-    @ns.response(code=201, model=recipe_model_detail, description=sui.desc_added(ns.name))             # noqa
+    @ns.response(code=201, model=recipe_model_detail, description=sui.desc_added(ns.name))      # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def post(self):
@@ -63,7 +64,7 @@ class RecipeListAPI(Resource):
 @ns.route("/<int:id>")
 class RecipeAPI(Resource):
 
-    @ns.response(code=200, model=recipe_model_detail, description=sui.desc_get(ns.name))               # noqa
+    @ns.response(code=200, model=recipe_model_detail, description=sui.desc_get(ns.name))        # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
@@ -73,10 +74,11 @@ class RecipeAPI(Resource):
         return recipe_controller.handle_get(id)
 
     @ns.expect(recipe_model_send)
-    @ns.response(code=200, model=recipe_model_detail, description=sui.desc_update(ns.name))            # noqa
+    @ns.response(code=200, model=recipe_model_detail, description=sui.desc_update(ns.name))     # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
@@ -141,6 +143,7 @@ class RecipeIngredientAPI(Resource):
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                   # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeIngredient"))            # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                          # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
@@ -161,6 +164,7 @@ class RecipeIngredientAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeIngredient"))            # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                          # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
@@ -198,9 +202,9 @@ class RecipeImagePostAPI(Resource):
 class RecipeImageGetAPI(Resource):
 
     @ns.response(code=200, model=None, description="Image file")
-    @ns.response(code=401, model=error_model, description="Unauthorized")                               # noqa
-    @ns.response(code=404, model=error_model, description="Image file not found")                       # noqa
-    @ns.response(code=500, model=error_model, description="Unexpected error")                           # noqa
+    @ns.response(code=401, model=error_model, description="Unauthorized")                       # noqa
+    @ns.response(code=404, model=error_model, description="Image file not found")               # noqa
+    @ns.response(code=500, model=error_model, description="Unexpected error")                   # noqa
     @jwt_required()
     def get(self, id):
         return image_controller.handle_get(id)
@@ -209,12 +213,12 @@ class RecipeImageGetAPI(Resource):
 @ns.route("/<int:id>/image/<int:image_id>")
 class RecipeImageAPI(Resource):
 
-    @ns.response(code=201, model=recipe_image_model, description=sui.desc_added("RecipeImage"))             # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                   # noqa
-    @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeImage"))                 # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
+    @ns.response(code=201, model=recipe_image_model, description=sui.desc_added("RecipeImage")) # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeImage"))     # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsRecipeCreatorOrAdminOrStaff
     def post(self, id, image_id):
@@ -262,6 +266,7 @@ class RecipeRatingAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipeRating"))        # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                  # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)
     @jwt_required()
     def post(self, id):
@@ -282,6 +287,7 @@ class RecipeRatingAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeRating"))        # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                  # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
     def patch(self, id):

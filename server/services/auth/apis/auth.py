@@ -24,6 +24,7 @@ class AuthRegisterAPI(Resource):
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
     @ns.response(code=400, model=error_model, description="Wrong user input")
     @ns.response(code=409, model=error_model, description="User is alrready existing")  # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")  # noqa
     @ns.response(code=500, model=error_model, description="Internal error message")  # noqa
     def post(self):
         return auth_controller.handle_register(request.get_json())
@@ -36,6 +37,7 @@ class LoginAPI(Resource):
     @ns.response(code=200, model=jwt_model, description="JSON Web Token")
     @ns.response(code=400, model=error_model, description="Wrong user input")
     @ns.response(code=401, model=error_model, description="Invalid user credentials")  # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")  # noqa
     @ns.response(code=500, model=error_model, description="Internal error message")  # noqa
     def post(self):
         return auth_controller.handle_login(request.get_json())

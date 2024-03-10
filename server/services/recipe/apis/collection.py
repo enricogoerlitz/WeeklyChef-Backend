@@ -46,6 +46,7 @@ class CollectionListAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def post(self):
@@ -88,6 +89,7 @@ class CollectionAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsCollectionOwner
@@ -133,11 +135,12 @@ class UserSharedCollectionAPI(Resource):
 
     @ns.expect(user_shared_collection_model_send)
     @ns.response(code=201, model=user_shared_collection_model, description=sui.desc_added("UserSharedCollection"))  # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                               # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                              # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))               # noqa
-    @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))    # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                          # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                           # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))                # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                                  # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                           # noqa
     @jwt_required()
     @IsCollectionOwner
     def post(self, id, user_id):
@@ -153,11 +156,12 @@ class UserSharedCollectionAPI(Resource):
         )
 
     @ns.expect(user_shared_collection_model_send)
-    @ns.response(code=200, model=user_shared_collection_model, description=sui.desc_update("RecipeIngredient"))  # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeIngredient"))            # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
+    @ns.response(code=200, model=user_shared_collection_model, description=sui.desc_update("UserSharedCollection")) # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                          # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("UserSharedCollection"))                # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                                  # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                           # noqa
     @jwt_required()
     @IsCollectionOwner
     def patch(self, id, user_id):
@@ -166,7 +170,7 @@ class UserSharedCollectionAPI(Resource):
             data=request.get_json()
         )
 
-    @ns.response(code=204, model=None, description=sui.desc_delete("CollectionRecipe"))         # noqa
+    @ns.response(code=204, model=None, description=sui.desc_delete("UserSharedCollection"))     # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa

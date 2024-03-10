@@ -34,9 +34,9 @@ ns = Namespace(
 class RecipePlannerListAPI(Resource):
 
     @ns.expect(qpp_recipe_planner_model)
-    @ns.response(code=200, model=[recipe_planner_model_detail], description=sui.desc_list(ns.name))       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=200, model=[recipe_planner_model_detail], description=sui.desc_list(ns.name)) # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
     def get(self):
         return recipe_planner_controller.handle_get_list(
@@ -46,11 +46,12 @@ class RecipePlannerListAPI(Resource):
         )
 
     @ns.expect(recipe_planner_model_send)
-    @ns.response(code=201, model=recipe_planner_model_detail, description=sui.desc_added(ns.name))        # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=201, model=recipe_planner_model_detail, description=sui.desc_added(ns.name))  # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))               # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                  # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
     def post(self):
         data = jwt.add_user_id_to_data(
@@ -64,22 +65,23 @@ class RecipePlannerListAPI(Resource):
 @ns.route("/<int:id>")
 class RecipePlannerAPI(Resource):
 
-    @ns.response(code=200, model=recipe_planner_model_detail, description=sui.desc_get(ns.name))   # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=200, model=recipe_planner_model_detail, description=sui.desc_get(ns.name))    # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))               # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrHasAccess
     def get(self, id):
         return recipe_planner_controller.handle_get(id)
 
     @ns.expect(recipe_planner_model_send)
-    @ns.response(code=200, model=recipe_planner_model_detail, description=sui.desc_update(ns.name))       # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=200, model=recipe_planner_model_detail, description=sui.desc_update(ns.name)) # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))               # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                  # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
     def patch(self, id):
@@ -88,11 +90,11 @@ class RecipePlannerAPI(Resource):
             data=request.get_json()
         )
 
-    @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                    # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=204, model=None, description=sui.desc_delete(ns.name))                        # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                           # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                          # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))               # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                           # noqa
     @jwt_required()
     @IsRecipePlannerOwner
     def delete(self, id):
@@ -103,9 +105,9 @@ class RecipePlannerAPI(Resource):
 class RecipePlannerItemListAPI(Resource):
 
     @ns.expect(qpp_recipe_planner_item_model)
-    @ns.response(code=200, model=[recipe_planner_item_model], description=sui.desc_list(ns.name))       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=200, model=[recipe_planner_item_model], description=sui.desc_list("RecipePlannerItem"))   # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                      # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrHasAccess
     def get(self, id):
@@ -115,12 +117,13 @@ class RecipePlannerItemListAPI(Resource):
         )
 
     @ns.expect(recipe_planner_item_model_send)
-    @ns.response(code=201, model=recipe_planner_item_model, description=sui.desc_added("SupermarketAreaIngredient"))     # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
-    @ns.response(code=409, model=error_model, description=sui.desc_conflict("SupermarketAreaIngredient"))       # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=201, model=recipe_planner_item_model, description=sui.desc_added("RecipePlannerItem"))    # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                       # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("RecipePlannerItem"))               # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                              # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
     def post(self, id):
@@ -132,11 +135,12 @@ class RecipePlannerItemListAPI(Resource):
 @ns.route("/<int:id>/item/<int:item_id>")
 class RecipePlannerItemAPI(Resource):
     @ns.expect(recipe_planner_item_model_send)
-    @ns.response(code=200, model=recipe_planner_item_model, description=sui.desc_update("SupermarketAreaIngredient"))  # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))            # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
+    @ns.response(code=200, model=recipe_planner_item_model, description=sui.desc_update("RecipePlannerItem"))   # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipePlannerItem"))               # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                              # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
     def patch(self, id, item_id):
@@ -145,11 +149,11 @@ class RecipePlannerItemAPI(Resource):
             data=request.get_json()
         )
 
-    @ns.response(code=204, model=None, description=sui.desc_delete("SupermarketAreaIngredient"))                # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))       # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=204, model=None, description=sui.desc_delete("RecipePlannerItem"))                # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                               # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                              # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipePlannerItem"))       # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
     def delete(self, id, item_id):
@@ -159,10 +163,10 @@ class RecipePlannerItemAPI(Resource):
 @ns.route("/<int:id>/item/<int:item_id>/reorder/<int:new_order_number>")
 class RecipePlannerChangeOrderAPI(Resource):
 
-    @ns.response(code=201, model=recipe_planner_item_model, description=sui.desc_added("SupermarketArea"))        # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=201, model=recipe_planner_item_model, description=sui.desc_added("RecipePlannerItem"))    # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                      # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
     def post(self, id, item_id, new_order_number):
@@ -176,12 +180,13 @@ class RecipePlannerChangeOrderAPI(Resource):
 class UserSharedRecipePlannerAPI(Resource):
 
     @ns.expect(user_shared_recipe_planner_model_send)
-    @ns.response(code=201, model=user_shared_recipe_planner_model, description=sui.desc_added("UserSharedCollection"))  # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                               # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                              # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))               # noqa
-    @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))    # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
+    @ns.response(code=201, model=user_shared_recipe_planner_model, description=sui.desc_added("UserSharedRecipePlanner"))   # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                                   # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                                   # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedRecipePlanner"))                     # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                                          # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                                   # noqa
     @jwt_required()
     @IsRecipePlannerOwner
     def post(self, id, user_id):
@@ -197,11 +202,12 @@ class UserSharedRecipePlannerAPI(Resource):
         )
 
     @ns.expect(user_shared_recipe_planner_model_send)
-    @ns.response(code=200, model=user_shared_recipe_planner_model, description=sui.desc_update("RecipeIngredient"))  # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("RecipeIngredient"))            # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
+    @ns.response(code=200, model=user_shared_recipe_planner_model, description=sui.desc_update("UserSharedRecipePlanner"))  # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                                   # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                                  # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("UserSharedRecipePlanner"))                     # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")                                          # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                                   # noqa
     @jwt_required()
     @IsRecipePlannerOwner
     def patch(self, id, user_id):
@@ -210,12 +216,12 @@ class UserSharedRecipePlannerAPI(Resource):
             data=request.get_json()
         )
 
-    @ns.response(code=204, model=None, description=sui.desc_delete("CollectionRecipe"))         # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
+    @ns.response(code=204, model=None, description=sui.desc_delete("UserSharedRecipePlanner"))          # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                               # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                              # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))               # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
     @jwt_required()
     @IsRecipePlannerOwner
     def delete(self, id, user_id):
-        return user_shared_recipe_planner_controller.handle_delete(id=(id, user_id))                # noqa
+        return user_shared_recipe_planner_controller.handle_delete(id=(id, user_id))                    # noqa

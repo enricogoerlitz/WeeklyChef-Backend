@@ -36,6 +36,7 @@ class UserListAPI(Resource):
     @ns.response(code=400, model=error_model, description="Wrong user input")
     @ns.response(code=401, model=error_model, description="User unauthorized")  # noqa
     @ns.response(code=409, model=error_model, description="User is already existing")  # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")  # noqa
     @ns.response(code=500, model=error_model, description="Internal error message")  # noqa
     @jwt_required()
     @IsAdminOrStaff

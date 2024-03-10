@@ -41,6 +41,7 @@ class CartListAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=409, model=error_model, description=sui.desc_conflict(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     def post(self):
@@ -55,7 +56,7 @@ class CartListAPI(Resource):
 @ns.route("/<int:id>")
 class CartAPI(Resource):
 
-    @ns.response(code=200, model=cart_model_detail, description=sui.desc_get(ns.name))   # noqa
+    @ns.response(code=200, model=cart_model_detail, description=sui.desc_get(ns.name))          # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
@@ -83,6 +84,7 @@ class CartAPI(Resource):
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsCartOwner
@@ -93,7 +95,7 @@ class CartAPI(Resource):
 @ns.route("/<int:id>/clear")
 class CartClearAPI(Resource):
 
-    @ns.response(code=204, model=None, description=sui.desc_get(ns.name))   # noqa
+    @ns.response(code=204, model=None, description=sui.desc_get(ns.name))                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
@@ -107,11 +109,12 @@ class CartClearAPI(Resource):
 class CartItemListAPI(Resource):
 
     @ns.expect(cart_item_model_send)
-    @ns.response(code=201, model=cart_item_model, description=sui.desc_added("SupermarketAreaIngredient"))     # noqa
+    @ns.response(code=201, model=cart_item_model, description=sui.desc_added("CartItem"))       # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
-    @ns.response(code=409, model=error_model, description=sui.desc_conflict("SupermarketAreaIngredient"))       # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("CartItem"))        # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsCartOwnerOrCanEdit
@@ -127,11 +130,12 @@ class CartItemListAPI(Resource):
 @ns.route("/<int:id>/item/<int:item_id>")
 class CartItemAPI(Resource):
     @ns.expect(cart_item_model_send)
-    @ns.response(code=200, model=cart_item_model, description=sui.desc_update("SupermarketAreaIngredient"))  # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                   # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                  # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))            # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                   # noqa
+    @ns.response(code=200, model=cart_item_model, description=sui.desc_update("CartItem"))      # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("CartItem"))        # noqa
+    @ns.response(code=415, model=error_model, description="Unsupported Mediatype")              # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsCartOwnerOrCanEdit
     def patch(self, id, item_id):
@@ -140,10 +144,10 @@ class CartItemAPI(Resource):
             data=request.get_json()
         )
 
-    @ns.response(code=204, model=None, description=sui.desc_delete("SupermarketAreaIngredient"))                # noqa
+    @ns.response(code=204, model=None, description=sui.desc_delete("CartItem"))                 # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("SupermarketAreaIngredient"))       # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("CartItem"))        # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsCartOwnerOrCanEdit
@@ -154,12 +158,12 @@ class CartItemAPI(Resource):
 @ns.route("/<int:id>/access/edit/user/<int:user_id>")
 class UserSharedRecipePlannerAPI(Resource):
 
-    @ns.response(code=201, model=user_shared_cart_model, description=sui.desc_added("UserSharedCollection"))  # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                               # noqa
-    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                              # noqa
-    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))               # noqa
-    @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))    # noqa
-    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                               # noqa
+    @ns.response(code=201, model=user_shared_cart_model, description=sui.desc_added("UserSharedCollection"))    # noqa
+    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                                       # noqa
+    @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                                      # noqa
+    @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))                       # noqa
+    @ns.response(code=409, model=error_model, description=sui.desc_conflict("UserSharedCollection"))            # noqa
+    @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                       # noqa
     @jwt_required()
     @IsCartOwner
     def post(self, id, user_id):
@@ -173,7 +177,7 @@ class UserSharedRecipePlannerAPI(Resource):
             unique_primarykey=(id, user_id)
         )
 
-    @ns.response(code=204, model=None, description=sui.desc_delete("CollectionRecipe"))         # noqa
+    @ns.response(code=204, model=None, description=sui.desc_delete("UserSharedRecipePlanner"))  # noqa
     @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound("Ressource"))       # noqa
@@ -181,4 +185,4 @@ class UserSharedRecipePlannerAPI(Resource):
     @jwt_required()
     @IsCartOwner
     def delete(self, id, user_id):
-        return user_shared_cart_controller.handle_delete(id=(id, user_id))                # noqa
+        return user_shared_cart_controller.handle_delete(id=(id, user_id))                      # noqa
