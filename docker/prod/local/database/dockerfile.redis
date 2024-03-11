@@ -1,0 +1,5 @@
+FROM redis:latest
+
+ENV REDIS_PASSWORD=weeklychefredispassword
+
+EXPOSE 6379
