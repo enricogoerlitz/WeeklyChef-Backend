@@ -1,3 +1,4 @@
+# flake8: noqa
 import json
 
 from flask import Flask, testing
@@ -221,7 +222,7 @@ def test_category_post_invalid_payload(
         # given
         data_name_is_null = {}                  # "name" not given
         data_name_to_short = {"name": "T" * 3}  # min 4
-        data_name_to_long = {"name": "T" * 31}  # max 30
+        data_name_to_long = {"name": "T" * 51}  # max 30
         api_route = f"{ROUTE}/"
 
         # when
@@ -279,7 +280,7 @@ def test_category_patch(
         assert result_data_db == result_data
 
 
-def test_category_put_invalid_id(
+def test_category_patch_invalid_id(
         app: Flask,
         client: testing.FlaskClient,
         admin_headers: dict
@@ -296,7 +297,7 @@ def test_category_put_invalid_id(
         assert response.status_code == 404
 
 
-def test_category_put_authorization(
+def test_category_patch_authorization(
         app: Flask,
         client: testing.FlaskClient,
         std_headers: dict,
@@ -331,7 +332,7 @@ def test_category_put_authorization(
         assert response_admin.status_code == 200
 
 
-def test_category_put_invalid_payload(
+def test_category_patch_invalid_payload(
         app: Flask,
         client: testing.FlaskClient,
         admin_headers: dict
@@ -341,7 +342,7 @@ def test_category_put_invalid_payload(
         category = create_category()
 
         data_name_to_short = {"name": "T" * 3}  # min 4
-        data_name_to_long = {"name": "T" * 31}  # max 30
+        data_name_to_long = {"name": "T" * 51}  # max 30
         api_route = f"{ROUTE}/{category.id}"
 
         # when

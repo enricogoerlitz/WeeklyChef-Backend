@@ -57,7 +57,6 @@ class CartListAPI(Resource):
 class CartAPI(Resource):
 
     @ns.response(code=200, model=cart_model_detail, description=sui.desc_get(ns.name))          # noqa
-    @ns.response(code=400, model=error_model, description=sui.DESC_INVUI)                       # noqa
     @ns.response(code=401, model=error_model, description=sui.DESC_UNAUTH)                      # noqa
     @ns.response(code=404, model=error_model, description=sui.desc_notfound(ns.name))           # noqa
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa

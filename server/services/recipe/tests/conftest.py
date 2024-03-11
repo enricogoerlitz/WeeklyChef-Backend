@@ -19,6 +19,7 @@ from server.core.enums import roles
 ADMIN_USERNAME = "AdminUser"
 STAFF_USERNAME = "StaffUser"
 STANDARD_USERNAME = "StdUser"
+STANDARD_USERNAME_2 = "StdUser2"
 
 
 @pytest.fixture()
@@ -39,6 +40,11 @@ def app():
             email="std.test@email.com",
             password="password"
         )
+        std_user_2 = User(
+            username=STANDARD_USERNAME_2,
+            email="std2.test@email.com",
+            password="password"
+        )
         staff_user = User(
             username=STAFF_USERNAME,
             email="staff.test@email.com",
@@ -54,7 +60,7 @@ def app():
         staff_user.roles.extend([std_role, staff_role])
         admin_user.roles.extend([std_role, staff_role, admin_role])
 
-        db.session.add_all([std_user, staff_user, admin_user])
+        db.session.add_all([std_user, std_user_2, staff_user, admin_user])
 
         db.session.commit()
 
@@ -95,3 +101,23 @@ def std_headers(app: Flask):
         headers = {"Authorization": f"Bearer {access_token}"}
 
     return headers
+
+
+@pytest.fixture()
+def user(app: Flask):
+    with app.app_context():
+        user = User.query.filter_by(username=STANDARD_USERNAME).first()
+        access_token = create_access_token(identity=user.to_identity())
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+    return user, headers
+
+
+@pytest.fixture()
+def user_2(app: Flask):
+    with app.app_context():
+        user = User.query.filter_by(username=STANDARD_USERNAME_2).first()
+        access_token = create_access_token(identity=user.to_identity())
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+    return user, headers
