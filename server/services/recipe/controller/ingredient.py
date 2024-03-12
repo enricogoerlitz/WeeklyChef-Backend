@@ -7,6 +7,7 @@ from server.core.models.db_models.planner import RecipePlanner
 from server.core.models.db_models.ingredient import Ingredient
 from server.core.models.db_models.cart import Cart
 from server.core.models.db_models.supermarket import Supermarket
+from server.core.models.db_models.unit import Unit
 
 
 class IngredientController(BaseCrudController):
@@ -20,5 +21,6 @@ ingredient_controller = IngredientController(
     unique_columns=["name"],
     search_fields=["name"],
     clear_cache_models=[Recipe, RecipePlanner, Cart, Supermarket],
+    foreign_key_columns=[(Unit, "unit_id")],
     use_caching=True
 )

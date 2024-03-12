@@ -16,6 +16,7 @@ from server.core.permissions.cart import (
     IsCartOwnerOrCanEdit
 )
 
+
 ns = Namespace(
     name="Cart",
     description=__name__,

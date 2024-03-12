@@ -8,7 +8,7 @@ from server.core.permissions.general import IsAdminOrStaff
 from server.core.models.api_models.tag import (
     tag_model, qpp_tag_model, tag_model_send
 )
-from server.services.recipe.controller.category import category_controller
+from server.services.recipe.controller.tag import tag_controller
 
 
 ns = Namespace(
@@ -27,7 +27,7 @@ class TagListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def get(self):
-        return category_controller.handle_get_list(request.args)
+        return tag_controller.handle_get_list(request.args)
 
     @ns.expect(tag_model_send)
     @ns.response(code=201, model=tag_model, description=sui.desc_added(ns.name))            # noqa
@@ -38,7 +38,7 @@ class TagListAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def post(self):
-        return category_controller.handle_post(
+        return tag_controller.handle_post(
             data=request.get_json()
         )
 
@@ -53,7 +53,7 @@ class TagAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                   # noqa
     @jwt_required()
     def get(self, id):
-        return category_controller.handle_get(id)
+        return tag_controller.handle_get(id)
 
     @ns.expect(tag_model_send)
     @ns.response(code=200, model=tag_model, description=sui.desc_update(ns.name))           # noqa
@@ -65,7 +65,7 @@ class TagAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def patch(self, id):
-        return category_controller.handle_patch(
+        return tag_controller.handle_patch(
             id=id,
             data=request.get_json()
         )
@@ -78,4 +78,4 @@ class TagAPI(Resource):
     @jwt_required()
     @IsAdminOrStaff
     def delete(self, id):
-        return category_controller.handle_delete(id)
+        return tag_controller.handle_delete(id)

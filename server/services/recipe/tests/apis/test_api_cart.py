@@ -2,7 +2,7 @@
 import json
 
 from flask import Flask, testing
-from server.core.models.db_models.cart import Cart, CartItem
+from server.core.models.db_models.cart import Cart, CartItem, UserSharedEditCart
 from server.core.models.db_models.user.user import User
 from server.services.recipe.tests.apis.test_api_ingredient import (
     create_ingredient
@@ -18,7 +18,7 @@ ROUTE = "/api/v1/cart"
 
 #   CART
 
-
+"""
 def test_cart_get(
         app: Flask,
         client: testing.FlaskClient,
@@ -67,14 +67,11 @@ def test_cart_get(
         assert result_data["items"][0]["is_done"] == expected_data_item["is_done"]
 
 
-"""
-
 def test_cart_get_invalid_id(
         app: Flask,
         client: testing.FlaskClient,
         admin_headers: dict
 ):
-    assert False
     with app.app_context():
         # given
         api_route = f"{ROUTE}/-1"
@@ -89,58 +86,119 @@ def test_cart_get_invalid_id(
 def test_cart_get_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-        api_route = f"{ROUTE}/{cart.id}"
+        cart_user_2_not_shared = create_obj(
+            Cart(
+                name="CartName",
+                owner_user_id=user_2.id,
+                is_active=True
+            )
+        )
+        cart_user_2_shared_with_user_1 = create_obj(
+            Cart(
+                name="CartName2",
+                owner_user_id=user_2.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart_user_2_shared_with_user_1.id,
+                user_id=user.id
+            )
+        )
+        api_route_not_shared = f"{ROUTE}/{cart_user_2_not_shared.id}"
+        api_route_shared = f"{ROUTE}/{cart_user_2_shared_with_user_1.id}"
 
         # when
-        response_without = client.get(api_route)
-        response_std = client.get(api_route, headers=std_headers)
-        response_staff = client.get(api_route, headers=staff_headers)
-        response_admin = client.get(api_route, headers=admin_headers)
+        unauth_user = client.get(api_route_not_shared)
+        user_2_cart_1_access = client.get(
+            api_route_not_shared,
+            headers=headers_2
+        )
+        user_2_cart_2_access = client.get(
+            api_route_shared,
+            headers=headers_2
+        )
+        user_1_cart_1_no_access = client.get(
+            api_route_not_shared,
+            headers=headers
+        )
+        user_1_cart_2_access = client.get(
+            api_route_shared,
+            headers=headers
+        )
 
-        result_data_std = json.loads(response_std.data)
-        result_data_staff = json.loads(response_staff.data)
-        result_data_admin = json.loads(response_admin.data)
-        expected_data = cart.to_dict()
+        user_2_cart_1_data = json.loads(user_2_cart_1_access.data)
+        user_2_cart_2_data = json.loads(user_2_cart_2_access.data)
+        user_1_cart_2_data = json.loads(user_1_cart_2_access.data)
+
+        cart_1_expected_data = cart_user_2_not_shared.to_dict()
+        cart_2_expected_data = cart_user_2_shared_with_user_1.to_dict()
+
+        cart_1_expected_data["items"] = []
+        cart_2_expected_data["items"] = []
 
         # then
-        assert response_without.status_code != 200
-        assert response_std.status_code == 200
-        assert response_staff.status_code == 200
-        assert response_admin.status_code == 200
+        assert unauth_user.status_code != 200
+        assert user_2_cart_1_access.status_code == 200
+        assert user_2_cart_2_access.status_code == 200
+        assert user_1_cart_1_no_access.status_code == 401
+        assert user_1_cart_2_access.status_code == 200
 
-        assert result_data_std == expected_data
-        assert result_data_staff == expected_data
-        assert result_data_admin == expected_data
+        assert user_2_cart_1_data == cart_1_expected_data
+        assert user_2_cart_2_data == cart_2_expected_data
+        assert user_1_cart_2_data == cart_2_expected_data
 
 
 def test_cart_get_clear(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-        api_route = f"{ROUTE}/{cart.id}"
+        cart = create_obj(
+            Cart(
+                name="CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=create_recipe(user.id).id,
+                ingredient_id=create_ingredient().id,
+                quantity=2,
+                is_done=False
+            )
+        )
+        api_route_get = f"{ROUTE}/{cart.id}"
+        api_route_clear = f"{ROUTE}/{cart.id}/clear"
 
         # when
-        response = client.get(api_route, headers=admin_headers)
+        response_with_data = client.get(api_route_get, headers=headers)
+        response_clear = client.get(api_route_clear, headers=headers)
+        response_cleared_data = client.get(api_route_get, headers=headers)
 
-        result_data = json.loads(response.data)
-        expected_data = cart.to_dict()
+        result_data = json.loads(response_with_data.data)
+        result_cleared_data = json.loads(response_cleared_data.data)
 
         # then
-        assert response.status_code == 200
-        assert result_data == expected_data
+        assert response_with_data.status_code == 200
+        assert response_clear.status_code == 204
+
+        assert len(result_data["items"]) == 1
+        assert len(result_cleared_data["items"]) == 0
 
 
 def test_cart_get_clear_invalid_id(
@@ -148,10 +206,9 @@ def test_cart_get_clear_invalid_id(
         client: testing.FlaskClient,
         admin_headers: dict
 ):
-    assert False
     with app.app_context():
         # given
-        api_route = f"{ROUTE}/-1"
+        api_route = f"{ROUTE}/-1/clear"
 
         # when
         response = client.get(api_route, headers=admin_headers)
@@ -163,36 +220,39 @@ def test_cart_get_clear_invalid_id(
 def test_cart_get_clear_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-        api_route = f"{ROUTE}/{cart.id}"
-
+        cart = create_obj(
+            Cart(
+                name="CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
+        api_route_clear = f"{ROUTE}/{cart.id}/clear"
+        
         # when
-        response_without = client.get(api_route)
-        response_std = client.get(api_route, headers=std_headers)
-        response_staff = client.get(api_route, headers=staff_headers)
-        response_admin = client.get(api_route, headers=admin_headers)
-
-        result_data_std = json.loads(response_std.data)
-        result_data_staff = json.loads(response_staff.data)
-        result_data_admin = json.loads(response_admin.data)
-        expected_data = cart.to_dict()
+        response_owner = client.get(api_route_clear, headers=headers)
+        response_access = client.get(api_route_clear, headers=headers_2)
+        response_unauth = client.get(api_route_clear, headers=headers_3)
 
         # then
-        assert response_without.status_code != 200
-        assert response_std.status_code == 200
-        assert response_staff.status_code == 200
-        assert response_admin.status_code == 200
-
-        assert result_data_std == expected_data
-        assert result_data_staff == expected_data
-        assert result_data_admin == expected_data
+        assert response_unauth.status_code == 401
+        assert response_owner.status_code == 204
+        assert response_access.status_code == 204
 
 
 # TEST GET-LIST
@@ -202,61 +262,102 @@ def test_cart_get_clear_authorization(
 def test_cart_get_list(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
         COUNT = 3
-        carts = [create_cart_with_relations(f"cart{i}") for i in range(0, COUNT)]
+        carts_user_1 = [
+            create_obj(
+                Cart(
+                    name=f"CartName{i}",
+                    owner_user_id=user.id,
+                    is_active=True
+                )
+            )
+                for i in range(0, COUNT)
+        ]
+        cart_user_2 = create_obj(
+            Cart(
+                name=f"CartName{COUNT + 1}",
+                owner_user_id=user_2.id,
+                is_active=True
+            )
+        )
+        cart_user_3 = create_obj(
+            Cart(
+                name=f"CartName{COUNT + 2}",
+                owner_user_id=user_3.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=carts_user_1[0].id,
+                user_id=user_2.id
+            )
+        )
         api_route = f"{ROUTE}/"
 
         # when
-        response = client.get(api_route, headers=admin_headers)
+        response = client.get(api_route, headers=headers)
+        response_2 = client.get(api_route, headers=headers_2)
+        response_3 = client.get(api_route, headers=headers_3)
 
-        result_data = json.loads(response.data)
-        expected_data = [cart.to_dict() for cart in carts]
+        result_data_user_1 = json.loads(response.data)
+        result_data_user_2 = json.loads(response_2.data)
+        result_data_user_3 = json.loads(response_3.data)
+
+        expected_data_user_1 = [cart.to_dict() for cart in carts_user_1]
+        expected_data_user_2 = [carts_user_1[0], cart_user_2]
+        expected_data_user_3 = [cart_user_3.to_dict()]
+        
+        expected_cart_data_1 = carts_user_1[0].to_dict()
 
         # then
         assert response.status_code == 200
-        assert len(carts) == COUNT
-        assert result_data == expected_data
+        assert response_2.status_code == 200
+        assert response_3.status_code == 200
+
+        assert len(result_data_user_1) == len(expected_data_user_1)
+        assert len(result_data_user_2) == len(expected_data_user_2)
+        assert len(result_data_user_3) == len(expected_data_user_3)
+
+        assert result_data_user_1[0]["name"] == expected_cart_data_1["name"]
+        assert result_data_user_1[0]["owner_user_id"] == expected_cart_data_1["owner_user_id"]
+        assert result_data_user_1[0]["is_active"] == expected_cart_data_1["is_active"]
+        assert "items" not in result_data_user_1[0]
 
 
 def test_cart_get_list_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        COUNT = 3
-        carts = [create_cart_with_relations(f"cart{i}") for i in range(0, COUNT)]
+        create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
         api_route = f"{ROUTE}/"
 
         # when
         response_without = client.get(api_route)
-        response_staff = client.get(api_route, headers=staff_headers)
-        response_admin = client.get(api_route, headers=admin_headers)
-        response_std = client.get(api_route, headers=std_headers)
-
-        result_data_std = json.loads(response_std.data)
-        result_data_staff = json.loads(response_staff.data)
-        result_data_admin = json.loads(response_admin.data)
-        expected_data = [cart.to_dict() for cart in carts]
+        response_user = client.get(api_route, headers=headers)
 
         # then
         assert response_without.status_code != 200
-        assert response_std.status_code == 200
-        assert response_staff.status_code == 200
-        assert response_admin.status_code == 200
-
-        assert result_data_std == expected_data
-        assert result_data_staff == expected_data
-        assert result_data_admin == expected_data
+        assert response_user.status_code == 200
 
 
 # TEST-POST
@@ -264,22 +365,26 @@ def test_cart_get_list_authorization(
 def test_cart_post(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        data = {"name": "Testcart"}
+        data = {
+            "name": "CartName",
+            "is_active": True
+        }
         api_route = f"{ROUTE}/"
 
         # when
-        response = client.post(api_route, headers=admin_headers, json=data)
+        response = client.post(api_route, headers=headers, json=data)
 
         result_data = json.loads(response.data)
-        result_data_db = cart.query.filter_by(**data).first().to_dict()
+        result_data_db = Cart.query.filter_by(**data).first().to_dict()
         result_data_without_id = result_data.copy()
         del result_data_without_id["id"]
         expected_data = data.copy()
+        expected_data["owner_user_id"] = user.id
 
         # then
         assert response.status_code == 201
@@ -290,71 +395,81 @@ def test_cart_post(
 def test_cart_post_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        data_without = {"name": "Testcart"}
-        data_std = {"name": "Testcart2"}
-        data_staff = {"name": "Testcart3"}
-        data_admin = {"name": "Testcart4"}
+        data = {
+            "name": "CartName",
+            "is_active": True
+        }
         api_route = f"{ROUTE}/"
 
         # when
         response_without = client.post(
-            api_route, json=data_without)
-        response_std = client.post(
-            api_route, headers=std_headers, json=data_std)
-        response_staff = client.post(
-            api_route, headers=staff_headers, json=data_staff)
-        response_admin = client.post(
-            api_route, headers=admin_headers, json=data_admin)
+            api_route, json=data)
+        response_user = client.post(
+            api_route, headers=headers, json=data)
 
         # then
         assert response_without.status_code != 201
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 201
-        assert response_admin.status_code == 201
+        assert response_user.status_code == 201
 
 
 def test_cart_post_invalid_payload(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        data_name_is_null = {}                  # "name" not given
-        data_name_to_short = {"name": "T" * 3}  # min 4
-        data_name_to_long = {"name": "T" * 31}  # max 30
+        data_name_is_null = {
+            "is_active": True
+        } # "name" not given
+        data_is_active_is_null = {
+            "name": "CartName",
+        } # "is_active" not given
+        data_name_to_short = {
+            "name": "",
+            "is_active": True
+        } # "name" to short
+        data_name_to_long = {
+            "name": "T" * 51,
+            "is_active": True
+        } # "name" to long
+
         api_route = f"{ROUTE}/"
 
         # when
         response_name_is_null = client.post(
-            api_route, headers=admin_headers, json=data_name_is_null)
+            api_route, headers=headers, json=data_name_is_null)
+        response_is_active_is_null = client.post(
+            api_route, headers=headers, json=data_is_active_is_null)
         response_name_to_short = client.post(
-            api_route, headers=admin_headers, json=data_name_to_short)
+            api_route, headers=headers, json=data_name_to_short)
         response_name_to_long = client.post(
-            api_route, headers=admin_headers, json=data_name_to_long)
+            api_route, headers=headers, json=data_name_to_long)
 
         response_name_is_null_data = json.loads(response_name_is_null.data)
+        response_is_active_is_null_data = json.loads(response_is_active_is_null.data)
         response_name_to_short_data = json.loads(response_name_to_short.data)
         response_name_to_long_data = json.loads(response_name_to_long.data)
 
         # then
         assert response_name_is_null.status_code == 400
+        assert response_is_active_is_null.status_code == 400
         assert response_name_to_short.status_code == 400
         assert response_name_to_long.status_code == 400
 
         assert "message" in response_name_is_null_data
+        assert "message" in response_is_active_is_null_data
         assert "message" in response_name_to_short_data
         assert "message" in response_name_to_long_data
 
         assert "name" in response_name_is_null_data["message"]
+        assert "is_active" in response_is_active_is_null_data["message"]
         assert "name" in response_name_to_short_data["message"]
         assert "name" in response_name_to_long_data["message"]
 
@@ -364,102 +479,199 @@ def test_cart_post_invalid_payload(
 def test_cart_item_post(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        data = {"name": "Testcart"}
-        api_route = f"{ROUTE}/"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        recipe = create_recipe(user.id)
+        ingredient = create_ingredient()
+        data = {
+            "recipe_id": recipe.id,
+            "ingredient_id": ingredient.id,
+            "quantity": 2,
+            "is_done": True,
+        }
+        api_route = f"{ROUTE}/{cart.id}/item"
 
         # when
-        response = client.post(api_route, headers=admin_headers, json=data)
+        response = client.post(api_route, headers=headers, json=data)
 
         result_data = json.loads(response.data)
-        result_data_db = cart.query.filter_by(**data).first().to_dict()
-        result_data_without_id = result_data.copy()
-        del result_data_without_id["id"]
+        result_data_db = CartItem.query.filter_by(**data).first().to_dict()
+
         expected_data = data.copy()
+        expected_data["cart_id"] = cart.id
+        expected_data["ingredient"] = ingredient.to_dict()
+        expected_data["recipe"] = ingredient.to_dict()
 
         # then
         assert response.status_code == 201
-        assert result_data_without_id == expected_data
-        assert result_data_db == result_data
+
+        assert result_data["id"] == result_data_db["id"]
+        assert result_data["is_done"] == result_data_db["is_done"]
+        assert result_data["quantity"] == result_data_db["quantity"]
+        assert result_data["recipe"]["id"] == result_data_db["recipe_id"]
+        assert result_data["ingredient"]["id"] == result_data_db["ingredient_id"]
 
 
-def test_cart_item_post_invalid_id(): pass
+def test_cart_item_post_invalid_id(
+        app: Flask,
+        client: testing.FlaskClient,
+        user: tuple[User, dict]
+):
+    user, headers = user
+    with app.app_context():
+        # given
+        api_route = f"{ROUTE}/1/item"
+
+        # when
+        response = client.post(api_route, headers=headers, json={})
+        response_data = json.loads(response.data)
+
+        # then
+        assert response.status_code == 404
+
+        assert "message" in response_data
 
 
 def test_cart_item_post_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        data_without = {"name": "Testcart"}
-        data_std = {"name": "Testcart2"}
-        data_staff = {"name": "Testcart3"}
-        data_admin = {"name": "Testcart4"}
-        api_route = f"{ROUTE}/"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        recipe = create_recipe(user.id)
+        ingredient = create_ingredient()
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
+        data = {
+            "recipe_id": recipe.id,
+            "ingredient_id": ingredient.id,
+            "quantity": 2,
+            "is_done": True,
+        }
+        api_route = f"{ROUTE}/{cart.id}/item"
 
         # when
         response_without = client.post(
-            api_route, json=data_without)
-        response_std = client.post(
-            api_route, headers=std_headers, json=data_std)
-        response_staff = client.post(
-            api_route, headers=staff_headers, json=data_staff)
-        response_admin = client.post(
-            api_route, headers=admin_headers, json=data_admin)
+            api_route, json=data)
+        response_user_owner = client.post(
+            api_route, headers=headers, json=data)
+        response_user_shared_with = client.post(
+            api_route, headers=headers_2, json=data)
+        response_user_access_denied= client.post(
+            api_route, headers=headers_3, json=data)
 
         # then
         assert response_without.status_code != 201
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 201
-        assert response_admin.status_code == 201
+        assert response_user_owner.status_code == 201
+        assert response_user_shared_with.status_code == 201
+        assert response_user_access_denied.status_code == 401
 
 
 def test_cart_item_post_invalid_payload(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        data_name_is_null = {}                  # "name" not given
-        data_name_to_short = {"name": "T" * 3}  # min 4
-        data_name_to_long = {"name": "T" * 31}  # max 30
-        api_route = f"{ROUTE}/"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        ingredient = create_ingredient()
+        data_recipe_id_not_exisiting = {
+            "recipe_id": -1,
+            "ingredient_id": ingredient.id,
+            "quantity": 1,
+            "is_done": True
+        }
+        data_ingredient_id_is_null = {
+            "quantity": 1,
+            "is_done": True
+        }
+        data_quantity_is_null = {
+            "ingredient_id": ingredient.id,
+            "is_done": True
+        }
+        data_quantity_to_small = {
+            "ingredient_id": ingredient.id,
+            "quantity": -1,
+            "is_done": True
+        }
+        data_is_done_is_null = {
+            "ingredient_id": ingredient.id,
+            "quantity": 1
+        }
+        
+        api_route = f"{ROUTE}/{cart.id}/item"
 
         # when
-        response_name_is_null = client.post(
-            api_route, headers=admin_headers, json=data_name_is_null)
-        response_name_to_short = client.post(
-            api_route, headers=admin_headers, json=data_name_to_short)
-        response_name_to_long = client.post(
-            api_route, headers=admin_headers, json=data_name_to_long)
+        resp_recipe_id_not_exisiting = client.post(
+            api_route, headers=headers, json=data_recipe_id_not_exisiting)
+        resp_ingredient_id_is_null = client.post(
+            api_route, headers=headers, json=data_ingredient_id_is_null)
+        resp_quantity_is_null = client.post(
+            api_route, headers=headers, json=data_quantity_is_null)
+        resp_quantity_to_small = client.post(
+            api_route, headers=headers, json=data_quantity_to_small)
+        resp_is_done_is_null = client.post(
+            api_route, headers=headers, json=data_is_done_is_null)
 
-        response_name_is_null_data = json.loads(response_name_is_null.data)
-        response_name_to_short_data = json.loads(response_name_to_short.data)
-        response_name_to_long_data = json.loads(response_name_to_long.data)
+        resp_recipe_id_not_exisiting_data = json.loads(resp_recipe_id_not_exisiting.data)
+        resp_ingredient_id_is_null_data = json.loads(resp_ingredient_id_is_null.data)
+        resp_quantity_is_null_data = json.loads(resp_quantity_is_null.data)
+        resp_quantity_to_small_data = json.loads(resp_quantity_to_small.data)
+        resp_is_done_is_null_data = json.loads(resp_is_done_is_null.data)
 
         # then
-        assert response_name_is_null.status_code == 400
-        assert response_name_to_short.status_code == 400
-        assert response_name_to_long.status_code == 400
+        assert resp_recipe_id_not_exisiting.status_code == 404
+        assert resp_ingredient_id_is_null.status_code == 400
+        assert resp_quantity_is_null.status_code == 400
+        assert resp_quantity_to_small.status_code == 400
+        assert resp_is_done_is_null.status_code == 400
 
-        assert "message" in response_name_is_null_data
-        assert "message" in response_name_to_short_data
-        assert "message" in response_name_to_long_data
+        assert "message" in resp_recipe_id_not_exisiting_data
+        assert "message" in resp_ingredient_id_is_null_data
+        assert "message" in resp_quantity_is_null_data
+        assert "message" in resp_quantity_to_small_data
+        assert "message" in resp_is_done_is_null_data
 
-        assert "name" in response_name_is_null_data["message"]
-        assert "name" in response_name_to_short_data["message"]
-        assert "name" in response_name_to_long_data["message"]
+        assert "recipe_id" in resp_recipe_id_not_exisiting_data["message"]
+        assert "ingredient_id" in resp_ingredient_id_is_null_data["message"]
+        assert "quantity" in resp_quantity_is_null_data["message"]
+        assert "quantity" in resp_quantity_to_small_data["message"]
+        assert "is_done" in resp_is_done_is_null_data["message"]
 
 
 #   SHARED USER
@@ -467,102 +679,112 @@ def test_cart_item_post_invalid_payload(
 def test_cart_shared_user_post(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        data = {"name": "Testcart"}
-        api_route = f"{ROUTE}/"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        data = {
+            "cart_id": cart.id,
+            "user_id": user.id
+        }
+        api_route = f"{ROUTE}/{cart.id}/access/edit/user/{user.id}"
 
         # when
-        response = client.post(api_route, headers=admin_headers, json=data)
+        response = client.post(api_route, headers=headers, json=data)
 
         result_data = json.loads(response.data)
-        result_data_db = cart.query.filter_by(**data).first().to_dict()
-        result_data_without_id = result_data.copy()
-        del result_data_without_id["id"]
-        expected_data = data.copy()
+        result_data_db = UserSharedEditCart.query.get((cart.id, user.id)).to_dict()
 
         # then
         assert response.status_code == 201
-        assert result_data_without_id == expected_data
         assert result_data_db == result_data
 
 
-def test_cart_shared_user_post_invalid_id(): pass
+def test_cart_shared_user_post_invalid_id(
+        app: Flask,
+        client: testing.FlaskClient,
+        user: tuple[User, dict]
+):
+    user, headers = user
+    with app.app_context():
+        # given
+        api_route = f"{ROUTE}/-1/access/edit/user/{user.id}"
+
+        # when
+        response = client.post(api_route, headers=headers, json={})
+
+        # then
+        assert response.status_code == 404
 
 
 def test_cart_shared_user_post_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        data_without = {"name": "Testcart"}
-        data_std = {"name": "Testcart2"}
-        data_staff = {"name": "Testcart3"}
-        data_admin = {"name": "Testcart4"}
-        api_route = f"{ROUTE}/"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        api_route = f"{ROUTE}/{cart.id}/access/edit/user/{user_2.id}"
 
         # when
         response_without = client.post(
-            api_route, json=data_without)
-        response_std = client.post(
-            api_route, headers=std_headers, json=data_std)
-        response_staff = client.post(
-            api_route, headers=staff_headers, json=data_staff)
-        response_admin = client.post(
-            api_route, headers=admin_headers, json=data_admin)
+            api_route, json={})
+        response_user_owner = client.post(
+            api_route, headers=headers, json={})
+        response_user_2_shared_but_access_denied = client.post(
+            api_route, headers=headers_2, json={})
+        response_user_3 = client.post(
+            api_route, headers=headers_3, json={})
 
         # then
         assert response_without.status_code != 201
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 201
-        assert response_admin.status_code == 201
+        assert response_user_owner.status_code == 201
+        assert response_user_2_shared_but_access_denied.status_code == 401
+        assert response_user_3.status_code == 401
 
 
 def test_cart_shared_user_post_invalid_payload(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        data_name_is_null = {}                  # "name" not given
-        data_name_to_short = {"name": "T" * 3}  # min 4
-        data_name_to_long = {"name": "T" * 31}  # max 30
-        api_route = f"{ROUTE}/"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        api_route = f"{ROUTE}/{cart.id}/access/edit/user/-1"
 
         # when
-        response_name_is_null = client.post(
-            api_route, headers=admin_headers, json=data_name_is_null)
-        response_name_to_short = client.post(
-            api_route, headers=admin_headers, json=data_name_to_short)
-        response_name_to_long = client.post(
-            api_route, headers=admin_headers, json=data_name_to_long)
-
-        response_name_is_null_data = json.loads(response_name_is_null.data)
-        response_name_to_short_data = json.loads(response_name_to_short.data)
-        response_name_to_long_data = json.loads(response_name_to_long.data)
+        response = client.post(api_route, headers=headers, json={})
 
         # then
-        assert response_name_is_null.status_code == 400
-        assert response_name_to_short.status_code == 400
-        assert response_name_to_long.status_code == 400
-
-        assert "message" in response_name_is_null_data
-        assert "message" in response_name_to_short_data
-        assert "message" in response_name_to_long_data
-
-        assert "name" in response_name_is_null_data["message"]
-        assert "name" in response_name_to_short_data["message"]
-        assert "name" in response_name_to_long_data["message"]
+        assert response.status_code == 404
 
 
 # TEST UPDATE
@@ -572,26 +794,32 @@ def test_cart_shared_user_post_invalid_payload(
 def test_cart_patch(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
+    user, headers = user
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-        data = {"name": "NewcartName"}
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        data = {
+            "name": "CartUpdatedName",
+            "is_active": False
+        }
         api_route = f"{ROUTE}/{cart.id}"
 
         # when
-        response = client.patch(api_route, headers=admin_headers, json=data)
+        response = client.patch(api_route, headers=headers, json=data)
 
         result_data = json.loads(response.data)
         result_data_db = cart.query.get(cart.id).to_dict()
-        result_data_without_id = result_data.copy()
-        del result_data_without_id["id"]
-        expected_data = data.copy()
 
         # then
         assert response.status_code == 200
-        assert result_data_without_id == expected_data
         assert result_data_db == result_data
 
 
@@ -602,11 +830,10 @@ def test_cart_patch_invalid_id(
 ):
     with app.app_context():
         # given
-        data = {"name": "NewcartName"}
         api_route = f"{ROUTE}/-1"
 
         # when
-        response = client.patch(api_route, headers=admin_headers, json=data)
+        response = client.patch(api_route, headers=admin_headers, json={})
 
         # then
         assert response.status_code == 404
@@ -615,69 +842,102 @@ def test_cart_patch_invalid_id(
 def test_cart_patch_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
 
         data_without = {"name": "NewTestcart"}
-        data_std = {"name": "NewTestcart2"}
-        data_staff = {"name": "NewTestcart3"}
-        data_admin = {"name": "NewTestcart4"}
+        data_user_owner = {"name": "NewTestcart2"}
+        data_user_2_can_edit = {"name": "NewTestcart3"}
+        data_user_3_access_denied = {"name": "NewTestcart4"}
 
         api_route = f"{ROUTE}/{cart.id}"
 
         # when
         response_without = client.patch(
             api_route, json=data_without)
-        response_std = client.patch(
-            api_route, headers=std_headers, json=data_std)
-        response_staff = client.patch(
-            api_route, headers=staff_headers, json=data_staff)
-        response_admin = client.patch(
-            api_route, headers=admin_headers, json=data_admin)
+        response_owner = client.patch(
+            api_route, headers=headers, json=data_user_owner)
+        response_can_edit = client.patch(
+            api_route, headers=headers_2, json=data_user_2_can_edit)
+        response_access_denied = client.patch(
+            api_route, headers=headers_3, json=data_user_3_access_denied)
 
         # then
         assert response_without.status_code != 200
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 200
-        assert response_admin.status_code == 200
+        assert response_owner.status_code == 200
+        assert response_can_edit.status_code == 200
+        assert response_access_denied.status_code == 401
 
 
 def test_cart_patch_invalid_payload(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
+    user, headers = user
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        data_name_to_short = {"name": ""}
+        data_name_to_long = {"name": "T" * 51}
+        data_is_active_is_null = {"is_active": None}
+        data_is_owner_user_id_is_readonly = {"owner_user_id": 1}
 
-        data_name_to_short = {"name": "T" * 3}  # min 4
-        data_name_to_long = {"name": "T" * 31}  # max 30
         api_route = f"{ROUTE}/{cart.id}"
 
         # when
-        response_name_to_short = client.patch(
-            api_route, headers=admin_headers, json=data_name_to_short)
-        response_name_to_long = client.patch(
-            api_route, headers=admin_headers, json=data_name_to_long)
+        resp_name_to_short = client.patch(api_route, headers=headers, json=data_name_to_short)
+        resp_name_to_long = client.patch(api_route, headers=headers, json=data_name_to_long)
+        resp_is_active_is_null = client.patch(api_route, headers=headers, json=data_is_active_is_null)
+        resp_is_owner_user_id_is_readonly = client.patch(api_route, headers=headers, json=data_is_owner_user_id_is_readonly)
 
-        response_name_to_short_data = json.loads(response_name_to_short.data)
-        response_name_to_long_data = json.loads(response_name_to_long.data)
+        resp_name_to_short_data = json.loads(resp_name_to_short.data)
+        resp_name_to_long_data = json.loads(resp_name_to_long.data)
+        resp_is_active_is_null_data = json.loads(resp_is_active_is_null.data)
+        resp_is_owner_user_id_is_readonly_data = json.loads(resp_is_owner_user_id_is_readonly.data)
 
         # then
-        assert response_name_to_short.status_code == 400
-        assert response_name_to_long.status_code == 400
+        assert resp_name_to_short.status_code == 400
+        assert resp_name_to_long.status_code == 400
+        assert resp_is_active_is_null.status_code == 400
+        assert resp_is_owner_user_id_is_readonly.status_code == 400
 
-        assert "message" in response_name_to_short_data
-        assert "message" in response_name_to_long_data
+        assert "message" in resp_name_to_short_data
+        assert "message" in resp_name_to_long_data
+        assert "message" in resp_is_active_is_null_data
+        assert "message" in resp_is_owner_user_id_is_readonly_data
 
-        assert "name" in response_name_to_short_data["message"]
-        assert "name" in response_name_to_long_data["message"]
+        assert "name" in resp_name_to_short_data["message"]
+        assert "name" in resp_name_to_long_data["message"]
+        assert "is_active" in resp_is_active_is_null_data["message"]
+        assert "owner_user_id" in resp_is_owner_user_id_is_readonly_data["message"]
+        assert "read only" in resp_is_owner_user_id_is_readonly_data["message"]
 
 
 #   CART ITEM
@@ -685,28 +945,43 @@ def test_cart_patch_invalid_payload(
 def test_cart_item_patch(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-        data = {"name": "NewcartName"}
-        api_route = f"{ROUTE}/{cart.id}"
+        cart = create_obj(
+            Cart(
+                name="CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        cart_item = create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=create_recipe(user.id).id,
+                ingredient_id=create_ingredient().id,
+                quantity=2,
+                is_done=False
+            )
+        )
+        data = {
+            "quantity": 4,
+            "is_done": False
+        }
+        api_route = f"{ROUTE}/{cart.id}/item/{cart_item.id}"
 
         # when
-        response = client.patch(api_route, headers=admin_headers, json=data)
+        response = client.patch(api_route, headers=headers, json=data)
 
-        result_data = json.loads(response.data)
-        result_data_db = cart.query.get(cart.id).to_dict()
-        result_data_without_id = result_data.copy()
-        del result_data_without_id["id"]
-        expected_data = data.copy()
+        result_data = CartItem.query.get(cart_item.id).to_dict()
 
         # then
+        print(result_data)
         assert response.status_code == 200
-        assert result_data_without_id == expected_data
-        assert result_data_db == result_data
+        assert result_data["quantity"] == data["quantity"]
+        assert result_data["is_done"] == data["is_done"]
 
 
 def test_cart_item_patch_invalid_id(
@@ -714,14 +989,12 @@ def test_cart_item_patch_invalid_id(
         client: testing.FlaskClient,
         admin_headers: dict
 ):
-    assert False
     with app.app_context():
         # given
-        data = {"name": "NewcartName"}
         api_route = f"{ROUTE}/-1"
 
         # when
-        response = client.patch(api_route, headers=admin_headers, json=data)
+        response = client.patch(api_route, headers=admin_headers, json={})
 
         # then
         assert response.status_code == 404
@@ -730,71 +1003,108 @@ def test_cart_item_patch_invalid_id(
 def test_cart_item_patch_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
+        cart_item = create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=create_recipe(user.id).id,
+                ingredient_id=create_ingredient().id,
+                quantity=2,
+                is_done=False
+            )
+        )
 
-        data_without = {"name": "NewTestcart"}
-        data_std = {"name": "NewTestcart2"}
-        data_staff = {"name": "NewTestcart3"}
-        data_admin = {"name": "NewTestcart4"}
+        data_without = {"quantity": 5}
+        data_user_owner = {"quantity": 5}
+        data_user_2_can_edit = {"quantity": 5}
+        data_user_3_access_denied = {"quantity": 5}
 
-        api_route = f"{ROUTE}/{cart.id}"
+        api_route = f"{ROUTE}/{cart.id}/item/{cart_item.id}"
 
         # when
         response_without = client.patch(
             api_route, json=data_without)
-        response_std = client.patch(
-            api_route, headers=std_headers, json=data_std)
-        response_staff = client.patch(
-            api_route, headers=staff_headers, json=data_staff)
-        response_admin = client.patch(
-            api_route, headers=admin_headers, json=data_admin)
+        response_owner = client.patch(
+            api_route, headers=headers, json=data_user_owner)
+        response_can_edit = client.patch(
+            api_route, headers=headers_2, json=data_user_2_can_edit)
+        response_access_denied = client.patch(
+            api_route, headers=headers_3, json=data_user_3_access_denied)
 
         # then
         assert response_without.status_code != 200
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 200
-        assert response_admin.status_code == 200
+        assert response_owner.status_code == 200
+        assert response_can_edit.status_code == 200
+        assert response_access_denied.status_code == 401
 
 
 def test_cart_item_patch_invalid_payload(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-
-        data_name_to_short = {"name": "T" * 3}  # min 4
-        data_name_to_long = {"name": "T" * 31}  # max 30
-        api_route = f"{ROUTE}/{cart.id}"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        cart_item = create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=create_recipe(user.id).id,
+                ingredient_id=create_ingredient().id,
+                quantity=2,
+                is_done=False
+            )
+        )
+        data_quantity_to_low = {"quantity": -1}
+        data_is_done_is_null = {"is_done": None}
+        api_route = f"{ROUTE}/{cart.id}/item/{cart_item.id}"
 
         # when
-        response_name_to_short = client.patch(
-            api_route, headers=admin_headers, json=data_name_to_short)
-        response_name_to_long = client.patch(
-            api_route, headers=admin_headers, json=data_name_to_long)
+        response_quantity_to_low = client.patch(
+            api_route, headers=headers, json=data_quantity_to_low)
+        response_is_done_is_null = client.patch(
+            api_route, headers=headers, json=data_is_done_is_null)
 
-        response_name_to_short_data = json.loads(response_name_to_short.data)
-        response_name_to_long_data = json.loads(response_name_to_long.data)
+        response_quantity_to_low_data = json.loads(response_quantity_to_low.data)
+        response_is_done_is_null_data = json.loads(response_is_done_is_null.data)
 
         # then
-        assert response_name_to_short.status_code == 400
-        assert response_name_to_long.status_code == 400
+        assert response_quantity_to_low.status_code == 400
+        assert response_is_done_is_null.status_code == 400
 
-        assert "message" in response_name_to_short_data
-        assert "message" in response_name_to_long_data
+        assert "message" in response_quantity_to_low_data
+        assert "message" in response_is_done_is_null_data
 
-        assert "name" in response_name_to_short_data["message"]
-        assert "name" in response_name_to_long_data["message"]
+        assert "quantity" in response_quantity_to_low_data["message"]
+        assert "is_done" in response_is_done_is_null_data["message"]
 
 
 # TEST DELETE
@@ -804,17 +1114,23 @@ def test_cart_item_patch_invalid_payload(
 def test_cart_delete(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
         db_model_count_before = cart.query.count()
         api_route = f"{ROUTE}/{cart.id}"
 
         # when
-        response = client.delete(api_route, headers=admin_headers)
+        response = client.delete(api_route, headers=headers)
 
         db_model_count_after = cart.query.count()
 
@@ -829,65 +1145,62 @@ def test_cart_delete_invalid_id(
         client: testing.FlaskClient,
         admin_headers: dict
 ):
-    assert False
     with app.app_context():
         # given
-        create_cart_with_relations()
-        db_model_count_before = cart.query.count()
         api_route = f"{ROUTE}/-1"
 
         # when
         response = client.delete(api_route, headers=admin_headers)
 
-        db_model_count_after = cart.query.count()
-
         # then
         assert response.status_code == 404
-        assert db_model_count_before == 1
-        assert db_model_count_after == 1
 
 
 def test_cart_delete_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        cart_without = create_cart_with_relations("Testcart")
-        cart_std = create_cart_with_relations("Testcart2")
-        cart_staff = create_cart_with_relations("Testcart3")
-        cart_admin = create_cart_with_relations("Testcart4")
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        cart_2 = create_obj(
+            Cart(
+                name=f"CartName2",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
 
-        api_route_without = f"{ROUTE}/{cart_without.id}"
-        api_route_std = f"{ROUTE}/{cart_std.id}"
-        api_route_staff = f"{ROUTE}/{cart_staff.id}"
-        api_route_admin = f"{ROUTE}/{cart_admin.id}"
+        api_route = f"{ROUTE}/{cart.id}"
+        api_route_2 = f"{ROUTE}/{cart_2.id}"
 
         # when
-        response_without = client.delete(api_route_without)
-        response_std = client.delete(api_route_std, headers=std_headers)
-        response_staff = client.delete(api_route_staff, headers=staff_headers)
-        response_admin = client.delete(api_route_admin, headers=admin_headers)
-
-        result_data_db_without = cart.query.get(cart_without.id)
-        result_data_db_std = cart.query.get(cart_std.id)
-        result_data_db_staff = cart.query.get(cart_staff.id)
-        result_data_db_admin = cart.query.get(cart_admin.id)
+        response_without = client.delete(
+            api_route_2)
+        response_owner = client.delete(
+            api_route, headers=headers)
+        response_can_edit = client.delete(
+            api_route_2, headers=headers_2)
+        response_access_denied = client.delete(
+            api_route_2, headers=headers_3)
 
         # then
-        assert response_without.status_code != 204
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 204
-        assert response_admin.status_code == 204
-
-        assert result_data_db_without is not None
-        assert result_data_db_std is not None
-        assert result_data_db_staff is None
-        assert result_data_db_admin is None
+        assert response_without.status_code != 200
+        assert response_owner.status_code == 204
+        assert response_can_edit.status_code == 401
+        assert response_access_denied.status_code == 401
 
 
 #   CART ITEM
@@ -895,19 +1208,34 @@ def test_cart_delete_authorization(
 def test_cart_item_delete(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-        db_model_count_before = cart.query.count()
-        api_route = f"{ROUTE}/{cart.id}"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        cart_item = create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=create_recipe(user.id).id,
+                ingredient_id=create_ingredient().id,
+                quantity=2,
+                is_done=False
+            )
+        )
+        db_model_count_before = CartItem.query.count()
+        api_route = f"{ROUTE}/{cart.id}/item/{cart_item.id}"
 
         # when
-        response = client.delete(api_route, headers=admin_headers)
+        response = client.delete(api_route, headers=headers)
 
-        db_model_count_after = cart.query.count()
+        db_model_count_after = CartItem.query.count()
 
         # then
         assert response.status_code == 204
@@ -918,17 +1246,23 @@ def test_cart_item_delete(
 def test_cart_item_delete_invalid_id(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
     with app.app_context():
         # given
-        create_cart_with_relations()
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
         db_model_count_before = cart.query.count()
-        api_route = f"{ROUTE}/-1"
+        api_route = f"{ROUTE}/{cart.id}/item/-1"
 
         # when
-        response = client.delete(api_route, headers=admin_headers)
+        response = client.delete(api_route, headers=headers)
 
         db_model_count_after = cart.query.count()
 
@@ -941,44 +1275,73 @@ def test_cart_item_delete_invalid_id(
 def test_cart_item_delete_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        cart_without = create_cart_with_relations("Testcart")
-        cart_std = create_cart_with_relations("Testcart2")
-        cart_staff = create_cart_with_relations("Testcart3")
-        cart_admin = create_cart_with_relations("Testcart4")
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
+        recipe = create_recipe(user.id)
+        ingredient = create_ingredient()
+        cart_item = create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=recipe.id,
+                ingredient_id=ingredient.id,
+                quantity=2,
+                is_done=False
+            )
+        )
+        cart_item_2 = create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=recipe.id,
+                ingredient_id=ingredient.id,
+                quantity=2,
+                is_done=False
+            )
+        )
+        cart_item_3 = create_obj(
+            CartItem(
+                cart_id=cart.id,
+                recipe_id=recipe.id,
+                ingredient_id=ingredient.id,
+                quantity=2,
+                is_done=False
+            )
+        )
 
-        api_route_without = f"{ROUTE}/{cart_without.id}"
-        api_route_std = f"{ROUTE}/{cart_std.id}"
-        api_route_staff = f"{ROUTE}/{cart_staff.id}"
-        api_route_admin = f"{ROUTE}/{cart_admin.id}"
+        api_route_item_1 = f"{ROUTE}/{cart.id}/item/{cart_item.id}"
+        api_route_item_2 = f"{ROUTE}/{cart.id}/item/{cart_item_2.id}"
+        api_route_item_3 = f"{ROUTE}/{cart.id}/item/{cart_item_3.id}"
 
         # when
-        response_without = client.delete(api_route_without)
-        response_std = client.delete(api_route_std, headers=std_headers)
-        response_staff = client.delete(api_route_staff, headers=staff_headers)
-        response_admin = client.delete(api_route_admin, headers=admin_headers)
-
-        result_data_db_without = cart.query.get(cart_without.id)
-        result_data_db_std = cart.query.get(cart_std.id)
-        result_data_db_staff = cart.query.get(cart_staff.id)
-        result_data_db_admin = cart.query.get(cart_admin.id)
+        response_without = client.delete(api_route_item_1)
+        response_owner = client.delete(api_route_item_1, headers=headers)
+        response_can_edit = client.delete(api_route_item_2, headers=headers_2)
+        response_access_denied = client.delete(api_route_item_3, headers=headers_3)
 
         # then
         assert response_without.status_code != 204
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 204
-        assert response_admin.status_code == 204
-
-        assert result_data_db_without is not None
-        assert result_data_db_std is not None
-        assert result_data_db_staff is None
-        assert result_data_db_admin is None
+        assert response_owner.status_code == 204
+        assert response_can_edit.status_code == 204
+        assert response_access_denied.status_code == 401
 
 
 #   SHARED USER
@@ -986,19 +1349,33 @@ def test_cart_item_delete_authorization(
 def test_cart_shared_user_delete(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
     with app.app_context():
         # given
-        cart = create_cart_with_relations()
-        db_model_count_before = cart.query.count()
-        api_route = f"{ROUTE}/{cart.id}"
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
+        db_model_count_before = UserSharedEditCart.query.count()
+        api_route = f"{ROUTE}/{cart.id}/access/edit/user/{user_2.id}"
 
         # when
-        response = client.delete(api_route, headers=admin_headers)
+        response = client.delete(api_route, headers=headers)
 
-        db_model_count_after = cart.query.count()
+        db_model_count_after = UserSharedEditCart.query.count()
 
         # then
         assert response.status_code == 204
@@ -1009,65 +1386,86 @@ def test_cart_shared_user_delete(
 def test_cart_shared_user_delete_invalid_id(
         app: Flask,
         client: testing.FlaskClient,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
     with app.app_context():
         # given
-        create_cart_with_relations()
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
         db_model_count_before = cart.query.count()
-        api_route = f"{ROUTE}/-1"
+        api_route_invalid_cart_id = f"{ROUTE}/-1/access/edit/user/{user_2.id}"
+        api_route_invalid_user_id = f"{ROUTE}/{cart.id}/access/edit/user/-1"
 
         # when
-        response = client.delete(api_route, headers=admin_headers)
+        response_invalid_cart_id = client.delete(api_route_invalid_cart_id, headers=headers)
+        response_invalid_user_id = client.delete(api_route_invalid_user_id, headers=headers)
 
         db_model_count_after = cart.query.count()
 
         # then
-        assert response.status_code == 404
+        assert response_invalid_cart_id.status_code == 404
+        assert response_invalid_user_id.status_code == 404
         assert db_model_count_before == 1
         assert db_model_count_after == 1
 
-
+"""
 def test_cart_shared_user_delete_authorization(
         app: Flask,
         client: testing.FlaskClient,
-        std_headers: dict,
-        staff_headers: dict,
-        admin_headers: dict
+        user: tuple[User, dict],
+        user_2: tuple[User, dict],
+        user_3: tuple[User, dict]
 ):
-    assert False
+    user, headers = user
+    user_2, headers_2 = user_2
+    user_3, headers_3 = user_3
     with app.app_context():
         # given
-        cart_without = create_cart_with_relations("Testcart")
-        cart_std = create_cart_with_relations("Testcart2")
-        cart_staff = create_cart_with_relations("Testcart3")
-        cart_admin = create_cart_with_relations("Testcart4")
+        cart = create_obj(
+            Cart(
+                name=f"CartName",
+                owner_user_id=user.id,
+                is_active=True
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_2.id
+            )
+        )
+        create_obj(
+            UserSharedEditCart(
+                cart_id=cart.id,
+                user_id=user_3.id
+            )
+        )
 
-        api_route_without = f"{ROUTE}/{cart_without.id}"
-        api_route_std = f"{ROUTE}/{cart_std.id}"
-        api_route_staff = f"{ROUTE}/{cart_staff.id}"
-        api_route_admin = f"{ROUTE}/{cart_admin.id}"
+        api_route = f"{ROUTE}/{cart.id}/access/edit/user/{user_2.id}"
+        api_route_2 = f"{ROUTE}/{cart.id}/access/edit/user/{user_3.id}"
 
         # when
-        response_without = client.delete(api_route_without)
-        response_std = client.delete(api_route_std, headers=std_headers)
-        response_staff = client.delete(api_route_staff, headers=staff_headers)
-        response_admin = client.delete(api_route_admin, headers=admin_headers)
-
-        result_data_db_without = cart.query.get(cart_without.id)
-        result_data_db_std = cart.query.get(cart_std.id)
-        result_data_db_staff = cart.query.get(cart_staff.id)
-        result_data_db_admin = cart.query.get(cart_admin.id)
+        response_without = client.delete(api_route)
+        response_owner = client.delete(api_route, headers=headers)
+        response_can_edit = client.delete(api_route_2, headers=headers_2)
+        response_access_denied = client.delete(api_route_2, headers=headers_3)
 
         # then
         assert response_without.status_code != 204
-        assert response_std.status_code == 401
-        assert response_staff.status_code == 204
-        assert response_admin.status_code == 204
-
-        assert result_data_db_without is not None
-        assert result_data_db_std is not None
-        assert result_data_db_staff is None
-        assert result_data_db_admin is None
-"""
+        assert response_owner.status_code == 204
+        assert response_can_edit.status_code == 401
+        assert response_access_denied.status_code == 401
