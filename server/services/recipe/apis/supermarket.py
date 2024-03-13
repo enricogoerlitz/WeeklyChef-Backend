@@ -165,7 +165,7 @@ class SupermarketAreaChangeOrderAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                       # noqa
     @jwt_required()
     @IsSupermarketOwnerOrCanEdit
-    def post(self, id, sarea_id, new_order_number):
+    def patch(self, id, sarea_id, new_order_number):
         return supermarket_area_controller.handle_post_change_order(
             id=sarea_id,
             new_order_number=new_order_number

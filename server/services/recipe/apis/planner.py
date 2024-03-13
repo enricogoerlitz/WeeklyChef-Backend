@@ -127,9 +127,10 @@ class RecipePlannerItemListAPI(Resource):
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
     def post(self, id):
-        return recipe_planner_item_controller.handle_post(
-            data=request.get_json()
-        )
+        data = request.get_json()
+        data["rplanner_id"] = id
+
+        return recipe_planner_item_controller.handle_post(data)
 
 
 @ns.route("/<int:id>/item/<int:item_id>")
@@ -169,7 +170,7 @@ class RecipePlannerChangeOrderAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                       # noqa
     @jwt_required()
     @IsRecipePlannerOwnerOrCanEdit
-    def post(self, id, item_id, new_order_number):
+    def patch(self, id, item_id, new_order_number):
         return recipe_planner_item_controller.handle_post_change_order(
             id=item_id,
             new_order_number=new_order_number

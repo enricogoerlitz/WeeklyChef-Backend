@@ -94,6 +94,7 @@ class RecipePlannerItem(db.Model):
     Das Rezept darf nur einmal am Tag geplant werden
 
     get by rplanner_id und date_form
+    label -> aggregationsname wie zB Frühstück, Mittag, Nachmittag, Abendessen etc  # noqa
     """
     __tablename__ = "rplanner_item"
 

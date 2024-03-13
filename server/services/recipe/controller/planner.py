@@ -132,6 +132,9 @@ class RecipePlannerItemController(BaseCrudController):
 
             return marshal(rp_item_obj, self._api_model)
 
+        except errors.DbModelValidationException as e:
+            return http_errors.bad_request(e)
+
         except errors.DbModelNotFoundException as e:
             return http_errors.not_found(e)
 
