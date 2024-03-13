@@ -338,7 +338,7 @@ class BaseCrudController(IController, AbstractRedisCache):
                     continue
 
             err_fields = str(filter_kwargs)
-            err_msg = f"The given fields are alredy existing with these values: {err_fields}."  # noqa
+            err_msg = f"The given fields are already existing with these values: {err_fields}."  # noqa
             raise errors.DbModelUnqiueConstraintException(msg=err_msg)
 
     def _ckeck_unique_primarykey(self, unique_primarykeys: tuple[str]) -> None:

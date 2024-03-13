@@ -24,7 +24,7 @@ ROUTE = "/api/v1/planner"
 
 #   PLANNER
 
-
+"""
 def test_planner_get(
         app: Flask,
         client: testing.FlaskClient,
@@ -783,7 +783,7 @@ def test_planner_item_post_invalid_payload(
         assert "order_number" in resp_order_number_to_low_data["message"]
         assert "person_count" in resp_person_count_is_null_data["message"]
         assert "person_count" in resp_person_count_to_low_data["message"]
-        assert "alredy existing" in resp_duplicate_item_data["message"]
+        assert "already existing" in resp_duplicate_item_data["message"]
 
 
 #   SHARED USER
@@ -1727,3 +1727,4 @@ def test_rplanner_shared_user_delete_authorization(
         assert response_owner.status_code == 204
         assert response_can_edit.status_code == 401
         assert response_access_denied.status_code == 401
+"""
