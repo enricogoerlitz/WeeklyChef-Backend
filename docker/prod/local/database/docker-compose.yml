@@ -3,9 +3,7 @@ name: "weeklychef-backend"
 
 services:
   database-recipe-service:
-    build:
-      context: .
-      dockerfile: dockerfile.db.recipe
+    image: mysql:latest
     ports:
       - "3307:3306"
     environment:
@@ -17,9 +15,7 @@ services:
       - db-recipe-data:/Users/enricogoerlitz/weeklychef/mysql # TODO: change volume path
 
   database-auth-service:
-    build:
-      context: .
-      dockerfile: dockerfile.db.auth
+    image: mysql:latest
     ports:
       - "3308:3306"
     environment:
@@ -31,9 +27,7 @@ services:
       - db-auth-data:/Users/enricogoerlitz/weeklychef/mysql # TODO: change volume path
 
   redis:
-    build:
-      context: .
-      dockerfile: dockerfile.redis
+    image: redis:latest
     ports:
       - "6380:6379"
 
