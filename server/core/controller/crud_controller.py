@@ -53,7 +53,7 @@ class AbstractRedisCache:
         self._clear_cache_models = list(set([self._main_model] + clear_cache_models))  # noqa
 
     # protected
-    def _get_cache(self, redis_addition_key: str | None) -> Any:
+    def _get_cache(self, redis_addition_key: str = None) -> Any:
         if not self._use_caching:
             return None
 
@@ -63,7 +63,7 @@ class AbstractRedisCache:
         return api_cache.get(redis_key)
 
     # protected
-    def _set_cache(self, data: Any, redis_addition_key: str | None) -> None:
+    def _set_cache(self, data: Any, redis_addition_key: str = None) -> None:
         redis_key = api_cache.gen_key(
             self._main_model, redis_addition_key=redis_addition_key)
         if self._use_caching:

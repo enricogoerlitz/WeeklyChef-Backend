@@ -21,10 +21,8 @@ ROUTE = "/api/v1/planner"
 
 # TEST GET
 
-
 #   PLANNER
 
-"""
 def test_planner_get(
         app: Flask,
         client: testing.FlaskClient,
@@ -1727,4 +1725,3 @@ def test_rplanner_shared_user_delete_authorization(
         assert response_owner.status_code == 204
         assert response_can_edit.status_code == 401
         assert response_access_denied.status_code == 401
-"""

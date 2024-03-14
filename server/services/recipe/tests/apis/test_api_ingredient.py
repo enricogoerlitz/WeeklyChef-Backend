@@ -76,7 +76,7 @@ ROUTE = "/api/v1/ingredient"
 
 # TEST GET
 
-"""
+
 def test_ingredient_get(
         app: Flask,
         client: testing.FlaskClient,
@@ -665,4 +665,3 @@ def test_ingredient_delete_authorization(
         assert result_data_db_std is not None
         assert result_data_db_staff is None
         assert result_data_db_admin is None
-"""

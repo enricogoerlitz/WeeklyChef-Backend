@@ -219,7 +219,7 @@ class SupermarketAreaIngredientAPI(Resource):
     @ns.response(code=500, model=error_model, description=sui.DESC_UNEXP)                                       # noqa
     @jwt_required()
     @IsSupermarketOwnerOrCanEdit
-    def delete(self, sarea_id, ingredient_id):
+    def delete(self, id, sarea_id, ingredient_id):
         return supermarket_area_ingredient_controller.handle_delete(
             id=(sarea_id, ingredient_id)
         )

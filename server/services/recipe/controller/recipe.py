@@ -274,7 +274,6 @@ recipe_controller = RecipeController(
         "preperation_description"
     ],
     foreign_key_columns=[
-        # (User, "creator_user_id"),
         (Category, "category_id")
     ],
     read_only_fields=["creator_user_id"],

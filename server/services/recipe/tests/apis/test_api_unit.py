@@ -20,7 +20,7 @@ def create_unit(name: str = "TestUnit") -> None:
 
 # TEST GET
 
-"""
+
 def test_unit_get(
         app: Flask,
         client: testing.FlaskClient,
@@ -452,4 +452,3 @@ def test_unit_delete_authorization(
         assert result_data_db_std is not None
         assert result_data_db_staff is None
         assert result_data_db_admin is None
-"""

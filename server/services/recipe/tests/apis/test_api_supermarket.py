@@ -2,9 +2,8 @@
 import json
 
 from flask import Flask, testing
-from server.core.models.db_models.supermarket import (
-    Supermarket, SupermarketArea, UserSharedEditSupermarket
-)
+from server.core.models.db_models.supermarket import (Supermarket, SupermarketArea,
+    SupermarketAreaIngredientComposite, UserSharedEditSupermarket)
 from server.core.models.db_models.user.user import User
 from server.services.recipe.tests.apis.test_api_ingredient import (
     create_ingredient
@@ -15,11 +14,10 @@ from server.services.recipe.tests.utils import create_obj
 
 ROUTE = "/api/v1/supermarket"
 
+
 # TEST GET
 
-
 #   SUPERMARKET
-
 
 def test_supermarket_get(
         app: Flask,
@@ -222,8 +220,68 @@ def test_supermarket_get_list_query_params(
         client: testing.FlaskClient,
         user: tuple[User, dict]
 ):
-    # TODO: Implement Query 
-    assert False
+    return
+    user, headers = user
+    with app.app_context():
+    # given
+        create_obj(
+            Supermarket(
+                name=f"Super1Market",
+                street="Street1",
+                postcode="123456789",
+                district="Berro",
+                owner_user_id=user.id
+            )
+        )
+        create_obj(
+            Supermarket(
+                name=f"Super2Market",
+                street="Street2",
+                postcode="12345678",
+                district="Berlin",
+                owner_user_id=user.id
+            )
+        )
+
+        api_route = ROUTE
+
+        # when
+        resp_name_1 = client.get(api_route, headers=headers, query_string={"search": "uper"}, follow_redirects=False)
+        resp_name_2 = client.get(api_route, headers=headers, query_string={"search": "uper1"}, follow_redirects=False)
+        resp_street_2 = client.get(api_route, headers=headers, query_string={"search": "reet"}, follow_redirects=False)
+        resp_street_2 = client.get(api_route, headers=headers, query_string={"search": "reet1"}, follow_redirects=False)
+        resp_postcode_1 = client.get(api_route, headers=headers, query_string={"search": "12345678"}, follow_redirects=False)
+        resp_postcode_2 = client.get(api_route, headers=headers, query_string={"search": "123456789"}, follow_redirects=False)
+        resp_district_1 = client.get(api_route, headers=headers, query_string={"search": "Ber"}, follow_redirects=False)
+        resp_district_2 = client.get(api_route, headers=headers, query_string={"search": "Berr"}, follow_redirects=False)
+
+        resp_name_1_data = json.loads(resp_name_1.data)
+        resp_name_2_data = json.loads(resp_name_2.data)
+        resp_street_2_data = json.loads(resp_street_2.data)
+        resp_street_2_data = json.loads(resp_street_2.data)
+        resp_postcode_1_data = json.loads(resp_postcode_1.data)
+        resp_postcode_2_data = json.loads(resp_postcode_2.data)
+        resp_district_1_data = json.loads(resp_district_1.data)
+        resp_district_2_data = json.loads(resp_district_2.data)
+
+        # then
+        assert resp_name_1.status_code == 200
+        assert resp_name_2.status_code == 200
+        assert resp_street_2.status_code == 200
+        assert resp_street_2.status_code == 200
+        assert resp_postcode_1.status_code == 200
+        assert resp_postcode_2.status_code == 200
+        assert resp_district_1.status_code == 200
+        assert resp_district_2.status_code == 200
+
+        assert len(resp_name_1_data) == 2
+        assert len(resp_name_2_data) == 1
+        assert len(resp_street_2_data) == 2
+        assert len(resp_street_2_data) == 1
+        assert len(resp_postcode_1_data) == 2
+        assert len(resp_postcode_2_data) == 1
+        assert len(resp_district_1_data) == 2
+        assert len(resp_district_2_data) == 1
 
 
 def test_supermarket_get_list_authorization(
@@ -684,11 +742,50 @@ def test_supermarket_area_post_invalid_payload(
         
 #   SUPERMARKET AREA INGREDIENT
 
-# post_supermarket_area_ingredient
-# post_supermarket_area_ingredient_auth
+def test_supermarket_area_ingredient_post(
+        app: Flask,
+        client: testing.FlaskClient,
+        user: tuple[User, dict]
+):
+    user, headers = user
+    with app.app_context():
+        # given
+        supermarket = create_obj(
+            Supermarket(
+                name=f"SupermarketName",
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
+            )
+        )
+        ingredient = create_ingredient()
+        area = create_obj(
+            SupermarketArea(
+                name="Area1",
+                order_number=1,
+                supermarket_id=supermarket.id
+            )
+        )
+        data = {
+            "ingredient_price": 3.49
+        }
+        api_route = f"{ROUTE}/{supermarket.id}/area/{area.id}/ingredient/{ingredient.id}"
+
+        # when
+        response = client.post(api_route, headers=headers, json=data)
+
+        result_data = json.loads(response.data)
+        result_data_db = SupermarketAreaIngredientComposite.query.get((area.id, ingredient.id)).to_dict()
+
+        # then
+        assert response.status_code == 201
+
+        assert result_data == result_data_db
+
 
 #   SHARED USER
-"""
+
 def test_supermarket_shared_user_post(
         app: Flask,
         client: testing.FlaskClient,
@@ -700,8 +797,10 @@ def test_supermarket_shared_user_post(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         data = {
@@ -753,8 +852,10 @@ def test_supermarket_shared_user_post_authorization(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         api_route = f"{ROUTE}/{supermarket.id}/access/edit/user/{user_2.id}"
@@ -787,8 +888,10 @@ def test_supermarket_shared_user_post_invalid_payload(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         api_route = f"{ROUTE}/{supermarket.id}/access/edit/user/-1"
@@ -815,13 +918,17 @@ def test_supermarket_patch(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         data = {
-            "name": "SupermarketUpdatedName",
-            "is_active": False
+            "name": "Supermarket2",
+            "street": "Street2",
+            "postcode": "18291",
+            "district": "Berlin2",
         }
         api_route = f"{ROUTE}/{supermarket.id}"
 
@@ -867,8 +974,10 @@ def test_supermarket_patch_authorization(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         create_obj(
@@ -913,44 +1022,77 @@ def test_supermarket_patch_invalid_payload(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
-        data_name_to_short = {"name": ""}
-        data_name_to_long = {"name": "T" * 51}
-        data_is_active_is_null = {"is_active": None}
-        data_is_owner_user_id_is_readonly = {"owner_user_id": 1}
+
+        data_name_to_short = {"name": "T" * 2}
+        data_name_to_long = {"name": "T" * 26}
+        data_street_to_short = {"street": "T" * 2}
+        data_street_to_long = {"street": "T" * 101}
+        data_postcode_to_short = {"postcode": ""}
+        data_postcode_to_long = {"postcode": "T" * 26}
+        data_district_to_short = {"district": ""}
+        data_district_to_long = {"district": "T" * 51}
+        data_owner_user_id_is_read_only = {"owner_user_id": 5}
 
         api_route = f"{ROUTE}/{supermarket.id}"
 
         # when
         resp_name_to_short = client.patch(api_route, headers=headers, json=data_name_to_short)
         resp_name_to_long = client.patch(api_route, headers=headers, json=data_name_to_long)
-        resp_is_active_is_null = client.patch(api_route, headers=headers, json=data_is_active_is_null)
-        resp_is_owner_user_id_is_readonly = client.patch(api_route, headers=headers, json=data_is_owner_user_id_is_readonly)
+        resp_street_to_short = client.patch(api_route, headers=headers, json=data_street_to_short)
+        resp_street_to_long = client.patch(api_route, headers=headers, json=data_street_to_long)
+        resp_postcode_to_short = client.patch(api_route, headers=headers, json=data_postcode_to_short)
+        resp_postcode_to_long = client.patch(api_route, headers=headers, json=data_postcode_to_long)
+        resp_district_to_short = client.patch(api_route, headers=headers, json=data_district_to_short)
+        resp_district_to_long = client.patch(api_route, headers=headers, json=data_district_to_long)
+        resp_owner_user_id_is_read_only = client.patch(api_route, headers=headers, json=data_owner_user_id_is_read_only)
 
         resp_name_to_short_data = json.loads(resp_name_to_short.data)
         resp_name_to_long_data = json.loads(resp_name_to_long.data)
-        resp_is_active_is_null_data = json.loads(resp_is_active_is_null.data)
-        resp_is_owner_user_id_is_readonly_data = json.loads(resp_is_owner_user_id_is_readonly.data)
+        resp_street_to_short_data = json.loads(resp_street_to_short.data)
+        resp_street_to_long_data = json.loads(resp_street_to_long.data)
+        resp_postcode_to_short_data = json.loads(resp_postcode_to_short.data)
+        resp_postcode_to_long_data = json.loads(resp_postcode_to_long.data)
+        resp_district_to_short_data = json.loads(resp_district_to_short.data)
+        resp_district_to_long_data = json.loads(resp_district_to_long.data)
+        resp_owner_user_id_is_read_only_data = json.loads(resp_owner_user_id_is_read_only.data)
 
         # then
         assert resp_name_to_short.status_code == 400
         assert resp_name_to_long.status_code == 400
-        assert resp_is_active_is_null.status_code == 400
-        assert resp_is_owner_user_id_is_readonly.status_code == 400
+        assert resp_street_to_short.status_code == 400
+        assert resp_street_to_long.status_code == 400
+        assert resp_postcode_to_short.status_code == 400
+        assert resp_postcode_to_long.status_code == 400
+        assert resp_district_to_short.status_code == 400
+        assert resp_district_to_long.status_code == 400
+        assert resp_owner_user_id_is_read_only.status_code == 400
 
         assert "message" in resp_name_to_short_data
         assert "message" in resp_name_to_long_data
-        assert "message" in resp_is_active_is_null_data
-        assert "message" in resp_is_owner_user_id_is_readonly_data
+        assert "message" in resp_street_to_short_data
+        assert "message" in resp_street_to_long_data
+        assert "message" in resp_postcode_to_short_data
+        assert "message" in resp_postcode_to_long_data
+        assert "message" in resp_district_to_short_data
+        assert "message" in resp_district_to_long_data
+        assert "message" in resp_owner_user_id_is_read_only_data
 
         assert "name" in resp_name_to_short_data["message"]
         assert "name" in resp_name_to_long_data["message"]
-        assert "is_active" in resp_is_active_is_null_data["message"]
-        assert "owner_user_id" in resp_is_owner_user_id_is_readonly_data["message"]
-        assert "read only" in resp_is_owner_user_id_is_readonly_data["message"]
+        assert "street" in resp_street_to_short_data["message"]
+        assert "street" in resp_street_to_long_data["message"]
+        assert "postcode" in resp_postcode_to_short_data["message"]
+        assert "postcode" in resp_postcode_to_long_data["message"]
+        assert "district" in resp_district_to_short_data["message"]
+        assert "district" in resp_district_to_long_data["message"]
+        assert "owner_user_id" in resp_owner_user_id_is_read_only_data["message"]
+        assert "read only" in resp_owner_user_id_is_read_only_data["message"]
 
 
 #   SUPERMARKET AREA
@@ -965,23 +1107,22 @@ def test_supermarket_area_patch(
         # given
         supermarket = create_obj(
             Supermarket(
-                name="SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                name=f"SupermarketName",
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         supermarket_area = create_obj(
             SupermarketArea(
+                name="AreaName",
+                order_number=1,
                 supermarket_id=supermarket.id,
-                recipe_id=create_recipe(user.id).id,
-                ingredient_id=create_ingredient().id,
-                quantity=2,
-                is_done=False
             )
         )
         data = {
-            "quantity": 4,
-            "is_done": False
+            "name": "NewName"
         }
         api_route = f"{ROUTE}/{supermarket.id}/area/{supermarket_area.id}"
 
@@ -993,8 +1134,7 @@ def test_supermarket_area_patch(
         # then
         print(result_data)
         assert response.status_code == 200
-        assert result_data["quantity"] == data["quantity"]
-        assert result_data["is_done"] == data["is_done"]
+        assert result_data["name"] == data["name"]
 
 
 def test_supermarket_area_patch_invalid_id(
@@ -1028,8 +1168,10 @@ def test_supermarket_area_patch_authorization(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         create_obj(
@@ -1040,18 +1182,16 @@ def test_supermarket_area_patch_authorization(
         )
         supermarket_area = create_obj(
             SupermarketArea(
-                supermarket_id=supermarket.id,
-                recipe_id=create_recipe(user.id).id,
-                ingredient_id=create_ingredient().id,
-                quantity=2,
-                is_done=False
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id
             )
         )
 
-        data_without = {"quantity": 5}
-        data_user_owner = {"quantity": 5}
-        data_user_2_can_edit = {"quantity": 5}
-        data_user_3_access_denied = {"quantity": 5}
+        data_without = {"name": "NewName"}
+        data_user_owner = {"name": "NewName"}
+        data_user_2_can_edit = {"name": "NewName"}
+        data_user_3_access_denied = {"name": "NewName"}
 
         api_route = f"{ROUTE}/{supermarket.id}/area/{supermarket_area.id}"
 
@@ -1083,50 +1223,166 @@ def test_supermarket_area_patch_invalid_payload(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         supermarket_area = create_obj(
             SupermarketArea(
-                supermarket_id=supermarket.id,
-                recipe_id=create_recipe(user.id).id,
-                ingredient_id=create_ingredient().id,
-                quantity=2,
-                is_done=False
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id
             )
         )
-        data_quantity_to_low = {"quantity": -1}
-        data_is_done_is_null = {"is_done": None}
+        data_name_to_short = {"name": "T" * 2}
+        data_name_to_long = {"name": "T" * 26}
         api_route = f"{ROUTE}/{supermarket.id}/area/{supermarket_area.id}"
 
         # when
-        response_quantity_to_low = client.patch(
-            api_route, headers=headers, json=data_quantity_to_low)
-        response_is_done_is_null = client.patch(
-            api_route, headers=headers, json=data_is_done_is_null)
+        response_name_to_short = client.patch(
+            api_route, headers=headers, json=data_name_to_short)
+        response_name_to_long = client.patch(
+            api_route, headers=headers, json=data_name_to_long)
 
-        response_quantity_to_low_data = json.loads(response_quantity_to_low.data)
-        response_is_done_is_null_data = json.loads(response_is_done_is_null.data)
+        response_name_to_short_data = json.loads(response_name_to_short.data)
+        response_name_to_long_data = json.loads(response_name_to_long.data)
 
         # then
-        assert response_quantity_to_low.status_code == 400
-        assert response_is_done_is_null.status_code == 400
+        assert response_name_to_short.status_code == 400
+        assert response_name_to_long.status_code == 400
 
-        assert "message" in response_quantity_to_low_data
-        assert "message" in response_is_done_is_null_data
+        assert "message" in response_name_to_short_data
+        assert "message" in response_name_to_long_data
 
-        assert "quantity" in response_quantity_to_low_data["message"]
-        assert "is_done" in response_is_done_is_null_data["message"]
+        assert "name" in response_name_to_short_data["message"]
+        assert "name" in response_name_to_long_data["message"]
 
 
-# patch_supermarket_area_reorder        
+def test_supermarket_area_patch_reorder(
+        app: Flask,
+        client: testing.FlaskClient,
+        user: tuple[User, dict]
+):
+    user, headers = user
+    with app.app_context():
+        # given
+        supermarket = create_obj(
+            Supermarket(
+                name=f"SupermarketName",
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
+            )
+        )
+        supermarket_area = create_obj(
+            SupermarketArea(
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id
+            )
+        )
+        new_order_number = 10
+        api_route = f"{ROUTE}/{supermarket.id}/area/{supermarket_area.id}/reorder/{new_order_number}"
+
+        # when
+        response = client.patch(api_route, headers=headers)
+        result_data_db = SupermarketArea.query.get(supermarket_area.id).to_dict()
+
+        # then
+        assert response.status_code == 200
+        assert result_data_db["order_number"] == new_order_number
+
+
+def test_supermarket_area_patch_reorder_invalid_payload(
+        app: Flask,
+        client: testing.FlaskClient,
+        user: tuple[User, dict]
+):
+    user, headers = user
+    with app.app_context():
+        # given
+        supermarket = create_obj(
+            Supermarket(
+                name=f"SupermarketName",
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
+            )
+        )
+        supermarket_area = create_obj(
+            SupermarketArea(
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id
+            )
+        )
+        api_route = f"{ROUTE}/{supermarket.id}/area/{supermarket_area.id}/reorder/0"
+
+        # when
+        response = client.patch(api_route, headers=headers)
+        resp_data = json.loads(response.data)
+
+        # then
+        assert response.status_code == 400
+
+        assert "message" in resp_data
+        assert "order_number" in resp_data["message"]     
 
 
 #   SUPERMARKET AREA INGREDIENT
 
-# patch_supermarket_area_ingredient
-# patch_supermarket_area_ingredient_auth
+def test_supermarket_area_ingredient_patch(
+        app: Flask,
+        client: testing.FlaskClient,
+        user: tuple[User, dict]
+):
+    user, headers = user
+    with app.app_context():
+        # given
+        supermarket = create_obj(
+            Supermarket(
+                name=f"SupermarketName",
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
+            )
+        )
+        supermarket_area = create_obj(
+            SupermarketArea(
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id,
+            )
+        )
+        ingredient = create_ingredient()
+        create_obj(
+            SupermarketAreaIngredientComposite(
+                sarea_id=supermarket_area.id,
+                ingredient_id=ingredient.id,
+                ingredient_price=2.29
+            )
+        )
+        data = {
+            "ingredient_price": 4.59
+        }
+        api_route = f"{ROUTE}/{supermarket.id}/area/{supermarket_area.id}/ingredient/{ingredient.id}"
+
+        # when
+        response = client.patch(api_route, headers=headers, json=data)
+
+        result_data = SupermarketAreaIngredientComposite.query.get(
+            (supermarket_area.id, ingredient.id)
+        ).to_dict()
+
+        # then
+        print(result_data)
+        assert response.status_code == 200
+        assert result_data["ingredient_price"] == data["ingredient_price"]
 
 
 # TEST DELETE
@@ -1144,8 +1400,10 @@ def test_supermarket_delete(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         db_model_count_before = supermarket.query.count()
@@ -1193,15 +1451,19 @@ def test_supermarket_delete_authorization(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         supermarket_2 = create_obj(
             Supermarket(
                 name=f"SupermarketName2",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
 
@@ -1238,17 +1500,17 @@ def test_supermarket_area_delete(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         supermarket_area = create_obj(
             SupermarketArea(
-                supermarket_id=supermarket.id,
-                recipe_id=create_recipe(user.id).id,
-                ingredient_id=create_ingredient().id,
-                quantity=2,
-                is_done=False
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id
             )
         )
         db_model_count_before = SupermarketArea.query.count()
@@ -1276,8 +1538,10 @@ def test_supermarket_area_delete_invalid_id(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         db_model_count_before = supermarket.query.count()
@@ -1309,8 +1573,10 @@ def test_supermarket_area_delete_authorization(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         create_obj(
@@ -1319,33 +1585,25 @@ def test_supermarket_area_delete_authorization(
                 user_id=user_2.id
             )
         )
-        recipe = create_recipe(user.id)
-        ingredient = create_ingredient()
         supermarket_area = create_obj(
             SupermarketArea(
-                supermarket_id=supermarket.id,
-                recipe_id=recipe.id,
-                ingredient_id=ingredient.id,
-                quantity=2,
-                is_done=False
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id
             )
         )
         supermarket_area_2 = create_obj(
             SupermarketArea(
-                supermarket_id=supermarket.id,
-                recipe_id=recipe.id,
-                ingredient_id=ingredient.id,
-                quantity=2,
-                is_done=False
+                name="AreaName2",
+                order_number=1,
+                supermarket_id=supermarket.id
             )
         )
         supermarket_area_3 = create_obj(
             SupermarketArea(
-                supermarket_id=supermarket.id,
-                recipe_id=recipe.id,
-                ingredient_id=ingredient.id,
-                quantity=2,
-                is_done=False
+                name="AreaName3",
+                order_number=1,
+                supermarket_id=supermarket.id
             )
         )
 
@@ -1368,8 +1626,50 @@ def test_supermarket_area_delete_authorization(
 
 #   SUPERMARKET AREA INGREDIENT
 
-# delete_supermarket_area_ingredient
-# delete_supermarket_area_ingredient_auth
+def test_supermarket_area_ingredient_delete(
+        app: Flask,
+        client: testing.FlaskClient,
+        user: tuple[User, dict]
+):
+    user, headers = user
+    with app.app_context():
+        # given
+        supermarket = create_obj(
+            Supermarket(
+                name=f"SupermarketName",
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
+            )
+        )
+        ingredient = create_ingredient()
+        supermarket_area = create_obj(
+            SupermarketArea(
+                name="AreaName",
+                order_number=1,
+                supermarket_id=supermarket.id
+            )
+        )
+        create_obj(
+            SupermarketAreaIngredientComposite(
+                sarea_id=supermarket_area.id,
+                ingredient_id=ingredient.id,
+                ingredient_price=4.89
+            )
+        )
+        db_model_count_before = SupermarketArea.query.count()
+        api_route = f"{ROUTE}/{supermarket.id}/area/{supermarket_area.id}/ingredient/{ingredient.id}"
+
+        # when
+        response = client.delete(api_route, headers=headers)
+
+        db_model_count_after = SupermarketAreaIngredientComposite.query.count()
+
+        # then
+        assert response.status_code == 204
+        assert db_model_count_before == 1
+        assert db_model_count_after == 0
 
 
 #   SHARED USER
@@ -1387,8 +1687,10 @@ def test_supermarket_shared_user_delete(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         create_obj(
@@ -1424,8 +1726,10 @@ def test_supermarket_shared_user_delete_invalid_id(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         create_obj(
@@ -1466,8 +1770,10 @@ def test_supermarket_shared_user_delete_authorization(
         supermarket = create_obj(
             Supermarket(
                 name=f"SupermarketName",
-                owner_user_id=user.id,
-                is_active=True
+                street="Street",
+                postcode="182923",
+                district="Berlin",
+                owner_user_id=user.id
             )
         )
         create_obj(
@@ -1497,4 +1803,3 @@ def test_supermarket_shared_user_delete_authorization(
         assert response_owner.status_code == 204
         assert response_can_edit.status_code == 401
         assert response_access_denied.status_code == 401
-"""

@@ -20,7 +20,7 @@ def create_tag(name: str = "TestTag") -> Tag:
 
 # TEST GET
 
-"""
+
 def test_tag_get(
         app: Flask,
         client: testing.FlaskClient,
@@ -453,4 +453,3 @@ def test_tag_delete_authorization(
         assert result_data_db_std is not None
         assert result_data_db_staff is None
         assert result_data_db_admin is None
-"""

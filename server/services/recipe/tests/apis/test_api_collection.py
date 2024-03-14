@@ -7,9 +7,6 @@ from server.core.models.db_models.collection import (
     Collection, CollectionRecipeComposite, UserSharedCollection
 )
 from server.core.models.db_models.user.user import User
-from server.services.recipe.tests.apis.test_api_ingredient import (
-    create_ingredient
-)
 from server.services.recipe.tests.apis.test_api_recipe import create_recipe, create_recipe_in_loop
 from server.services.recipe.tests.utils import create_obj
 from server.services.recipe.tests.apis.test_api_category import create_category
@@ -20,9 +17,8 @@ ROUTE = "/api/v1/collection"
 
 # TEST GET
 
-
 #   COLLECTION
-"""
+
 def test_collection_get(
         app: Flask,
         client: testing.FlaskClient,
@@ -1171,4 +1167,3 @@ def test_collection_shared_user_delete_authorization(
         assert response_owner.status_code == 204
         assert response_can_edit.status_code == 401
         assert response_access_denied.status_code == 401
-"""
