@@ -3,8 +3,7 @@ name: "weeklychef-backend"
 
 services:
   recipe-service:
-    build:
-      - # TODO: IMAGE
+    image: enricogoerlitz/weeklychef-recipe-service:latest
     ports:
       - "5002:5002"
     restart: always
@@ -20,7 +19,14 @@ services:
       REDIS_PORT: # TODO: CHANGE => 6379
     volumes:
       - recipe-images:/Users/enricogoerlitz/weeklychef/images  # GoogleDrive in future!
+    networks:
+      - weeklychef_network
 
 volumes:
   recipe-images:
 # TODO: Token ex=15min / Refresh Token ex=30Tage!
+
+networks:
+  weeklychef_network:
+    external: true
+    name: weeklychef_network

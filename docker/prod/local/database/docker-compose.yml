@@ -13,6 +13,8 @@ services:
       MYSQL_PASSWORD: # TODO: add username password
     volumes:
       - db-recipe-data:/Users/enricogoerlitz/weeklychef/mysql # TODO: change volume path
+    networks:
+      - weeklychef_network
 
   database-auth-service:
     image: mysql:latest
@@ -25,12 +27,21 @@ services:
       MYSQL_PASSWORD: devpassword # TODO: add username password
     volumes:
       - db-auth-data:/Users/enricogoerlitz/weeklychef/mysql # TODO: change volume path
+    networks:
+      - weeklychef_network
 
   redis:
     image: redis:latest
     ports:
       - "6380:6379"
+    networks:
+      - weeklychef_network
 
 volumes:
   db-recipe-data:
   db-auth-data:
+
+networks:
+  weeklychef_network:
+    # external: true
+    name: weeklychef_network
