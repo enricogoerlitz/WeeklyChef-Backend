@@ -9,7 +9,7 @@ from flask_cors import CORS
 from server.db import db
 from server.api import api
 from server.utils.jwt import jwt_manager
-from server.utils.initialize.recipe_service import initialize_dummy_database
+from server.utils.initialize.recipe_service import initialize_dummy_database  # noqa
 from server.core.models.db_models import (cart, recipe, planner, supermarket)  # noqa - import all models for table initfrom server.api import api
 from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
 from server.services.recipe.apis.recipe import ns as ns_recipe
@@ -21,6 +21,7 @@ from server.services.recipe.apis.collection import ns as ns_collection
 from server.services.recipe.apis.supermarket import ns as ns_supermarket
 from server.services.recipe.apis.planner import ns as ns_planner
 from server.services.recipe.apis.cart import ns as ns_cart
+from server.logger import logger
 
 
 load_dotenv()
@@ -60,12 +61,19 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_planner)
     api.add_namespace(ns_cart)
 
-    if os.environ.get("DEBUG", False):
-        with app.app_context():
-            db.drop_all()
-            db.create_all()
+    is_debug = os.environ.get("DEBUG", False)
 
-        # initialize db with starting data
-        initialize_dummy_database(app)
+    with app.app_context():
+        if is_debug:
+            db.drop_all()
+
+        # TODO: Add DB Migrations!
+        logger.info("-------------- CREATE TABLES --------------")
+        db.create_all()
+
+        if is_debug:
+            # initialize db with starting data
+            # initialize_dummy_database(app)
+            pass
 
     return app

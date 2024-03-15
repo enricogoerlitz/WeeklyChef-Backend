@@ -4,7 +4,7 @@ from server.core.models.db_models.user import Role, User
 from server.db import db
 
 
-def initialize_dummy_database(app: Flask) -> None:
+def initialize_user_database(app: Flask) -> None:
     """Create standard user, roles, ..."""
     with app.app_context():
         # >>> AUTH / USER INIT

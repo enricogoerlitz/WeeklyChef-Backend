@@ -1,11 +1,9 @@
 version: "3"
-name: "weeklychef-backend"
+name: "weeklychef-backend-prod"
 
 services:
   database-recipe-service:
-    build:
-      context: .
-      dockerfile: dockerfile.db.recipe
+    image: mysql:latest
     ports:
       - "3307:3306"
     environment:
@@ -14,12 +12,10 @@ services:
       MYSQL_USER: serviceuser
       MYSQL_PASSWORD: devpassword
     volumes:
-      - db-recipe-data:/Users/enricogoerlitz/weeklychef/mysql
+      - db-recipe-data:/home/enricogoerlitz/weeklychef-recipe/mysql
 
   database-auth-service:
-    build:
-      context: .
-      dockerfile: dockerfile.db.auth
+    image: mysql:latest
     ports:
       - "3308:3306"
     environment:
@@ -28,27 +24,20 @@ services:
       MYSQL_USER: serviceuser
       MYSQL_PASSWORD: devpassword
     volumes:
-      - db-auth-data:/Users/enricogoerlitz/weeklychef/mysql
+      - db-auth-data:/home/enricogoerlitz/weeklychef-auth/mysql
 
   redis:
-    build:
-      context: .
-      dockerfile: dockerfile.redis
+    image: redis:latest
     ports:
       - "6380:6379"
-    environment:
-      REDIS_PASSWORD: weeklychefredispassword
 
   auth-service:
-    build:
-      context: ../../
-      dockerfile: docker/dev/dockerfile.service.auth
+    image: enricogoerlitz/weeklychef-auth-service:latest
     ports:
       - "5001:5001"
     restart: always
     environment:
-      LOGGING_FILEPATH: "/server/log/logs.log"
-      DEBUG: true
+      DEBUG: false
       SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database-auth-service:3306/weeklychef"
       SQLALCHEMY_TRACK_MODIFICATIONS: false
       JWT_SECRET_KEY: "f1ae9b76935d89426cec6993698e865c1a12574ac9deb393dcdbc8f21eb76998"
@@ -59,22 +48,17 @@ services:
       SWAGGER_API_DESCRIPTION: "WeeklyChef Authentication Service REST API"
       REDIS_HOST: redis
       REDIS_PORT: 6379
-    volumes:
-      - /Users/enricogoerlitz/LDesktop/Dev-Projects/Web-Development/WeeklyChef-Backend/server:/server
     depends_on:
       - database-auth-service
       - redis
 
   recipe-service:
-    build:
-      context: ../../
-      dockerfile: docker/dev/dockerfile.service.recipe
+    image: enricogoerlitz/weeklychef-recipe-service:latest
     ports:
       - "5002:5002"
     restart: always
     environment:
-      DEBUG: true
-      LOGGING_FILEPATH: "/server/log/logs.log"
+      DEBUG: false
       SQLALCHEMY_DATABASE_URI: "mysql://serviceuser:devpassword@database-recipe-service:3306/weeklychef"
       SQLALCHEMY_TRACK_MODIFICATIONS: false
       JWT_SECRET_KEY: "f1ae9b76935d89426cec6993698e865c1a12574ac9deb393dcdbc8f21eb76998"
@@ -86,9 +70,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
     volumes:
-      - /Users/enricogoerlitz/LDesktop/Dev-Projects/Web-Development/WeeklyChef-Backend/server:/server
-      - recipe-images:/Users/enricogoerlitz/weeklychef/images
-      # - recipe-service-logs:/Users/enricogoerlitz/weeklychef-recipe/log
+      - recipe-images:/home/enricogoerlitz/weeklychef-recipe/images
     depends_on:
       - auth-service
 

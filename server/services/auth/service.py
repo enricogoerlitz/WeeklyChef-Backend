@@ -9,11 +9,12 @@ from flask_cors import CORS
 from server.db import db
 from server.api import api
 from server.utils.jwt import jwt_manager
-from server.utils.initialize.user_service import initialize_dummy_database
+from server.utils.initialize.user_service import initialize_user_database  # noqa
 from server.core.models.db_models import (user)  # noqa - import all models for table initfrom server.api import api
 from server.services.heathcheck.apis.heathcheck import ns as ns_heathcheck
 from server.services.auth.apis.auth import ns as ns_auth
 from server.services.auth.apis.user import ns as ns_user
+from server.logger import logger
 
 
 load_dotenv()
@@ -49,13 +50,16 @@ def create_app(database_uri: str = None) -> Flask:
     api.add_namespace(ns_auth)
     api.add_namespace(ns_user)
 
-    if os.environ.get("DEBUG", False):
-        # initialize db tables
-        with app.app_context():
-            db.drop_all()
-            db.create_all()
+    is_debug = os.environ.get("DEBUG", False)
 
-        # initialize db with starting data
-        initialize_dummy_database(app)
+    with app.app_context():
+        if is_debug:
+            db.drop_all()
+
+        # TODO: Add DB-Migrations!
+        logger.info("-------------- CREATE TABLES --------------")
+        db.create_all()
+
+        initialize_user_database(app)
 
     return app
