@@ -1,0 +1,22 @@
+version: "3"
+name: "weeklychef-backend"
+
+services:
+  auth-service:
+    build:
+      - # TODO: ADD IMAGE
+    ports:
+      - "5001:5001"
+    restart: always
+    environment:
+      DEBUG: false
+      SQLALCHEMY_DATABASE_URI: # TODO: CHANGE => "mysql://serviceuser:devpassword@database-auth-service:3306/weeklychef"
+      SQLALCHEMY_TRACK_MODIFICATIONS: false
+      JWT_SECRET_KEY: # TODO: CHANGE => "f1ae9b76935d89426cec6993698e865c1a12574ac9deb393dcdbc8f21eb76998"
+      JWT_ACCESS_TOKEN_EXPIRES_MINUTES: # TODO: CHANGE => 43200
+      JWT_REFRESH_TOKEN_EXPIRES_MINUTES: # TODO: CHANGE => 86400
+      SWAGGER_API_VERSION: "1.0"
+      SWAGGER_API_TITLE: "WeeklyChef API v1.0"
+      SWAGGER_API_DESCRIPTION: "WeeklyChef Authentication Service REST API"
+      REDIS_HOST: # TODO: CHANGE => redis
+      REDIS_PORT: # TODO: CHANGE => 6379

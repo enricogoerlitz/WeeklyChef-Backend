@@ -1,0 +1,20 @@
+[15.03.2024 09:43:32,%f] [INFO] service.py -------------- CREATE TABLES --------------
+[15.03.2024 09:43:33,%f] [INFO] service.py -------------- CREATE TABLES --------------
+[15.03.2024 09:43:33,%f] [INFO] _internal.py [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://172.21.0.5:5001
+[15.03.2024 09:43:33,%f] [INFO] _internal.py [33mPress CTRL+C to quit[0m
+[15.03.2024 09:43:33,%f] [INFO] _internal.py  * Restarting with stat
+[15.03.2024 09:43:33,%f] [INFO] _internal.py [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://172.21.0.6:5002
+[15.03.2024 09:43:33,%f] [INFO] _internal.py [33mPress CTRL+C to quit[0m
+[15.03.2024 09:43:33,%f] [INFO] _internal.py  * Restarting with stat
+[15.03.2024 09:43:36,%f] [INFO] service.py -------------- CREATE TABLES --------------
+[15.03.2024 09:43:36,%f] [INFO] service.py -------------- CREATE TABLES --------------
+[15.03.2024 09:43:36,%f] [WARNING] _internal.py  * Debugger is active!
+[15.03.2024 09:43:36,%f] [INFO] _internal.py  * Debugger PIN: 141-001-713
+[15.03.2024 09:43:36,%f] [WARNING] _internal.py  * Debugger is active!
+[15.03.2024 09:43:36,%f] [INFO] _internal.py  * Debugger PIN: 132-649-863

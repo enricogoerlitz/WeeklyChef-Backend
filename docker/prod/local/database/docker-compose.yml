@@ -1,0 +1,38 @@
+version: "3"
+name: "weeklychef-backend"
+
+services:
+  database-recipe-service:
+    image: mysql:latest
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: # TODO: add password
+      MYSQL_DATABASE: # TODO: database
+      MYSQL_USER: # TODO: add username
+      MYSQL_PASSWORD: # TODO: add username password
+    volumes:
+      - db-recipe-data:/Users/enricogoerlitz/weeklychef/mysql # TODO: change volume path
+
+  database-auth-service:
+    image: mysql:latest
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: dbrootpassword # TODO: add password
+      MYSQL_DATABASE: weeklychef # TODO: database
+      MYSQL_USER: serviceuser # TODO: add username
+      MYSQL_PASSWORD: devpassword # TODO: add username password
+    volumes:
+      - db-auth-data:/Users/enricogoerlitz/weeklychef/mysql # TODO: change volume path
+    networks:
+      - weeklychef_network
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6380:6379"
+
+volumes:
+  db-recipe-data:
+  db-auth-data:
