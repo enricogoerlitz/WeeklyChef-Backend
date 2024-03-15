@@ -1,0 +1,43 @@
+name: Run Tests on Main Push or Merge
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.dev.txt
+
+    - name: Run Auth Service tests
+      run: |
+        python -m pytest server/services/auth/tests -W ignore::DeprecationWarning
+
+    - name: Run Core tests
+      run: |
+        python -m pytest server/core/tests -W ignore::DeprecationWarning
+
+    - name: Run Healthcheck Service tests
+      run: |
+        python -m pytest server/services/heathcheck/tests -W ignore::DeprecationWarning
+
+    - name: Run Recipe Service tests
+      run: |
+        python -m pytest server/services/recipe/tests -W ignore::DeprecationWarning

@@ -294,6 +294,8 @@ def test_collection_post(
         del result_data["acl"]
 
         # then
+        print(result_data_db)
+        print(result_data)
         assert response.status_code == 201
         assert result_data_without_id == expected_data
         assert result_data_db == result_data
